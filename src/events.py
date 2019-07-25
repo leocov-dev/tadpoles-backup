@@ -1,6 +1,5 @@
-import requests
-import pprint
 from settings import client, conf
+
 URL = "https://www.tadpoles.com"
 
 EVENTS_URL = f"{conf.API_URL}/events"
