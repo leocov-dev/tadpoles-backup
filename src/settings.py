@@ -6,13 +6,17 @@ env.read_env()
 
 
 class Config:
-    OAUTH_TOKEN = env("OAUTH_TOKEN")
-    API_URL = "https://www.tadpoles.com/remote/v1"
+    MAX_YEARS = 10
+    MAX_FILE_NAME_LEN = 80
+    OAUTH_TOKEN = env('OAUTH_TOKEN')
+    API_URL = 'https://www.tadpoles.com/remote/v1'
+    EVENTS_URL = f'{API_URL}/events'
+    ATTACHMENTS_URL = f'{API_URL}/obj_attachment'
 
 
 def get_client():
     rc = requests.Session()
-    rc.headers = {"Cookie": f"DgU00={conf.OAUTH_TOKEN}"}
+    rc.headers = {'Cookie': f'DgU00={conf.OAUTH_TOKEN}'}
     return rc
 
 
