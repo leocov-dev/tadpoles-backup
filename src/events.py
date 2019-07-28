@@ -24,7 +24,7 @@ def parse_events(start, end, num=300):
     try:
         data = response.json()
         events = data['events']
-        if not events:
+        if not events and not conf.SKIP_NO_DATA_CHECK:
             raise NoEvents
         event_count = 0
         for event in events:

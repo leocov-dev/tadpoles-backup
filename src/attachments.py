@@ -11,7 +11,8 @@ def save_attachment(obj, key, base_file_name, saver, suffix=1):
     response = client.get(conf.ATTACHMENTS_URL, params={'obj': obj, 'key': key})
     mime = response.headers.get('Content-Type')
     if not mime:
-        raise NoMime
+        print(f'Failed to save, no mime type in response. {base_file_name}')
+        return
 
     ext = mimetypes.guess_extension(mime)
     if ext in REMAP:
