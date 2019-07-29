@@ -4,7 +4,7 @@
 
 Forked from https://github.com/twneale/tadpoles
 
-Reworked to make use of the REST API behind the tadpoles.com website.
+Reworked to make use of the REST API behind the tadpoles.com website. 
 
 ##About
 This tool will allow you to save all your childs images at full resolution from tadpoles.com.  It can be be configured with multiple save backends or new ones can be written.
@@ -15,9 +15,9 @@ Current save backends:
 * Backblaze B2
 
 ##Usage
-_It is preferred to run this inside a virtual env._
+_It is preferred to run this application inside a virtual env._
 
-You need an authentication token. This can be easily obtained by logging into tadpoles.com and inspecting the cookies in any request (after login).
+You need an authentication token. This can be easily obtained by logging into tadpoles.com and inspecting the cookies in any request (after login). Tokens seem to expire after about 1 month.
 
 The requests will include a value like this:
 ```
