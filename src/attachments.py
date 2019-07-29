@@ -1,6 +1,6 @@
 import mimetypes
 
-from exc import NoMime
+from exc import NoMimeError
 from settings import conf, client
 
 REMAP = {'.jpe': '.jpg'}

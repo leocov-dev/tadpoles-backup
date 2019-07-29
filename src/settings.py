@@ -1,14 +1,19 @@
 import environs
 import requests
 
+from exc import NoTokenError
+
 env = environs.Env()
 env.read_env()
 
 
 class Config:
+    OAUTH_TOKEN = env('OAUTH_TOKEN')
+    if not OAUTH_TOKEN:
+        raise NoTokenError
+
     MAX_YEARS = env.int('MAX_YEARS', 10)
     MAX_FILE_NAME_LEN = 80
-    OAUTH_TOKEN = env('OAUTH_TOKEN')
     API_URL = 'https://www.tadpoles.com/remote/v1'
     EVENTS_URL = f'{API_URL}/events'
     ATTACHMENTS_URL = f'{API_URL}/obj_attachment'

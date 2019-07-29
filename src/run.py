@@ -3,7 +3,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 
 from events import parse_events
-from exc import NoEvents
+from exc import NoEventsError
 from settings import conf
 
 
@@ -17,7 +17,7 @@ def main():
             print(f'Request: {previous.date()} - {earliest.date()}')
             parse_events(end=previous, start=earliest)
             previous = earliest
-    except NoEvents as e:
+    except NoEventsError as e:
         print(f'Done with: {e.__class__.__name__}')
         return 0
 

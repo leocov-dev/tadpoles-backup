@@ -5,7 +5,7 @@ import uuid
 from pytz import timezone
 
 from attachments import save_attachment
-from exc import NoEvents
+from exc import NoEventsError
 from settings import client, conf
 
 
@@ -25,7 +25,7 @@ def parse_events(start, end, num=300):
         data = response.json()
         events = data['events']
         if not events and not conf.SKIP_NO_DATA_CHECK:
-            raise NoEvents
+            raise NoEventsError
         event_count = 0
         for event in events:
             new_attachments = event.get('new_attachments', [])
@@ -54,7 +54,7 @@ def parse_events(start, end, num=300):
                 save_attachment(obj_key, att['key'], base_name, None, i + 1)
 
         print(f'Got: {event_count} events.')
-    except NoEvents as e:
+    except NoEventsError as e:
         raise e
     except Exception as e:
         print(f'{e.__class__.__name__}: {e}')
