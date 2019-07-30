@@ -1,10 +1,10 @@
-#Tadpoles.com Scraper
+# Tadpoles.com Image Downloader
 
 #### **This is still a work in progress! - Non-functional**
 
 Inspired by https://github.com/twneale/tadpoles but reworked from scratch to make use of the REST API behind the tadpoles.com website. 
 
-##About
+## About
 This tool will allow you to save all your childs images at full resolution from tadpoles.com.  It can be be configured with multiple save backends or new ones can be written.
 
 Current save backends:
@@ -12,7 +12,7 @@ Current save backends:
 * Amazon S3
 * Backblaze B2
 
-##Usage
+## Usage
 _It is preferred to run this application inside a virtual env._
 
 You need an authentication token. This can be easily obtained by logging into tadpoles.com and inspecting the cookies in any request (after login). Tokens seem to expire after about 1 month.
@@ -35,7 +35,7 @@ OAUTH_TOKEN=ABCDE
 ```
 Execute the run.py script.
 
-##Notes
+## Notes
 The tool queries one months worth of pictures at a time. If a query comes up with no data, then execution will stop. This may be unexpected in cases of parents having a gap > 1 month in children's attendance. This check can be skipped with the `.env` file by adding a `SKIP_NO_DATA_CHECK=true` line.
 
 The tool will only query back for the past 10 years from the current date. This value can be configured with the `.env` file by adding a `MAX_YEARS=<int>` line.

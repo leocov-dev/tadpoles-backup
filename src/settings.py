@@ -19,6 +19,8 @@ class Config:
     ATTACHMENTS_URL = f'{API_URL}/obj_attachment'
     SKIP_NO_DATA_CHECK = env.bool('SKIP_NO_DATA_CHECK', False)
 
+    LOCAL_TARGET_DIR = env('LOCAL_TARGET_DIR')
+
 
 def get_client():
     rc = requests.Session()
