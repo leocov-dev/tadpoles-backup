@@ -3,10 +3,11 @@ import re
 import uuid
 
 from pytz import timezone
+from requests import RequestException
 
-from attachments import save_attachment
+from attachments import get_attachment
 from exc import NoEventsError
-from settings import client, conf
+from settings import client, conf, saver
 
 
 def parse_events(start, end, num=300):
@@ -46,16 +47,15 @@ def parse_events(start, end, num=300):
                     comment = comment.rstrip('_')
             child_name = event.get('parent_member_display')
 
-            base_name = f'{time.date().strftime("%Y.%m.%d")}-{child_name}-{comment}'
-
             # usually only one attachment, but just in case
-            for i, att in enumerate(new_attachments):
-                # print(file_name)
-                save_attachment(obj_key, att['key'], base_name, None, i + 1)
+            for att in new_attachments:
+                # todo: parse mimetype from attachment
+                ext = "XXX"
+                saver.add(ext=ext, timestamp=time, child=child_name, comment=comment)
+
+        # finalize a batch of saver operations
+        saver.commit()
 
         print(f'Got: {event_count} events.')
-    except NoEventsError as e:
-        raise e
-    except Exception as e:
-        print(f'{e.__class__.__name__}: {e}')
+    except RequestException:
         response.raise_for_status()

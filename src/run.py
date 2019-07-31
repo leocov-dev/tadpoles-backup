@@ -1,10 +1,13 @@
 import datetime
+import logging
 
 from dateutil.relativedelta import relativedelta
 
 from events import parse_events
 from exc import NoEventsError
 from settings import conf
+
+log = logging.getLogger()
 
 
 def main():
@@ -17,8 +20,12 @@ def main():
             print(f'Request: {previous.date()} - {earliest.date()}')
             parse_events(end=previous, start=earliest)
             previous = earliest
+            break
     except NoEventsError as e:
         print(f'Done with: {e.__class__.__name__}')
+        return 0
+    except Exception as e:
+        log.exception(e)
         return 0
 
     print(f'Done with: MAX_YEARS ({conf.MAX_YEARS}) reached.')
