@@ -12,7 +12,7 @@ class AbstractSaver(metaclass=ABCMeta):
     @staticmethod
     def build_file_name(ext, timestamp, child_name, comment=None):
         if not comment:
-            comment = str(uuid.uuid4).split('-')[0]
+            comment = str(uuid.uuid4()).split('-')[0]
         base_name = f'{timestamp.date().strftime("%Y.%m.%d")}-{child_name}-{comment}'
         max_name_len = conf.MAX_FILE_NAME_LEN - len(ext)
         file_name = f'{base_name[:max_name_len].rstrip("_")}{ext}'

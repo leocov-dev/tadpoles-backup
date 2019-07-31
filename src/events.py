@@ -6,9 +6,9 @@ import uuid
 from pytz import timezone
 from requests import RequestException
 
-from attachments import get_attachment
 from exc import NoEventsError
-from settings import client, conf, saver
+from savers import saver
+from settings import client, conf
 
 
 def parse_events(start, end, num=300):
@@ -50,7 +50,10 @@ def parse_events(start, end, num=300):
 
             # usually only one attachment, but just in case
             for att in new_attachments:
+                # TODO: pass mime_type to saver instead, need to dif between images and movies
                 ext = mimetypes.guess_extension(att['mime_type'])
+                if ext in conf.REMAP:
+                    ext = conf.REMAP[ext]
                 saver.add(obj=obj_key, key=att['key'], ext=ext, timestamp=time, child=child_name, comment=comment)
 
         # finalize a batch of saver operations

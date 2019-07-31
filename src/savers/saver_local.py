@@ -25,6 +25,7 @@ class LocalSaver(AbstractSaver):
         if self.exists(child, file_name):
             return
 
+        print(f'Adding new file: {file_name}')
         data = get_attachment(obj, key)
         self.file_queue.append((file_name, data))
 

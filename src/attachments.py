@@ -1,8 +1,5 @@
-import mimetypes
-
 from requests import RequestException
 
-from exc import NoMimeError
 from settings import conf, client
 
 
