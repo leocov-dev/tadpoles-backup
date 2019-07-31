@@ -1,4 +1,5 @@
 import datetime
+import mimetypes
 import re
 import uuid
 
@@ -49,9 +50,8 @@ def parse_events(start, end, num=300):
 
             # usually only one attachment, but just in case
             for att in new_attachments:
-                # todo: parse mimetype from attachment
-                ext = "XXX"
-                saver.add(ext=ext, timestamp=time, child=child_name, comment=comment)
+                ext = mimetypes.guess_extension(att['mime_type'])
+                saver.add(obj=obj_key, key=att['key'], ext=ext, timestamp=time, child=child_name, comment=comment)
 
         # finalize a batch of saver operations
         saver.commit()
