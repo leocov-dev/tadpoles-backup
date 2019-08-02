@@ -1,19 +1,19 @@
-# Tadpoles.com Image Downloader
+# Tadpoles.com Image Backup
 
 #### **This is still a work in progress! - Non-functional**
 
 Inspired by https://github.com/twneale/tadpoles but reworked from scratch to make use of the REST API behind the tadpoles.com website. 
 
 ## About
-This tool will allow you to save all your childs images at full resolution from tadpoles.com.  It can be be configured with multiple save backends or new ones can be written.
+This tool will allow you to save all your child's images at full resolution from tadpoles.com.  It can be be configured with multiple save backends or new ones can be written.
 
 Current save backends:
 * Local file system
-* Amazon S3
-* Backblaze B2
+* Amazon S3 (non-functional)
+* Backblaze B2 (non-functional)
 
 ## Usage
-_It is preferred to run this application inside a virtual env._
+_It is preferred to run this application inside a python virtual env._
 
 You need an authentication token. This can be easily obtained by logging into tadpoles.com and inspecting the cookies in any request (after login). Tokens seem to expire after about 1 month.
 

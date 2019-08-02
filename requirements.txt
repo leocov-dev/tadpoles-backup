@@ -2,3 +2,4 @@ environs
 requests
 pytz
 python-dateutil
+structlog
