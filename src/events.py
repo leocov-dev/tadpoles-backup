@@ -17,7 +17,6 @@ def parse_events(start: [datetime, date], end: [datetime, date], num=300) -> (in
     end = to_daily_timestamp(end)
 
     log.info(f'Request: {t2d(end)} - {t2d(start)}')
-    return 0, 0, 0
 
     params = {'direction': 'range',
               'earliest_event_time': start,
