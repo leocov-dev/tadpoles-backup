@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, date
 import re
 import uuid
 
@@ -9,13 +9,15 @@ from exc import NoEventsError
 from logs import log
 from savers import saver
 from settings import client, conf
+from utils import timestamp_to_date as t2d, date_to_timestamp, to_daily_timestamp
 
 
-def parse_events(start, end, num=300):
-    if isinstance(start, datetime.datetime):
-        start = int(start.timestamp())
-    if isinstance(end, datetime.datetime):
-        end = int(end.timestamp())
+def parse_events(start: [datetime, date], end: [datetime, date], num=300) -> (int, int, int):
+    start = to_daily_timestamp(start)
+    end = to_daily_timestamp(end)
+
+    log.info(f'Request: {t2d(end)} - {t2d(start)}')
+    return 0, 0, 0
 
     params = {'direction': 'range',
               'earliest_event_time': start,
@@ -25,9 +27,10 @@ def parse_events(start, end, num=300):
     response = client.get(conf.EVENTS_URL, params=params)
     try:
         data = response.json()
-        events = data['events']
+        events = None  # data['events']
         if not events and not conf.SKIP_NO_DATA_CHECK:
-            raise NoEventsError
+            raise NoEventsError(
+                f'Event-range: {t2d(end)} - {t2d(start)} returned no events')
         event_count = 0
         for event in events:
             new_attachments = event.get('new_attachments', [])
@@ -55,7 +58,7 @@ def parse_events(start, end, num=300):
 
         # finalize a batch of saver operations
         saver.commit()
+        return event_count, saver.skipped, saver.saved
 
-        log.debug(f'Response: {event_count} events.')
     except RequestException:
         response.raise_for_status()

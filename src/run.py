@@ -1,33 +1,48 @@
-import datetime
-
-from dateutil.relativedelta import relativedelta
+from datetime import datetime
 
 from events import parse_events
 from exc import NoEventsError
 from logs import log
 from settings import conf
+from utils import date_range_generator
+
+DELTA_MAP = {'days': 365,
+             'weeks': 52,
+             'months': 12}
 
 
-def main():
-    previous = datetime.datetime.today()
-    previous = previous.replace(hour=0, minute=0, second=0, microsecond=0)
+def main(delta=1, delta_key='weeks'):
+    """ process events in blocks
+    Examples:
+        delta=1, delta_key='months'
+        process events in 1 month chunks
+    """
+    total_events = 0
+    total_skipped = 0
+    total_saved = 0
+
+    # default msg
+    msg = f'Stopped after {conf.MAX_YEARS} years'
 
     try:
-        for _ in range(conf.MAX_YEARS * 12):
-            earliest = previous - relativedelta(weeks=1)  # TODO: reset this to months=1
-            log.info(f'Request: {previous.date()} - {earliest.date()}')
-            parse_events(end=previous, start=earliest)
-            previous = earliest
-            break  # TODO: remove this
+        log.info(f'Processing events in {delta} {delta_key.rstrip("s")} batches.\n')
+        for current, previous in date_range_generator(delta, delta_key, datetime.now(), conf.MAX_YEARS):
+            event_count, skipped, saved = parse_events(previous, current)
+            total_events += event_count
+            total_skipped += skipped
+            total_saved += saved
+            # break  # TODO: remove this
     except NoEventsError as e:
-        log.info(f'Done with: {e.__class__.__name__}')
-        return 0
+        msg = 'Event block contained no events, exiting...'
+        log.warning(str(e))
+        return
     except Exception as e:
+        msg = 'Unexpected failure.'
         log.exception(e)
         return 1
-
-    log.info(f'Done with: MAX_YEARS ({conf.MAX_YEARS}) reached.')
-    return 0
+    finally:
+        log.info(f'\nDone with: {msg}')
+        log.info(f'Checked: {total_events}, Skipped: {total_skipped}, Saved {total_saved}')
 
 
 if __name__ == '__main__':

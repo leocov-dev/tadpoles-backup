@@ -12,7 +12,7 @@ class S3Saver(AbstractBucketSaver):
     def commit(self):
         pass
 
-    def save_path(self, file_name):
+    def get_save_path(self, file_name):
         pass
 
     def exists(self, file_name):
