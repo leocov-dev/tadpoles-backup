@@ -1,15 +1,59 @@
 import collections
+import io
 import mimetypes
+import re
 import uuid
 from abc import ABCMeta, abstractmethod, ABC
 from datetime import datetime
 from typing import Deque
 
+import filetype
+
 from attachments import get_attachment
 from logs import log
 from settings import conf
 
-FileItem = collections.namedtuple('FileItem', 'data mime timestamp filename')
+file_types = collections.defaultdict(int)
+
+
+def print_file_type_info():
+    log.info(dict(file_types))
+
+
+class FileItem:
+    def __init__(self, data, mime, timestamp, filename, child, comment):
+        self.data = data
+        self.mime = mime
+        self.timestamp = timestamp
+        self.filename = filename
+        self.child = child
+        self.comment = comment.replace('\n', '')
+
+        self._apply_metadata()
+
+    def _apply_metadata(self):
+        # out_data = io.BytesIO(self.data)
+        # TODO: figuring this out
+        img_type = filetype.guess(self.data)
+        if not img_type:
+            log.info(self.data[:30])
+            file_types[self.mime] += 1
+        else:
+            file_types[img_type.extension] += 1
+        # if 'image' in self.mime:
+        #     zeroth_ifd = {piexif.ImageIFD.Make: u"tadpoles-backup",
+        #                   piexif.ImageIFD.Software: 'Python',
+        #                   piexif.ImageIFD.ImageDescription: 'Josephine'
+        #                   }
+        #     exif_ifd = {piexif.ExifIFD.DateTimeOriginal: self.timestamp.strftime('%Y:%m:%d %H:%M:%S'),
+        #                 piexif.ExifIFD.UserComment: UserComment.dump(self.comment)
+        #                 }
+        #
+        #     exif_dict = {"0th": zeroth_ifd, "Exif": exif_ifd}
+        #
+        #     piexif.insert(piexif.dump(exif_dict), self.data, out_data)
+
+        # self.data = out_data.read()
 
 
 class AbstractSaver(metaclass=ABCMeta):
@@ -21,26 +65,42 @@ class AbstractSaver(metaclass=ABCMeta):
         self.saved = 0
 
     @staticmethod
-    def build_file_name(mime: str, timestamp: datetime, child_name: str, comment: str = None) -> str:
+    def _build_file_name(mime: str, timestamp: datetime, child_name: str, comment: str) -> str:
+        comment = re.sub('\W+', '_', comment)
+        comment = comment.rstrip('_')
+
         ext = mimetypes.guess_extension(mime)
         if ext in conf.REMAP_EXT:
             ext = conf.REMAP_EXT[ext]
-        if not comment:
-            *_, comment = str(uuid.uuid4()).split('-')
+
         base_name = f'{timestamp.date().strftime("%Y.%m.%d")}-{child_name}-{comment}'
         max_name_len = conf.MAX_FILE_NAME_LEN - len(ext)
         file_name = f'{base_name[:max_name_len].rstrip("_")}{ext}'
         return file_name
 
     def add(self, obj: str, key: str, mime: str, timestamp: datetime, child: str, comment: str = None):
-        filename = self.build_file_name(mime, timestamp, child, comment)
+        # TODO: remove this
+        if 'image' not in mime:
+            log.info(f'Mime: {mime}')
+
+        *_, default_comment = str(uuid.uuid4).split('-')
+        if not comment or comment == 'None':
+            comment = default_comment
+
+        filename = self._build_file_name(mime, timestamp, child, comment)
         if self.exists(timestamp, filename):
             self.skipped += 1
             return
 
-        log.info(f'Adding new file: {filename}')
-        data = get_attachment(obj, key)
-        self.file_queue.append(FileItem(data=data, mime=mime, timestamp=timestamp, filename=filename))
+        # TODO: temp
+        # log.info(f'Adding new file: {filename}')
+
+        self.file_queue.append(FileItem(data=get_attachment(obj, key),
+                                        mime=mime,
+                                        timestamp=timestamp,
+                                        filename=filename,
+                                        child=child,
+                                        comment=comment))
 
     @abstractmethod
     def commit(self):

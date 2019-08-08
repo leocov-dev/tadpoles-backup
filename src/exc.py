@@ -16,3 +16,7 @@ class NoTokenError(TadpoleBackupError):
 
 class SaveError(TadpoleBackupError):
     """ exception saving file """
+
+
+class UnauthorizedError(TadpoleBackupError):
+    """ 401 error """

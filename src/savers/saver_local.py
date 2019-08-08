@@ -1,10 +1,8 @@
 import os
 from datetime import datetime
 
-from attachments import get_attachment
-from savers.saver_base import AbstractSaver, FileItem
+from savers.saver_base import AbstractSaver
 from settings import conf
-from logs import log
 
 
 class LocalSaver(AbstractSaver):
@@ -27,6 +25,7 @@ class LocalSaver(AbstractSaver):
     def commit(self):
         while self.file_queue:
             file_item = self.file_queue.popleft()
-            with open(self.get_save_path(file_item.timestamp, file_item.filename), 'wb') as f:
-                f.write(file_item.data)
+            # TODO: skip save
+            # with open(self.get_save_path(file_item.timestamp, file_item.filename), 'wb') as f:
+            #     f.write(file_item.data)
             self.saved += 1
