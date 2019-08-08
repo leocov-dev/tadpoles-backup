@@ -4,6 +4,7 @@ from events import parse_events
 from exc import NoEventsError, UnauthorizedError
 from logs import log
 from savers.saver_base import print_file_type_info
+from savers import SAVER
 from settings import conf
 from utils import date_range_generator
 
@@ -19,8 +20,6 @@ def main(delta=1, delta_key='weeks', start_from=datetime.now()):
         process events in 1 month chunks
     """
     total_events = 0
-    total_skipped = 0
-    total_saved = 0
 
     # default msg
     msg = f'Stopped after {conf.MAX_YEARS} years'
@@ -28,10 +27,8 @@ def main(delta=1, delta_key='weeks', start_from=datetime.now()):
     try:
         log.info(f'Processing events in {delta} {delta_key.rstrip("s")} batches.\n')
         for current, previous in date_range_generator(delta, delta_key, start_from, conf.MAX_YEARS):
-            event_count, skipped, saved = parse_events(previous, current)
+            event_count = parse_events(previous, current)
             total_events += event_count
-            total_skipped += skipped
-            total_saved += saved
             # break  # TODO: remove this
     except NoEventsError as e:
         msg = 'Event block contained no events, exiting...'
@@ -48,7 +45,7 @@ def main(delta=1, delta_key='weeks', start_from=datetime.now()):
         return 1
     finally:
         log.info(f'\nDone with: {msg}')
-        log.info(f'Checked: {total_events}, Skipped: {total_skipped}, Saved {total_saved}')
+        log.info(f'Checked: {total_events}, Skipped: {SAVER.skipped}, Saved {SAVER.saved}')
 
         print_file_type_info()
 

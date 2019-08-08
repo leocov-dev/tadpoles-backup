@@ -18,4 +18,4 @@ def get_saver():
     raise SaveError('Could not get a saver with current environment variable settings.')
 
 
-saver = get_saver()
+SAVER = get_saver()

@@ -17,7 +17,7 @@ file_types = collections.defaultdict(int)
 
 
 def print_file_type_info():
-    log.info(dict(file_types))
+    log.debug(f'found types: {dict(file_types)}')
 
 
 class FileItem:
@@ -36,10 +36,11 @@ class FileItem:
         # TODO: figuring this out
         img_type = filetype.guess(self.data)
         if not img_type:
-            log.info(self.data[:30])
+            # for future development
+            log.debug(self.data[:30])
             file_types[self.mime] += 1
         else:
-            file_types[img_type.extension] += 1
+            file_types[img_type.mime] += 1
         # if 'image' in self.mime:
         #     zeroth_ifd = {piexif.ImageIFD.Make: u"tadpoles-backup",
         #                   piexif.ImageIFD.Software: 'Python',
