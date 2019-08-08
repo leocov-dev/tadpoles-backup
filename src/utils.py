@@ -1,7 +1,9 @@
 import calendar
 from datetime import datetime, date
 
+import filetype
 from dateutil.relativedelta import relativedelta
+from filetype.types.isobmff import IsoBmff
 
 
 def timestamp_to_date(a_timestamp: int) -> date:
@@ -38,3 +40,27 @@ def date_range_generator(delta: int, delta_key: str, start_date: [date, datetime
         yield current, previous
 
         current = previous
+
+
+class Mp4Lenient(IsoBmff):
+    """
+    More lenient mp4 detection for filetype package
+    """
+    MIME = 'video/mp4'
+    EXTENSION = 'mp4'
+
+    def __init__(self):
+        super().__init__(
+            mime=self.MIME,
+            extension=self.EXTENSION
+        )
+
+    def match(self, buf):
+        if not self._is_isobmff(buf):
+            return False
+
+        major_brand, minor_version, compatible_brands = self._get_ftyp(buf)
+        return any([cb in ['mp41', 'mp42'] for cb in compatible_brands])
+
+
+filetype.add_type(Mp4Lenient())

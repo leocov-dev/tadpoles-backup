@@ -79,10 +79,6 @@ class AbstractSaver(metaclass=ABCMeta):
         return file_name
 
     def add(self, obj: str, key: str, mime: str, timestamp: datetime, child: str, comment: str = None):
-        # TODO: remove this
-        if 'image' not in mime:
-            log.info(f'Mime: {mime}')
-
         *_, default_comment = str(uuid.uuid4).split('-')
         if not comment or comment == 'None':
             comment = default_comment
