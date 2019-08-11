@@ -6,16 +6,16 @@ from exc import NoTokenError
 env = environs.Env()
 env.read_env()
 
+STR_DATE_FMT = '%Y-%m-%d'
+
 
 class Config:
     OAUTH_TOKEN = env('OAUTH_TOKEN')
     if not OAUTH_TOKEN:
         raise NoTokenError
 
-    # sometimes mimetypes will not guess the 'commonly accepted' extension
-    REMAP_EXT = {'.jpe': '.jpg'}
-
     MAX_YEARS = env.int('MAX_YEARS', 10)
+
     MAX_FILE_NAME_LEN = 80
     API_URL = 'https://www.tadpoles.com/remote/v1'
     EVENTS_URL = f'{API_URL}/events'
@@ -44,3 +44,21 @@ def get_client():
 
 conf = Config()
 client = get_client()
+
+
+def update_conf(**kwargs):
+    global conf
+
+    auth_token = kwargs.get('auth_token')
+    if auth_token:
+        conf.OAUTH_TOKEN = auth_token
+
+    max_years = kwargs.get('max_years')
+    if max_years:
+        conf.MAX_YEARS = max_years
+
+    save_path = kwargs.get('save_path')
+    if save_path:
+        conf.LOCAL_TARGET_DIR = save_path
+
+    return conf

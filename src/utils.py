@@ -14,11 +14,11 @@ def date_to_timestamp(a_date: date) -> int:
     return calendar.timegm(a_date.timetuple())
 
 
-def to_daily_timestamp(object: [datetime, date]) -> int:
-    if isinstance(object, datetime):
-        return int(object.timestamp())
-    elif isinstance(object, date):
-        return date_to_timestamp(object)
+def to_timestamp_int(obj: [datetime, date]) -> int:
+    if isinstance(obj, datetime):
+        return int(obj.timestamp())
+    elif isinstance(obj, date):
+        return date_to_timestamp(obj)
 
 
 DELTA_MAP = {'days': 365,
