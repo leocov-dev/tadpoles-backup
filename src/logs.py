@@ -1,5 +1,6 @@
 import logging
 import logging.config
+from settings import conf
 
 
 def config_logger(lvl='DEBUG'):
@@ -19,4 +20,4 @@ def config_logger(lvl='DEBUG'):
     return logging.getLogger('tadpoles')
 
 
-log = config_logger()
+log = config_logger(conf.LOGGING_LEVEL)

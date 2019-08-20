@@ -3,7 +3,20 @@ from datetime import datetime, date
 
 import filetype
 from dateutil.relativedelta import relativedelta
-from filetype.types.isobmff import IsoBmff
+from filetype.types import video
+
+MAX_LINE_LEN = 80
+
+
+def center_in_console(text):
+    text_len = len(text) + 2
+    if text_len >= MAX_LINE_LEN:
+        return text[:MAX_LINE_LEN]
+
+    pad = (MAX_LINE_LEN - text_len) // 2
+    pad_str = '-' * pad
+
+    return f'{pad_str} {text} {pad_str}'
 
 
 def timestamp_to_date(a_timestamp: int) -> date:
@@ -42,18 +55,10 @@ def date_range_generator(delta: int, delta_key: str, start_date: [date, datetime
         current = previous
 
 
-class Mp4Lenient(IsoBmff):
+class Mp4Compatible(video.Mp4):
     """
     More lenient mp4 detection for filetype package
     """
-    MIME = 'video/mp4'
-    EXTENSION = 'mp4'
-
-    def __init__(self):
-        super().__init__(
-            mime=self.MIME,
-            extension=self.EXTENSION
-        )
 
     def match(self, buf):
         if not self._is_isobmff(buf):
@@ -63,4 +68,4 @@ class Mp4Lenient(IsoBmff):
         return any([cb in ['mp41', 'mp42'] for cb in compatible_brands])
 
 
-filetype.add_type(Mp4Lenient())
+filetype.add_type(Mp4Compatible())

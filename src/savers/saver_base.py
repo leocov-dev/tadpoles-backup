@@ -17,24 +17,26 @@ class AbstractSaver(metaclass=ABCMeta):
         self.saved = 0
 
     def add(self, obj: str, key: str, datetime_obj: datetime, child: str, comment: str = None):
-        fileitem = FileItem(datetime_obj, child, comment)
-        log.info(f'Adding new file: {fileitem.base_name}')
+        try:
+            file_item = FileItem(datetime_obj, child, comment)
+            log.debug(f'Adding new file: {file_item.base_name}')
 
-        self.file_queue.append(fileitem)
+            self.file_queue.append(file_item)
+        except TypeError as e:
+            print(comment)
+            raise e
 
     @abstractmethod
     def commit(self):
         """ process the file_queue and write the binary data """
-        pass
 
     @abstractmethod
-    def get_save_path(self, timestamp: datetime, file_name: str):
+    def get_save_path(self, file_item: FileItem):
         """ get the target save path """
-        pass
 
     @abstractmethod
-    def exists(self, timestamp: datetime, file_name: str) -> bool:
-        pass
+    def exists(self, file_item: FileItem) -> bool:
+        """ does this file exist in the file system """
 
 
 class AbstractBucketSaver(AbstractSaver, ABC):

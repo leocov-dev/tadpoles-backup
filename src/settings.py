@@ -15,12 +15,13 @@ class Config:
         raise NoTokenError
 
     MAX_YEARS = env.int('MAX_YEARS', 10)
-
+    EVENTS_PAGE_SIZE = env.int('EVENTS_PAGE_SIZE', 100)
     MAX_FILE_NAME_LEN = 80
     API_URL = 'https://www.tadpoles.com/remote/v1'
     EVENTS_URL = f'{API_URL}/events'
     ATTACHMENTS_URL = f'{API_URL}/obj_attachment'
     SKIP_NO_DATA_CHECK = env.bool('SKIP_NO_DATA_CHECK', False)
+    LOGGING_LEVEL = env('LOGGING_LEVEL', 'INFO').upper()
 
     # save files to a local directory
     LOCAL_TARGET_DIR = env('LOCAL_TARGET_DIR', None)

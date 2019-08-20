@@ -12,12 +12,12 @@ from piexif.helper import UserComment
 from exc import NoDataError
 from logs import log
 from settings import conf
-from utils import Mp4Lenient
+from utils import Mp4Compatible
 
 file_type_list = collections.defaultdict(int)
 
 
-def print_file_type_info():
+def debug_file_type_info():
     log.debug(f'found types: {dict(file_type_list)}')
 
 
@@ -28,6 +28,8 @@ class FileItem:
         self.data = data
         self.datetime = datetime_obj
         self.child = child
+        if not comment:
+            comment = str(uuid.uuid4().hex)
         self.comment = comment
         self.ext = 'bin'
         self.file_type = None
@@ -53,6 +55,9 @@ class FileItem:
 
     def __str__(self):
         return f'{self.datetime}'
+
+    def download_data(self):
+        pass
 
     def _guess_ext(self):
         if not self.data:
@@ -85,13 +90,13 @@ class FileItem:
             rgb = im.convert('RGB')
             rgb.save(self.data, format='jpeg')
             self._jpg_metadata()
-        elif any([isinstance(self.file_type, t) for t in [Mp4Lenient, video.Mp4]]):
+        elif any([isinstance(self.file_type, t) for t in [Mp4Compatible, video.Mp4]]):
             self._mp4_metadata()
 
     def _jpg_metadata(self):
         zeroth_ifd = {piexif.ImageIFD.Make: "tadpoles-backup",
                       piexif.ImageIFD.Software: 'Python',
-                      piexif.ImageIFD.ImageDescription: 'Josephine'
+                      piexif.ImageIFD.ImageDescription: self.child
                       }
         exif_ifd = {piexif.ExifIFD.DateTimeOriginal: self.datetime.strftime('%Y:%m:%d %H:%M:%S'),
                     piexif.ExifIFD.UserComment: UserComment.dump(self.comment)

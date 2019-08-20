@@ -5,9 +5,9 @@ from events import iter_events
 from exc import NoEventsError, UnauthorizedError
 from logs import log
 from savers import SAVER
-from savers.file_item import print_file_type_info
+from savers.file_item import debug_file_type_info
 from settings import conf, update_conf
-from utils import date_range_generator
+from utils import date_range_generator, center_in_console
 
 DELTA_MAP = {'days': 365,
              'weeks': 52,
@@ -24,35 +24,38 @@ def main(delta=1, delta_key='weeks', start_from=None):
         start_from = datetime.now()
     total_events = 0
 
+    return_code = 0
+    log_func = log.info
     # default msg
     msg = f'Stopped after {conf.MAX_YEARS} years'
 
     try:
-        log.info(f'Processing events in {delta} {delta_key.rstrip("s")} batches.\n')
+        log.info(center_in_console('Tadpoles-Backup'))
+        log.info(f'Processing events in {delta} {delta_key.rstrip("s")} batches.')
         for current, previous in date_range_generator(delta, delta_key, start_from, conf.MAX_YEARS):
             event_count = iter_events(previous, current)
             total_events += event_count
-            # break  # TODO: remove this
+
+    except NoEventsError:
+        msg = 'Event block contained no events, exiting...'
+    except UnauthorizedError as e:
+        msg = f'{e.__class__.__name__}: {e}'
+        log_func = log.error
+        return_code = 1
+    except Exception as e:
+        log.exception(str(e))
+        msg = f'Unexpected failure: {e.__class__.__name__}, {e}'
+        log_func = log.error
+        return_code = 1
+    finally:
+        log_func(f'{msg}')
 
         SAVER.commit()
-    except NoEventsError as e:
-        msg = 'Event block contained no events, exiting...'
-        log.warning(str(e))
-        return
-    except UnauthorizedError as e:
-        log.critical(str(e))
-        msg = e.__class__.__name__
-        return 1
-    except Exception as e:
-        msg = 'Unexpected failure.'
-        log.exception(e)
-        msg = e.__class__.__name__
-        return 1
-    finally:
-        log.info(f'\nDone with: {msg}')
-        log.info(f'Checked: {total_events}, Skipped: {SAVER.skipped}, Saved {SAVER.saved}')
 
-        print_file_type_info()
+        log.info(center_in_console(f'Checked: {total_events}, Skipped: {SAVER.skipped}, Saved {SAVER.saved}'))
+
+        debug_file_type_info()
+        return return_code
 
 
 if __name__ == '__main__':

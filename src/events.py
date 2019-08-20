@@ -12,55 +12,54 @@ from settings import client, conf, STR_DATE_FMT
 from utils import timestamp_to_date as t2d, to_timestamp_int
 
 
-def iter_events(start: [datetime, date], end: [datetime, date], num_events=5) -> (int, int, int):
+def iter_events(start: [datetime, date], end: [datetime, date], event_page_size=conf.EVENTS_PAGE_SIZE) -> (int, int, int):
     start = to_timestamp_int(start)
     end = to_timestamp_int(end)
-    event_count = 0
+    events_total = 0
 
     log.info(f'Request: {t2d(end)} - {t2d(start)}')
 
     params = {'direction': 'range',
               'earliest_event_time': start,
               'latest_event_time': end,
-              'num_events': num_events}
+              'num_events': event_page_size}
 
-    response = client.get(conf.EVENTS_URL, params=params)
-    try:
-        data = response.json()
-        cursor = data['cursor']
-        events = data['events']
-        event_count += len(events)
-        parse_events(events)
-        print(cursor)
-        while cursor:
+    cursor = True
+    while cursor:
+        if isinstance(cursor, str):
             params['cursor'] = cursor
-            response = client.get(conf.EVENTS_URL, params=params)
+        response = client.get(conf.EVENTS_URL, params=params)
+        try:
             data = response.json()
             cursor = data['cursor']
             events = data['events']
-            event_count += len(events)
-            parse_events(events)
-            print(cursor)
-        return event_count
+            events_count = len(events)
+            if events_count > 0:
+                events_total += events_count
+                parse_events(events)
 
-    except RequestException:
-        response.raise_for_status()
-        return event_count
+        # except RequestException as e:
+        #     log.debug(f'{e.__class__.__name__}: {e}')
+        #     response.raise_for_status()
+        #     return event_count
 
-    except JSONDecodeError:
-        if response.status_code == 401:
-            raise UnauthorizedError('Auth token is invalid or expired')
-        if not conf.SKIP_NO_DATA_CHECK:
-            raise NoEventsError('No Events')
+        except JSONDecodeError as e:
+            if response.status_code == 401:
+                raise UnauthorizedError('Auth token is invalid or expired')
+            if not conf.SKIP_NO_DATA_CHECK:
+                raise NoEventsError('Could not parse JSON events')
+
+    if events_total == 0 and not conf.SKIP_NO_DATA_CHECK:
+        raise NoEventsError('No events in block.')
+
+    return events_total
 
 
 __no_comment_counter = defaultdict(lambda: defaultdict(int))
 
 
 def parse_events(events):
-    if not events and not conf.SKIP_NO_DATA_CHECK:
-        raise NoEventsError('No events')
-
+    """ inspect the events in this batch and save any attachments that are found """
     for event in events:
         # looking for events with file attachments
         new_attachments = event.get('new_attachments', [])
@@ -75,7 +74,8 @@ def parse_events(events):
         child_name = event.get('parent_member_display')
         if not comment:
             __no_comment_counter[child_name][time.date().strftime(STR_DATE_FMT)] += 1
-            comment = __no_comment_counter[child_name][time.date().strftime(STR_DATE_FMT)]
+            count = __no_comment_counter[child_name][time.date().strftime(STR_DATE_FMT)]
+            comment = f"{count:04}"
 
         # usually only one attachment, but just in case
         for att in new_attachments:
