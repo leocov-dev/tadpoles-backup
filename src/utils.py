@@ -34,22 +34,22 @@ def to_timestamp_int(obj: [datetime, date]) -> int:
         return date_to_timestamp(obj)
 
 
-DELTA_MAP = {'days': 365,
-             'weeks': 52,
-             'months': 12}
+BATCH_UNIT_MAP = {'days': 365,
+                  'weeks': 52,
+                  'months': 12}
 
 
-def date_range_generator(delta: int, delta_key: str, start_date: [date, datetime], max_years: int):
+def date_range_generator(batch_interval: int, batch_unit: str, start_date: [date, datetime], max_years: int):
     if isinstance(start_date, datetime):
         start_date = start_date.date()
 
-    if delta_key not in DELTA_MAP:
-        raise ValueError(f'delta_key must be one of: {list(DELTA_MAP.keys())}')
+    if batch_unit not in BATCH_UNIT_MAP:
+        raise ValueError(f'batch_unit must be one of: {list(BATCH_UNIT_MAP.keys())}')
 
     current = start_date
 
-    for _ in range(max_years * DELTA_MAP[delta_key]):
-        previous = current - relativedelta(**{delta_key: delta})
+    for _ in range(max_years * BATCH_UNIT_MAP[batch_unit]):
+        previous = current - relativedelta(**{batch_unit: batch_interval})
         yield current, previous
 
         current = previous

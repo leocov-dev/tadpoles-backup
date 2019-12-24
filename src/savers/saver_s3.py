@@ -2,18 +2,15 @@ from savers.saver_base import AbstractBucketSaver
 
 
 class S3Saver(AbstractBucketSaver):
-
     def __init__(self, bucket, access_id, secret_key):
         super().__init__(bucket, access_id, secret_key)
 
-    def add(self, *args, **kwargs):
+    def _get_save_path(self, file_name):
         pass
 
-    def commit(self):
+    def _exists(self, file_name):
         pass
 
-    def get_save_path(self, file_name):
+    def _write_file_item(self, file_item):
         pass
 
-    def exists(self, file_name):
-        pass

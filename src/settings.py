@@ -1,5 +1,8 @@
+import os
+
 import environs
 import requests
+from requests_futures.sessions import FuturesSession
 
 from exc import NoTokenError
 
@@ -10,8 +13,8 @@ STR_DATE_FMT = '%Y-%m-%d'
 
 
 class Config:
-    OAUTH_TOKEN = env('OAUTH_TOKEN')
-    if not OAUTH_TOKEN:
+    AUTH_TOKEN = env('OAUTH_TOKEN')
+    if not AUTH_TOKEN:
         raise NoTokenError
 
     MAX_YEARS = env.int('MAX_YEARS', 10)
@@ -22,6 +25,7 @@ class Config:
     ATTACHMENTS_URL = f'{API_URL}/obj_attachment'
     SKIP_NO_DATA_CHECK = env.bool('SKIP_NO_DATA_CHECK', False)
     LOGGING_LEVEL = env('LOGGING_LEVEL', 'INFO').upper()
+    THREADED = env.bool('THREADED', False)
 
     # save files to a local directory
     LOCAL_TARGET_DIR = env('LOCAL_TARGET_DIR', None)
@@ -36,30 +40,25 @@ class Config:
     B2_ACCOUNT_ID = env('B2_ACCOUNT_ID', None)
     B2_ACCOUNT_KEY = env('B2_ACCOUNT_KEY', None)
 
-
-def get_client():
-    rc = requests.Session()
-    rc.headers = {'Cookie': f'DgU00={conf.OAUTH_TOKEN}'}
-    return rc
-
-
-conf = Config()
-client = get_client()
+    @classmethod
+    def update(cls, **kwargs):
+        for k, v in kwargs.items():
+            attr_name = k.upper()
+            if hasattr(cls, attr_name):
+                setattr(cls, attr_name, v)
 
 
-def update_conf(**kwargs):
-    global conf
+def get_client(concurrent=False):
+    if concurrent:
+        cpu_count = os.cpu_count()
+        session = FuturesSession(max_workers=cpu_count * 2 if cpu_count else 4)
+    else:
+        session = requests.Session()
+    session.headers = {'Cookie': f'DgU00={Config.AUTH_TOKEN}'}
+    return session
 
-    auth_token = kwargs.get('auth_token')
-    if auth_token:
-        conf.OAUTH_TOKEN = auth_token
 
-    max_years = kwargs.get('max_years')
-    if max_years:
-        conf.MAX_YEARS = max_years
+client = get_client(concurrent=False)
+concurrent_client = get_client(concurrent=True)
 
-    save_path = kwargs.get('save_path')
-    if save_path:
-        conf.LOCAL_TARGET_DIR = save_path
 
-    return conf

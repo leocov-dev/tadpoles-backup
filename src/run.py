@@ -6,18 +6,14 @@ from exc import NoEventsError, UnauthorizedError
 from logs import log
 from savers import SAVER
 from savers.file_item import debug_file_type_info
-from settings import conf, update_conf
+from settings import Config
 from utils import date_range_generator, center_in_console
 
-DELTA_MAP = {'days': 365,
-             'weeks': 52,
-             'months': 12}
 
-
-def main(delta=1, delta_key='weeks', start_from=None):
+def main(batch_interval=1, batch_unit='weeks', start_from=None):
     """ process events in blocks
     Examples:
-        delta=1, delta_key='months'
+        batch_interval=1, batch_unit='months'
         process events in 1 month chunks
     """
     if not start_from:
@@ -27,14 +23,15 @@ def main(delta=1, delta_key='weeks', start_from=None):
     return_code = 0
     log_func = log.info
     # default msg
-    msg = f'Stopped after {conf.MAX_YEARS} years'
+    msg = f'Stopped after {Config.MAX_YEARS} years'
 
     try:
         log.info(center_in_console('Tadpoles-Backup'))
-        log.info(f'Processing events in {delta} {delta_key.rstrip("s")} batches.')
-        for current, previous in date_range_generator(delta, delta_key, start_from, conf.MAX_YEARS):
+        log.info(f'Processing events in {batch_interval} {batch_unit.rstrip("s")} batches.')
+        for current, previous in date_range_generator(batch_interval, batch_unit, start_from, Config.MAX_YEARS):
             event_count = iter_events(previous, current)
             total_events += event_count
+            break
 
     except NoEventsError:
         msg = 'Event block contained no events, exiting...'
@@ -70,7 +67,7 @@ if __name__ == '__main__':
     subparser = parser.add_subparsers(title='modes', description='Saver Types')
 
     parser_local = subparser.add_parser('local')
-    parser_local.add_argument('--save-path', help='Destination directory for files')
+    parser_local.add_argument('--local-target-dir', help='Destination directory for files')
 
     parser_s3 = subparser.add_parser('s3')
 
@@ -78,7 +75,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    update_conf(**vars(args))
+    Config.update(**vars(args))
+
     start_date = datetime.strptime(args.start_date, '%Y-%m-"d') if args.start_date else None
 
-    exit(main(delta=args.batch_interval, delta_key=args.batch_unit, start_from=start_date))
+    exit(main(batch_interval=args.batch_interval, batch_unit=args.batch_unit, start_from=start_date))

@@ -1,9 +1,10 @@
 environs
 requests
 pytz
-python-dateutil
 structlog
 piexif
 filetype
 pillow
-mutagen
+requests_futures
+requests-toolbelt
+python-dateutil

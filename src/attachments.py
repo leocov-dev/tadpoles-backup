@@ -1,11 +1,19 @@
+import io
+
 from requests import RequestException
+from requests_toolbelt.downloadutils import stream
 
-from settings import conf, client
+from settings import Config, client
 
 
-def get_attachment(obj, key):
-    response = client.get(conf.ATTACHMENTS_URL, params={'obj': obj, 'key': key})
+def get_attachment(obj, key) -> bytes:
+    response = client.get(Config.ATTACHMENTS_URL, params={'obj': obj, 'key': key})
     try:
         return response.content
     except RequestException:
         response.raise_for_status()
+
+
+def stream_attachment(obj, key, bytes_obj: io.BytesIO):
+    r = client.get(Config.ATTACHMENTS_URL, params={'obj': obj, 'key': key}, stream=True)
+    stream.stream_response_to_file(r, path=bytes_obj)

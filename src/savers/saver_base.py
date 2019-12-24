@@ -1,11 +1,11 @@
 import collections
-import uuid
 from abc import ABCMeta, abstractmethod, ABC
 from datetime import datetime
 from typing import Deque
 
 from logs import log
 from savers.file_item import FileItem
+from settings import concurrent_client, Config
 
 
 class AbstractSaver(metaclass=ABCMeta):
@@ -18,7 +18,8 @@ class AbstractSaver(metaclass=ABCMeta):
 
     def add(self, obj: str, key: str, datetime_obj: datetime, child: str, comment: str = None):
         try:
-            file_item = FileItem(datetime_obj, child, comment)
+            future = concurrent_client.get(Config.ATTACHMENTS_URL, params={'obj': obj, 'key': key})
+            file_item = FileItem(datetime_obj, child, comment, future)
             log.debug(f'Adding new file: {file_item.base_name}')
 
             self.file_queue.append(file_item)
@@ -26,17 +27,32 @@ class AbstractSaver(metaclass=ABCMeta):
             print(comment)
             raise e
 
-    @abstractmethod
     def commit(self):
-        """ process the file_queue and write the binary data """
+        try:
+            while self.file_queue:
+                file_item = self.file_queue.popleft()
+                if not file_item.ready:
+                    self.file_queue.append(file_item)
+                    continue
+                if self._exists(file_item):
+                    self.skipped += 1
+                    continue
+                self._write_file_item(file_item)
+                self.saved += 1
+        except Exception as e:
+            log.exception(f'Commit Failure: {self.__class__.__name__}, {e}')
 
     @abstractmethod
-    def get_save_path(self, file_item: FileItem):
+    def _get_save_path(self, file_item: FileItem):
         """ get the target save path """
 
     @abstractmethod
-    def exists(self, file_item: FileItem) -> bool:
+    def _exists(self, file_item: FileItem) -> bool:
         """ does this file exist in the file system """
+
+    @abstractmethod
+    def _write_file_item(self, file_item):
+        """ write the file item to the file system """
 
 
 class AbstractBucketSaver(AbstractSaver, ABC):

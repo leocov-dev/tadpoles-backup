@@ -8,11 +8,11 @@ from requests import RequestException
 from exc import NoEventsError, UnauthorizedError
 from logs import log
 from savers import SAVER
-from settings import client, conf, STR_DATE_FMT
+from settings import client, Config, STR_DATE_FMT
 from utils import timestamp_to_date as t2d, to_timestamp_int
 
 
-def iter_events(start: [datetime, date], end: [datetime, date], event_page_size=conf.EVENTS_PAGE_SIZE) -> (int, int, int):
+def iter_events(start: [datetime, date], end: [datetime, date], event_page_size=Config.EVENTS_PAGE_SIZE) -> (int, int, int):
     start = to_timestamp_int(start)
     end = to_timestamp_int(end)
     events_total = 0
@@ -28,7 +28,8 @@ def iter_events(start: [datetime, date], end: [datetime, date], event_page_size=
     while cursor:
         if isinstance(cursor, str):
             params['cursor'] = cursor
-        response = client.get(conf.EVENTS_URL, params=params)
+        response = client.get(Config.EVENTS_URL, params=params)
+        response.raise_for_status()
         try:
             data = response.json()
             cursor = data['cursor']
@@ -38,18 +39,13 @@ def iter_events(start: [datetime, date], end: [datetime, date], event_page_size=
                 events_total += events_count
                 parse_events(events)
 
-        # except RequestException as e:
-        #     log.debug(f'{e.__class__.__name__}: {e}')
-        #     response.raise_for_status()
-        #     return event_count
-
         except JSONDecodeError as e:
             if response.status_code == 401:
                 raise UnauthorizedError('Auth token is invalid or expired')
-            if not conf.SKIP_NO_DATA_CHECK:
+            if not Config.SKIP_NO_DATA_CHECK:
                 raise NoEventsError('Could not parse JSON events')
 
-    if events_total == 0 and not conf.SKIP_NO_DATA_CHECK:
+    if events_total == 0 and not Config.SKIP_NO_DATA_CHECK:
         raise NoEventsError('No events in block.')
 
     return events_total
