@@ -13,16 +13,13 @@ STR_DATE_FMT = '%Y-%m-%d'
 
 
 class Config:
-    AUTH_TOKEN = env('OAUTH_TOKEN')
-    if not AUTH_TOKEN:
-        raise NoTokenError
+    # AUTH_TOKEN = env('OAUTH_TOKEN')
+    # if not AUTH_TOKEN:
+    #     raise NoTokenError
 
     MAX_YEARS = env.int('MAX_YEARS', 10)
     EVENTS_PAGE_SIZE = env.int('EVENTS_PAGE_SIZE', 100)
     MAX_FILE_NAME_LEN = 80
-    API_URL = 'https://www.tadpoles.com/remote/v1'
-    EVENTS_URL = f'{API_URL}/events'
-    ATTACHMENTS_URL = f'{API_URL}/obj_attachment'
     SKIP_NO_DATA_CHECK = env.bool('SKIP_NO_DATA_CHECK', False)
     LOGGING_LEVEL = env('LOGGING_LEVEL', 'INFO').upper()
     THREADED = env.bool('THREADED', False)
@@ -48,17 +45,36 @@ class Config:
                 setattr(cls, attr_name, v)
 
 
+class TadpolesConfig:
+    API_URL = 'https://www.tadpoles.com/remote/v1'
+    EVENTS_URL = f'{API_URL}/events'
+    ATTACHMENTS_URL = f'{API_URL}/obj_attachment'
+
+
+class Context:
+    def __init__(self):
+        self._data = {}
+
+    @property
+    def auth_token(self):
+        if not self._data['auth_token']:
+            raise NoTokenError
+        return self._data['auth_token']
+
+    @auth_token.setter
+    def auth_token(self, value):
+        self._data['auth_token'] = value
+
+
 def get_client(concurrent=False):
     if concurrent:
         cpu_count = os.cpu_count()
         session = FuturesSession(max_workers=cpu_count * 2 if cpu_count else 4)
     else:
         session = requests.Session()
-    session.headers = {'Cookie': f'DgU00={Config.AUTH_TOKEN}'}
+    session.headers = {'Cookie': f'DgU00={Context.auth_token}'}
     return session
 
 
 client = get_client(concurrent=False)
 concurrent_client = get_client(concurrent=True)
-
-

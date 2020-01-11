@@ -10,7 +10,12 @@ from settings import Config
 from utils import date_range_generator, center_in_console
 
 
-def main(batch_interval=1, batch_unit='weeks', start_from=None):
+def main(
+        batch_interval=1,
+        batch_unit='weeks',
+        start_from=None,
+        max_years=10
+):
     """ process events in blocks
     Examples:
         batch_interval=1, batch_unit='months'
@@ -55,7 +60,7 @@ def main(batch_interval=1, batch_unit='weeks', start_from=None):
         return return_code
 
 
-if __name__ == '__main__':
+def cli():
     parser = argparse.ArgumentParser(description='Backup images and video from Tadpoles.com')
     parser.add_argument('--auth-token', help='Authentication Token')
     parser.add_argument('--start-date', help='Date in format YYYY-MM-DD')
@@ -69,14 +74,23 @@ if __name__ == '__main__':
     parser_local = subparser.add_parser('local')
     parser_local.add_argument('--local-target-dir', help='Destination directory for files')
 
-    parser_s3 = subparser.add_parser('s3')
+    parser_s3 = subparser.add_parser('s3')  # noqa
 
-    parser_b2 = subparser.add_parser('b2')
+    parser_b2 = subparser.add_parser('b2')  # noqa
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+if __name__ == '__main__':
+    args = cli()
 
     Config.update(**vars(args))
 
     start_date = datetime.strptime(args.start_date, '%Y-%m-"d') if args.start_date else None
 
-    exit(main(batch_interval=args.batch_interval, batch_unit=args.batch_unit, start_from=start_date))
+    exit(main(
+        batch_interval=args.batch_interval,
+        batch_unit=args.batch_unit,
+        start_from=start_date,
+        max_years=args.max_years
+    ))
