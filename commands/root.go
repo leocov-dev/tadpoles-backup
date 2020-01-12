@@ -8,7 +8,10 @@ import (
 )
 
 var (
-	rootCmd = &cobra.Command{Use: "tadpoles-backup"}
+	rootCmd = &cobra.Command{
+		Use:   "tadpoles-backup",
+		Short: "Backup photos of your child from www.tadpoles.com",
+	}
 )
 
 func init() {

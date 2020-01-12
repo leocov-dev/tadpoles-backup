@@ -1,13 +1,13 @@
-GOFMT_FILES?=$$(find . -not -path "./vendor/*" -type f -name '*.go')
+GOFMT_FILES?=$$(find . -type f -name '*.go')
 
 default: dev
 
-# bin generates the releaseable binaries for Terraform
+# bin generates release zip packages in ./dist
 bin: fmtcheck
-	@TF_RELEASE=1 sh -c "$(CURDIR)/scripts/build.sh"
+	@sh -c "$(CURDIR)/scripts/build.sh"
 
-# dev creates binaries for testing Terraform locally. These are put
-# into ./bin/ as well as $GOPATH/bin
+# dev creates binaries for testing locally.
+# These are put into ./bin/ as well as $GOPATH/bin
 dev: fmtcheck
 	go install .
 
@@ -19,4 +19,4 @@ fmtcheck:
 
 .NOTPARALLEL:
 
-.PHONY: bin default dev e2etest fmtcheck generate
+.PHONY: bin default dev fmtcheck fmt

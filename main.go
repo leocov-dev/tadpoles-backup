@@ -5,9 +5,11 @@ import (
 )
 
 func main() {
+
 	err := commands.Execute()
 
 	if err != nil {
 		println(err)
 	}
+
 }

@@ -2,12 +2,14 @@
 
 # Check gofmt
 echo "==> Checking that code complies with gofmt requirements..."
-gofmt_files=$(gofmt -l "$(find . -name '*.go')")
+gofmt_files=$(gofmt -l $(find . -type f -name "*.go"))
 if [[ -n ${gofmt_files} ]]; then
-    echo 'gofmt needs running on the following files:'
+    echo "gofmt [FAIL]"
     echo "${gofmt_files}"
-    echo "You can use the command: \`make fmt\` to reformat code."
+    echo "Run: \`make fmt\` to reformat code."
     exit 1
+else
+  echo "gofmt [PASS]"
 fi
 
 exit 0

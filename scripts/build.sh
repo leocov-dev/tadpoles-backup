@@ -92,4 +92,4 @@ done
 # Done!
 echo
 echo "==> Results:"
-ls -hl bin/
+ls -hl dist/
