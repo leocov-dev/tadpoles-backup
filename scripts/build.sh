@@ -81,12 +81,13 @@ echo "==> Packaging..."
 for PLATFORM in $(find ./dist -mindepth 1 -maxdepth 1 -type d); do
     OSARCH=$(basename "${PLATFORM}")
     echo "--> ${OSARCH}"
-"
-    pushd ${PLATFORM}" >/dev/null 2>&1
+
+    pushd "${PLATFORM}" >/dev/null 2>&1 || exit
     zip ../"${OSARCH}".zip ./*
-    popd >/dev/null 2>&1
+    zip -uj ../"${OSARCH}".zip ../../LICENSE
+    popd >/dev/null 2>&1 || exit
+    rm -rf "${PLATFORM}"
 done
-rm -R -- dist/*/
 
 # Done!
 echo
