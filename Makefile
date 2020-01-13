@@ -3,12 +3,12 @@ GOFMT_FILES?=$$(find . -type f -name '*.go')
 default: dev
 
 # bin generates release zip packages in ./dist
-bin: fmtcheck
+bin: fmt
 	@sh -c "$(CURDIR)/scripts/build.sh"
 
 # dev creates binaries for testing locally.
 # These are put into ./bin/ as well as $GOPATH/bin
-dev: fmtcheck
+dev: fmt
 	go install .
 
 fmt:

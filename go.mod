@@ -7,4 +7,5 @@ require (
 	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.6.1
+	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 )
