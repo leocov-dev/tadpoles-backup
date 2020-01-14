@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"github.com/leocov-dev/tadpoles-backup/internal/input"
 	"github.com/spf13/cobra"
 )
 
@@ -18,4 +19,5 @@ func init() {
 
 func backupRun(cmd *cobra.Command, args []string) {
 	fmt.Println("BackupRun")
+	input.DoLoginIfNeeded()
 }

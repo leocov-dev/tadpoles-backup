@@ -1,9 +1,15 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+)
 
 var (
-	apiUrl         = "https://www.tadpoles.com/remote/v1"
-	EventsUrl      = fmt.Sprintf("%s/events", apiUrl)
-	AttachmentsUrl = fmt.Sprintf("%s/obj_attachment", apiUrl)
+	TadpolesHost   = "https://www.tadpoles.com"
+	TadpolesUrl, _ = url.Parse(TadpolesHost)
+	apiUrlV1       = fmt.Sprintf("%s/remote/v1", TadpolesHost)
+	EventsUrl      = fmt.Sprintf("%s/events", apiUrlV1)
+	AttachmentsUrl = fmt.Sprintf("%s/obj_attachment", apiUrlV1)
+	LoginUrl       = fmt.Sprintf("%s/auth/login", TadpolesHost)
 )

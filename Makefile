@@ -9,10 +9,10 @@ bin: fmt
 # dev creates binaries for testing locally.
 # These are put into ./bin/ as well as $GOPATH/bin
 dev: fmt
-	go install .
+	@go install ./...
 
 fmt:
-	gofmt -w $(GOFMT_FILES)
+	@gofmt -w $(GOFMT_FILES)
 
 fmtcheck:
 	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
