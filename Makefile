@@ -4,7 +4,7 @@ default: dev
 
 # bin generates release zip packages in ./dist
 release: tidy fmt
-	@sh -c "$(CURDIR)/scripts/build.sh"
+	@sh -c "$(CURDIR)/scripts/release.sh"
 
 # dev creates binaries for testing locally.
 # These are put into ./bin/ as well as $GOPATH/bin

@@ -1,7 +1,6 @@
 package utils
 
 import (
-	log "github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
 	"time"
@@ -19,7 +18,6 @@ func (t JsonTime) MarshalJSON() ([]byte, error) {
 func (t *JsonTime) UnmarshalJSON(s []byte) (err error) {
 	r := string(s)
 	r = strings.Split(r, ".")[0]
-	log.Debug(r)
 	q, err := strconv.ParseInt(r, 10, 64)
 	if err != nil {
 		return err

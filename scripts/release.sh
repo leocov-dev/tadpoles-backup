@@ -86,7 +86,6 @@ for PLATFORM in $(find ./dist -mindepth 1 -maxdepth 1 -type d); do
     zip ../"${OSARCH}".zip ./*
     zip -uj ../"${OSARCH}".zip ../../LICENSE
     popd >/dev/null 2>&1 || exit
-#    rm -rf "${PLATFORM}"
 done
 
 # Done!
