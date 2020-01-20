@@ -22,4 +22,4 @@ tidy:
 
 .NOTPARALLEL:
 
-.PHONY: bin default dev fmtcheck fmt
+.PHONY: bin default dev fmtcheck fmt tidy
