@@ -9,7 +9,8 @@ import (
 	"time"
 )
 
-type Parameters struct {
+// Response from API
+type parameters struct {
 	LastEventTime  utils.JsonTime `json:"last_event_time"`
 	FirstEventTime utils.JsonTime `json:"first_event_time"`
 	Memberships    []*memberships `json:"memberships"`
@@ -25,13 +26,14 @@ type dependants struct {
 	DisplayName string `json:"display_name"`
 }
 
+// Condensed Info
 type Params struct {
 	FirstEvent time.Time
 	LastEvent  time.Time
 	Dependants []string
 }
 
-func GetParameters() (*Params, error) {
+func GetParameters() (params *Params, err error) {
 	resp, err := client.ApiClient.Get(client.ParametersEndpoint)
 	if err != nil {
 		return nil, err
@@ -43,21 +45,21 @@ func GetParameters() (*Params, error) {
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	var param Parameters
+	var param parameters
 	err = json.Unmarshal(body, &param)
 
-	var depts []string
+	var dependantNames []string
 	for _, item := range param.Memberships {
 		for _, dep := range item.Dependants {
-			depts = append(depts, dep.DisplayName)
+			dependantNames = append(dependantNames, dep.DisplayName)
 		}
 	}
 
-	params := Params{
+	params = &Params{
 		FirstEvent: param.FirstEventTime.Time(),
 		LastEvent:  param.LastEventTime.Time(),
-		Dependants: depts,
+		Dependants: dependantNames,
 	}
 
-	return &params, err
+	return params, err
 }
