@@ -1,35 +1,59 @@
 package tadpoles_api
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/leocov-dev/tadpoles-backup/config"
-	"github.com/leocov-dev/tadpoles-backup/internal/errors"
-	"io/ioutil"
+	"github.com/leocov-dev/tadpoles-backup/internal/client"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
+	"time"
 )
 
-func PostLogin(email string, password string) error {
-	resp, err := apiClient.PostForm(
-		config.LoginUrl,
+func DoLogin(email string, password string) error {
+	log.Debug("Login...")
+	resp, err := client.ApiClient.PostForm(
+		client.LoginEndpoint,
 		url.Values{
 			"email":    {email},
 			"password": {password},
 			"service":  {"tadpoles"},
 		},
 	)
-	if err != nil || resp.StatusCode != http.StatusOK {
-		fmt.Printf("Error logging into: %s\n", config.TadpolesUrl.Host)
-		return &errors.RequestError{Response: resp, Message: "Login failed, please try again."}
+	if err != nil {
+		return err
 	}
-	storeAuthCookie(resp)
+	if resp.StatusCode != http.StatusOK {
+		return client.NewRequestError(resp)
+	}
+	admitErr := DoAdmit()
+	if admitErr != nil {
+		return admitErr
+	}
+
+	client.SerializeCookies()
+
+	log.Debug("Login successful")
 	return nil
 }
 
-func storeAuthCookie(response *http.Response) {
-	cookiesData := Jar.Cookies(config.TadpolesUrl)
-	jsonString, _ := json.MarshalIndent(cookiesData, "", "  ")
+// Must call admit endpoint before any other requests to get proper auth cookies set
+func DoAdmit() error {
+	log.Debug("Admit...")
+	t := time.Now()
+	zone, _ := t.Zone()
+	log.Debug("zone: ", zone)
+	resp, err := client.ApiClient.PostForm(
+		client.AdmitEndpoint,
+		url.Values{
+			"tz": {zone},
+		},
+	)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return client.NewRequestError(resp)
+	}
 
-	ioutil.WriteFile("tadpolesSession.json", jsonString, 0644)
+	log.Debug("Admit successful")
+	return nil
 }

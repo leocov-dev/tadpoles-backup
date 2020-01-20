@@ -3,7 +3,7 @@ GOFMT_FILES?=$$(find . -type f -name '*.go')
 default: dev
 
 # bin generates release zip packages in ./dist
-bin: fmt
+release: fmt
 	@sh -c "$(CURDIR)/scripts/build.sh"
 
 # dev creates binaries for testing locally.
