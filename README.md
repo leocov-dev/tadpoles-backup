@@ -1,10 +1,8 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![GitHub go.mod Go version (branch)](https://img.shields.io/github/go-mod/go-version/leocov-dev/tadpoles-backup/golang) [![Build Status](https://travis-ci.org/leocov-dev/tadpoles-backup.svg?branch=golang)](https://travis-ci.org/leocov-dev/tadpoles-backup)
+
 # Tadpoles Image Backup
 
 #### **This is still a work in progress! - Non-functional**
-
-Inspired by but reworked from scratch to make use of the REST API behind the `www.tadpoles.com`. 
-
-I started writing this in Python but have since switched to Go.
 
 ## About
 This tool will allow you to save all your child's images at full resolution from `www.tadpoles.com`.  It can be be configured with multiple save back-ends.
