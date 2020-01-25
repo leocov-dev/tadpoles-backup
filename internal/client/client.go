@@ -14,7 +14,7 @@ import (
 
 var (
 	homeDir, _         = os.UserHomeDir()
-	TadpolesCookieFile = path.Join(homeDir, "tadpolesSession.json")
+	TadpolesCookieFile = path.Join(homeDir, ".tadpole-backup-cookie")
 
 	Jar, _    = cookiejar.New(nil)
 	ApiClient = &http.Client{Jar: Jar}

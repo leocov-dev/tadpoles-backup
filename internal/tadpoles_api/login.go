@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func DoLogin(email string, password string) error {
+func ApiLogin(email string, password string) error {
 	log.Debug("Login...")
 	resp, err := client.ApiClient.PostForm(
 		client.LoginEndpoint,
@@ -24,20 +24,14 @@ func DoLogin(email string, password string) error {
 	if resp.StatusCode != http.StatusOK {
 		return client.NewRequestError(resp)
 	}
-	admitErr := DoAdmit()
-	if admitErr != nil {
-		return admitErr
-	}
-
-	client.SerializeCookies()
 
 	log.Debug("Login successful")
 	return nil
 }
 
 // Must call admit endpoint before any other requests to get proper auth cookies set
-func DoAdmit() error {
-	log.Debug("Admit...")
+func ApiAdmit() error {
+	log.Debug("ApiAdmit...")
 	t := time.Now()
 	zone, _ := t.Zone()
 	log.Debug("zone: ", zone)
@@ -54,6 +48,6 @@ func DoAdmit() error {
 		return client.NewRequestError(resp)
 	}
 
-	log.Debug("Admit successful")
+	log.Debug("ApiAdmit successful")
 	return nil
 }

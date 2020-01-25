@@ -14,21 +14,27 @@ import (
 
 func DoLoginIfNeeded() {
 	client.DeserializeCookies()
-	err := tadpoles_api.DoAdmit()
+	err := tadpoles_api.ApiAdmit()
 
-	if err != nil {
-		log.Debug(err)
-	} else {
+	if err == nil {
 		// serialized credential cookie was valid!
 		return
 	}
 
+	log.Debug("ApiAdmit Error: ", err)
+
 	for {
 		email, password := credentials()
-		err := tadpoles_api.DoLogin(email, password)
-
-		if err == nil {
+		err := tadpoles_api.ApiLogin(email, password)
+		if err != nil {
+			log.Debug("Login Error: ", err)
+		}
+		err = tadpoles_api.ApiAdmit()
+		if err != nil {
+			log.Debug("ApiAdmit Error: ", err)
+		} else {
 			// login was successful!
+			client.SerializeCookies()
 			break
 		}
 

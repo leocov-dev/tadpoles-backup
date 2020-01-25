@@ -6,7 +6,7 @@ import (
 )
 
 func GetAccountInfo() (info *schemas.Info, err error) {
-	parameters, err := GetParameters()
+	parameters, err := ApiParameters()
 	if err != nil {
 		return nil, err
 	}
@@ -15,7 +15,7 @@ func GetAccountInfo() (info *schemas.Info, err error) {
 }
 
 func GetFileAttachments(firstEventTime time.Time, lastEventTime time.Time) (attachments []*schemas.FileAttachment, err error) {
-	events, err := GetEvents(firstEventTime, lastEventTime)
+	events, err := ApiEvents(firstEventTime, lastEventTime)
 	if err != nil {
 		return nil, err
 	}

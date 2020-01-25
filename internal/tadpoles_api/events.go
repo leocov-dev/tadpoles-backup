@@ -13,9 +13,7 @@ import (
 	"time"
 )
 
-var (
-	urlBase, _ = url.Parse(client.EventsEndpoint)
-)
+var ()
 
 type pageResponse struct {
 	Cursor string       `json:"cursor"`
@@ -35,9 +33,10 @@ type pageEvent struct {
 	EventTime   utils.JsonTime     `json:"event_time"`
 	TimeZone    string             `json:"tz"`
 	EventKey    string             `json:"key"`
+	Member      string             `json:"member"`
 }
 
-func GetEvents(firstEventTime time.Time, lastEventTime time.Time) (events []*pageEvent, err error) {
+func ApiEvents(firstEventTime time.Time, lastEventTime time.Time) (events []*pageEvent, err error) {
 	log.Info(fmt.Sprintf("EventsURL: %s", client.EventsEndpoint))
 
 	params := url.Values{
@@ -45,7 +44,7 @@ func GetEvents(firstEventTime time.Time, lastEventTime time.Time) (events []*pag
 		"earliest_event_time": {strconv.FormatInt(firstEventTime.Unix(), 10)},
 		"latest_event_time":   {strconv.FormatInt(lastEventTime.Unix(), 10)},
 		"num_events":          {"78"}, // TODO: experiment with page size
-		"cursor":              nil, // it is acceptable to start cursor as empty
+		"cursor":              nil,    // it is acceptable to start cursor as empty
 	}
 
 	for true {
@@ -66,6 +65,7 @@ func GetEvents(firstEventTime time.Time, lastEventTime time.Time) (events []*pag
 }
 
 func getEventPage(params *url.Values, attachments *[]*pageEvent) error {
+	urlBase, _ := url.Parse(client.EventsEndpoint)
 	urlBase.RawQuery = params.Encode()
 
 	log.Debug("Query: ", urlBase.String())
