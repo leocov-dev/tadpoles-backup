@@ -1,5 +1,7 @@
 package utils
 
+import "os"
+
 func Contains(slice []string, item string) bool {
 	set := make(map[string]struct{}, len(slice))
 	for _, s := range slice {
@@ -8,4 +10,12 @@ func Contains(slice []string, item string) bool {
 
 	_, ok := set[item]
 	return ok
+}
+
+func FileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
 }

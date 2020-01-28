@@ -44,7 +44,7 @@ func statRun(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Print("Checking Events...")
-	attachments, err := tadpoles_api.GetFileAttachments(info.FirstEvent, info.LastEvent)
+	attachments, err := tadpoles_api.GetEventAttachmentData(info.FirstEvent, info.LastEvent)
 	if err != nil {
 		cmdFailed(cmd, err)
 	}

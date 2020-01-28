@@ -1,19 +1,16 @@
-package tadpoles_api
+package api
 
 import (
 	"github.com/leocov-dev/tadpoles-backup/internal/client"
-	"github.com/leocov-dev/tadpoles-backup/internal/schemas"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 )
 
-func ApiAttachment(attachment *schemas.FileAttachment) (data []byte, err error) {
-	log.Debug("Get attachment", attachment)
+func Attachment(eventKey string, attachmentKey string) (data []byte, err error) {
 	params := url.Values{
-		"obj": {attachment.EventKey},
-		"key": {attachment.AttachmentKey},
+		"obj": {eventKey},
+		"key": {attachmentKey},
 	}
 
 	urlBase, _ := url.Parse(client.AttachmentsEndpoint)

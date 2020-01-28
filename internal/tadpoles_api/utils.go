@@ -1,10 +1,11 @@
 package tadpoles_api
 
 import (
+	"github.com/leocov-dev/tadpoles-backup/internal/api"
 	"github.com/leocov-dev/tadpoles-backup/internal/schemas"
 )
 
-func flattenAttachments(events []*pageEvent) (attachments []*schemas.FileAttachment) {
+func eventsToAttachments(events []*api.PageEvent) (attachments []*schemas.FileAttachment) {
 	for _, event := range events {
 		for _, eventAttachment := range event.Attachments {
 			att := &schemas.FileAttachment{
@@ -21,7 +22,7 @@ func flattenAttachments(events []*pageEvent) (attachments []*schemas.FileAttachm
 	return attachments
 }
 
-func translateParameters(parameters *parametersResponse) *schemas.Info {
+func translateParameters(parameters *api.ParametersResponse) *schemas.Info {
 	info := &schemas.Info{
 		FirstEvent: parameters.FirstEventTime.Time(),
 		LastEvent:  parameters.LastEventTime.Time(),

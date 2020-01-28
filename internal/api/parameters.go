@@ -1,4 +1,4 @@
-package tadpoles_api
+package api
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 )
 
 // Response from API
-type parametersResponse struct {
+type ParametersResponse struct {
 	LastEventTime  utils.JsonTime `json:"last_event_time"`
 	FirstEventTime utils.JsonTime `json:"first_event_time"`
 	Memberships    []*memberships `json:"memberships"`
@@ -26,7 +26,7 @@ type dependants struct {
 	Key         string `json:"person"`
 }
 
-func ApiParameters() (params *parametersResponse, err error) {
+func Parameters() (params *ParametersResponse, err error) {
 	resp, err := client.ApiClient.Get(client.ParametersEndpoint)
 	if err != nil {
 		return nil, err

@@ -1,4 +1,4 @@
-package tadpoles_api
+package api
 
 import (
 	"encoding/json"
@@ -13,11 +13,9 @@ import (
 	"time"
 )
 
-var ()
-
 type pageResponse struct {
 	Cursor string       `json:"cursor"`
-	Events []*pageEvent `json:"events"`
+	Events []*PageEvent `json:"events"`
 }
 
 type eventAttachment struct {
@@ -25,7 +23,7 @@ type eventAttachment struct {
 	MimeType      string `json:"mime_type"`
 }
 
-type pageEvent struct {
+type PageEvent struct {
 	Comment     string             `json:"comment"`
 	Attachments []*eventAttachment `json:"new_attachments"`
 	ChildName   string             `json:"parent_member_display"`
@@ -36,7 +34,7 @@ type pageEvent struct {
 	Member      string             `json:"member"`
 }
 
-func ApiEvents(firstEventTime time.Time, lastEventTime time.Time) (events []*pageEvent, err error) {
+func Events(firstEventTime time.Time, lastEventTime time.Time) (events []*PageEvent, err error) {
 	log.Info(fmt.Sprintf("EventsURL: %s", client.EventsEndpoint))
 
 	params := url.Values{
@@ -64,7 +62,7 @@ func ApiEvents(firstEventTime time.Time, lastEventTime time.Time) (events []*pag
 	return events, nil
 }
 
-func getEventPage(params *url.Values, attachments *[]*pageEvent) error {
+func getEventPage(params *url.Values, attachments *[]*PageEvent) error {
 	urlBase, _ := url.Parse(client.EventsEndpoint)
 	urlBase.RawQuery = params.Encode()
 

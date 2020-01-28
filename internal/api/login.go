@@ -1,4 +1,4 @@
-package tadpoles_api
+package api
 
 import (
 	"github.com/leocov-dev/tadpoles-backup/internal/client"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func ApiLogin(email string, password string) error {
+func Login(email string, password string) error {
 	log.Debug("Login...")
 	resp, err := client.ApiClient.PostForm(
 		client.LoginEndpoint,
@@ -30,8 +30,8 @@ func ApiLogin(email string, password string) error {
 }
 
 // Must call admit endpoint before any other requests to get proper auth cookies set
-func ApiAdmit() error {
-	log.Debug("ApiAdmit...")
+func Admit() error {
+	log.Debug("Admit...")
 	t := time.Now()
 	zone, _ := t.Zone()
 	log.Debug("zone: ", zone)
@@ -48,6 +48,6 @@ func ApiAdmit() error {
 		return client.NewRequestError(resp)
 	}
 
-	log.Debug("ApiAdmit successful")
+	log.Debug("Admit successful")
 	return nil
 }

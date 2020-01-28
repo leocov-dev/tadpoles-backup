@@ -44,25 +44,11 @@ func backupRun(cmd *cobra.Command, args []string) {
 
 	fmt.Print("Checking Events...")
 	log.Debug("") // newline for debug mode
-	attachments, err := tadpoles_api.GetFileAttachments(info.FirstEvent, info.LastEvent)
+	attachments, err := tadpoles_api.GetEventAttachmentData(info.FirstEvent, info.LastEvent)
 	if err != nil {
 		cmdFailed(cmd, err)
 	}
 	fmt.Println("\rFile Attachments: ", len(attachments))
 
-	//for i, attachment := range attachments {
-	//	log.Info(fmt.Sprintf("Downloading %6d", i))
-	//	data, _ := tadpoles_api.ApiAttachment(attachment)
-	//	log.Debug("data len: ", binary.Size(data))
-	//
-	//	kind, _ := filetype.Match(data)
-	//	log.Debug(fmt.Sprintf("Kind: %+v\n", kind.Extension))
-	//	known := []string{"png", "jpg"}
-	//	if !utils.Contains(known, kind.Extension) {
-	//		fmt.Println("extension: ", kind.Extension)
-	//	}
-	//
-	//	contentType := http.DetectContentType(data)
-	//	log.Debug("Type: ", contentType)
-	//}
+	tadpoles_api.DownloadFileAttachments(attachments, backupTarget)
 }

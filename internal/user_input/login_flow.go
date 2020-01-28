@@ -3,8 +3,8 @@ package user_input
 import (
 	"bufio"
 	"fmt"
+	"github.com/leocov-dev/tadpoles-backup/internal/api"
 	"github.com/leocov-dev/tadpoles-backup/internal/client"
-	"github.com/leocov-dev/tadpoles-backup/internal/tadpoles_api"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
@@ -14,24 +14,24 @@ import (
 
 func DoLoginIfNeeded() {
 	client.DeserializeCookies()
-	err := tadpoles_api.ApiAdmit()
+	err := api.Admit()
 
 	if err == nil {
 		// serialized credential cookie was valid!
 		return
 	}
 
-	log.Debug("ApiAdmit Error: ", err)
+	log.Debug("Admit Error: ", err)
 
 	for {
 		email, password := credentials()
-		err := tadpoles_api.ApiLogin(email, password)
+		err := api.Login(email, password)
 		if err != nil {
 			log.Debug("Login Error: ", err)
 		}
-		err = tadpoles_api.ApiAdmit()
+		err = api.Admit()
 		if err != nil {
-			log.Debug("ApiAdmit Error: ", err)
+			log.Debug("Admit Error: ", err)
 		} else {
 			// login was successful!
 			client.SerializeCookies()

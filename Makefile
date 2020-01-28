@@ -9,7 +9,7 @@ release: tidy fmt
 # dev creates binaries for testing locally.
 # These are put into ./bin/ as well as $GOPATH/bin
 dev: tidy fmt
-	@go install ./...
+	@go install -race ./...
 
 fmt:
 	@gofmt -w $(GOFMT_FILES)

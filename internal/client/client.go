@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
@@ -27,23 +28,14 @@ var (
 	apiV1               = fmt.Sprintf("%s://%s/remote/v1", TadpolesUrl.Scheme, TadpolesUrl.Host)
 	EventsEndpoint      = fmt.Sprintf("%s/events", apiV1)
 	AttachmentsEndpoint = fmt.Sprintf("%s/obj_attachment", apiV1)
-	GuardiansEndpoint   = fmt.Sprintf("%s/guardians", apiV1)
 	AdmitEndpoint       = fmt.Sprintf("%s/athome/admit", apiV1)
 	ParametersEndpoint  = fmt.Sprintf("%s/parameters", apiV1)
 )
 
-func fileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !info.IsDir()
-}
-
 // load cookies from serialized json on disk if able.
 func DeserializeCookies() {
 	var storedCookies []*http.Cookie
-	if fileExists(TadpolesCookieFile) {
+	if utils.FileExists(TadpolesCookieFile) {
 
 		// Open our jsonFile
 		jsonFile, _ := os.Open(TadpolesCookieFile)
