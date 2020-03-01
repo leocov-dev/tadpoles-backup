@@ -1,7 +1,0 @@
-environs
-requests
-pytz
-python-dateutil
-structlog
-piexif
-filetype

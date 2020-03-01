@@ -1,41 +1,59 @@
-# Tadpoles.com Image Backup
+[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT) ![GitHub go.mod Go version (branch)](https://img.shields.io/github/go-mod/go-version/leocov-dev/tadpoles-backup) [![Build Status](https://travis-ci.org/leocov-dev/tadpoles-backup.svg?branch=golang)](https://travis-ci.org/leocov-dev/tadpoles-backup)
+
+# Tadpoles Image Backup
 
 #### **This is still a work in progress! - Non-functional**
 
-Inspired by https://github.com/twneale/tadpoles but reworked from scratch to make use of the REST API behind the tadpoles.com website. 
-
 ## About
-This tool will allow you to save all your child's images at full resolution from tadpoles.com.  It can be be configured with multiple save backends or new ones can be written.
+This tool will allow you to save all your child's images at full resolution from _tadpoles.com_.  
 
-Current save backends:
+Current save back-ends:
 * Local file system
-* Amazon S3 (non-functional)
-* Backblaze B2 (non-functional)
+* ~~Amazon S3~~
+* ~~Backblaze B2~~
+
+## Install
+Get a prebuilt executable from the releases page.  Download and extract `tadpoles-backup` to a place of your choosing.
+
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/leocov-dev/tadpoles-backup)
 
 ## Usage
-_It is preferred to run this application inside a python virtual env._
 
-You need an authentication token. This can be easily obtained by logging into tadpoles.com and inspecting the cookies in any request (after login). Tokens seem to expire after about 1 month.
+> :exclamation:**IMPORTANT**:exclamation:
+>
+> You **MUST** have a _tadpoles.com_ account with a tadpoles specific password. 
+You **CAN NOT** log in to this tool with Google Auth.
+If you normally log into _tadpoles.com_ with Google/Gmail account verification read these [instructions](.github/GoogleAccountSignIn.md).
 
-The requests will include a value like this:
-```
-Cookie: DgU00="<some_long_token_string>"
+```bash
+# Print help with command details:
+$ tadpoles-backup --help
+
+# Get account statistics (requires login)
+$ tadpoles-backup stat
+
+# Download images (requires login)
+$ tadpoles-backup backup "/a/directory/on/your/machine/"
 ```
 
-1. Create a file named `.env` in the root of the project.
-2. Add an env variable with the contents of the auth token cookie variable without any quotes.
-```
-# .env file
-OAUTH_TOKEN=<some_long_token_string>"
+## Development
 
-# Example:
-# If in request cookie, DgU00="ABCDE"
-# put this in .env file
-OAUTH_TOKEN=ABCDE
+Install Go version specified in `.go-version` (recommended to use [goenv](https://github.com/syndbg/goenv))
+
+```bash
+$ make dev
+$ bin/tadpoles-backup --help
 ```
-Execute the run.py script.
 
 ## Notes
-The tool queries one months worth of pictures at a time. If a query comes up with no data, then execution will stop. This may be unexpected in cases of parents having a gap > 1 month in children's attendance. This check can be skipped with the `.env` file by adding a `SKIP_NO_DATA_CHECK=true` line.
 
-The tool will only query back for the past 10 years from the current date. This value can be configured with the `.env` file by adding a `MAX_YEARS=<int>` line.
+`tadples-backup` caches your login session cookie locally so you are not prompted repeatedly to enter your password. 
+It **DOES NOT** store or retain your email or password!
+
+It writes a file to your home directory with a temporary authentication cookie which lasts a few weeks.
+This file is located at `$HOME/.tadpoles-backup-cookie` and can be deleted whenever you choose.
+
+
+## Inspired By
+* [twneale/tadpoles](https://github.com/twneale/tadpoles)
+* [huckMac/tadpoles-scraper](https://github.com/ChuckMac/tadpoles-scraper)
