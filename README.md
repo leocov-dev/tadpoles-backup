@@ -19,7 +19,7 @@ Get a prebuilt executable from the releases page.  Download and extract `tadpole
 
 ## Usage
 
-> **IMPORTANT** :bangbang:
+> :exclamation:**IMPORTANT**:exclamation:
 >
 > You **MUST** have a _tadpoles.com_ account with a valid password. 
 You **CAN NOT** log in to this tool with Google Auth.
