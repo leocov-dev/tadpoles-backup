@@ -23,6 +23,10 @@ var (
 	}
 )
 
+func init() {
+	rootCmd.AddCommand(backupCmd)
+}
+
 func backupArgs() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {

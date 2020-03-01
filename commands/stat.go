@@ -19,6 +19,10 @@ var (
 	}
 )
 
+func init() {
+	rootCmd.AddCommand(statCmd)
+}
+
 func statRun(cmd *cobra.Command, args []string) {
 	h := utils.NewHeading(":", 15)
 	s := utils.StartSpinner("Getting Account Info...")
@@ -29,7 +33,7 @@ func statRun(cmd *cobra.Command, args []string) {
 	}
 	s.Stop()
 
-	h.Write("Timeframe", fmt.Sprintf("%s to %s",
+	h.Write("Time-frame", fmt.Sprintf("%s to %s",
 		info.FirstEvent.Format("2006-01-02"),
 		info.LastEvent.Format("2006-01-02")))
 

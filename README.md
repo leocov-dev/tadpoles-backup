@@ -21,9 +21,9 @@ Get a prebuilt executable from the releases page.  Download and extract `tadpole
 
 > :exclamation:**IMPORTANT**:exclamation:
 >
-> You **MUST** have a _tadpoles.com_ account with a valid password. 
+> You **MUST** have a _tadpoles.com_ account with a tadpoles specific password. 
 You **CAN NOT** log in to this tool with Google Auth.
-If you normally log into _tadpoles.com_ with Gmail/Google account verification read these [instructions](.github/GoogleAccountSignIn.md).
+If you normally log into _tadpoles.com_ with Google/Gmail account verification read these [instructions](.github/GoogleAccountSignIn.md).
 
 ```bash
 # Print help with command details:

@@ -65,9 +65,12 @@ for PLATFORM in $(find ./dist -mindepth 1 -maxdepth 1 -type d); do
     echo "--> ${OSARCH}"
 
     pushd "${PLATFORM}" >/dev/null 2>&1 || exit
-    zip ../"${OSARCH}".zip ./*
-    zip -uj ../"${OSARCH}".zip ../../LICENSE
+    zip "../${OSARCH}.zip" ./*
+    zip -uj "../${OSARCH}.zip" ../../LICENSE
+
+    rm -rf "../${OSARCH}"
     popd >/dev/null 2>&1 || exit
+
 done
 
 # Done!

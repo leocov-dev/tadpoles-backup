@@ -2,16 +2,16 @@ package commands
 
 import (
 	"fmt"
+	"github.com/leocov-dev/tadpoles-backup/config"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 var (
 	rootCmd = &cobra.Command{
-		Use:   "tadpoles-backup",
+		Use:   config.Name,
 		Short: "Backup photos of your child from www.tadpoles.com",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			// These run before every sub-command
 			setLoggingLevel()
 		},
 	}
@@ -22,9 +22,6 @@ var (
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&debugMode, "debug", "d", false, "Print additional debug and informational logs. Setting this always sets --verbose as well.")
 	rootCmd.PersistentFlags().BoolVarP(&verboseMode, "verbose", "v", false, "Print additional informational logs.")
-
-	rootCmd.AddCommand(statCmd)
-	rootCmd.AddCommand(backupCmd)
 }
 
 func Execute() error {
