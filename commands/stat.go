@@ -38,7 +38,7 @@ func statRun(cmd *cobra.Command, args []string) {
 		i += 1
 		h.WriteAligned(fmt.Sprintf("%d", i), dep, utils.Right)
 	}
-	
+
 	s = utils.StartSpinner("Checking Events...")
 	attachments, err := tadpoles_api.GetEventAttachmentData(info.FirstEvent, info.LastEvent)
 	if err != nil {
