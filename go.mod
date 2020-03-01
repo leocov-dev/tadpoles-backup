@@ -3,6 +3,7 @@ module github.com/leocov-dev/tadpoles-backup
 go 1.13.6
 
 require (
+	github.com/briandowns/spinner v1.9.0
 	github.com/gosuri/uilive v0.0.4 // indirect
 	github.com/gosuri/uiprogress v0.0.1
 	github.com/h2non/filetype v1.0.10

@@ -44,6 +44,7 @@ func DownloadFileAttachments(attachments []*schemas.FileAttachment, backupTarget
 
 	uiprogress.Start()
 	dwnd := uiprogress.AddBar(len(attachments))
+	dwnd.AppendCompleted()
 
 	var wg = &sync.WaitGroup{}
 

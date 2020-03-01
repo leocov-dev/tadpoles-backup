@@ -14,8 +14,8 @@ import (
 )
 
 type pageResponse struct {
-	Cursor string       `json:"cursor"`
-	Events []*PageEvent `json:"events"`
+	Cursor string   `json:"cursor"`
+	Events []*Event `json:"events"`
 }
 
 type eventAttachment struct {
@@ -23,7 +23,7 @@ type eventAttachment struct {
 	MimeType      string `json:"mime_type"`
 }
 
-type PageEvent struct {
+type Event struct {
 	Comment     string             `json:"comment"`
 	Attachments []*eventAttachment `json:"new_attachments"`
 	ChildName   string             `json:"parent_member_display"`
@@ -34,15 +34,15 @@ type PageEvent struct {
 	Member      string             `json:"member"`
 }
 
-func Events(firstEventTime time.Time, lastEventTime time.Time) (events []*PageEvent, err error) {
-	log.Info(fmt.Sprintf("EventsURL: %s", client.EventsEndpoint))
+func Events(firstEventTime time.Time, lastEventTime time.Time) (events []*Event, err error) {
+	log.Debug(fmt.Sprintf("EventsURL: %s", client.EventsEndpoint))
 
 	params := url.Values{
 		"direction":           {"range"},
 		"earliest_event_time": {strconv.FormatInt(firstEventTime.Unix(), 10)},
 		"latest_event_time":   {strconv.FormatInt(lastEventTime.Unix(), 10)},
-		"num_events":          {"78"}, // TODO: experiment with page size
-		"cursor":              nil,    // it is acceptable to start cursor as empty
+		"num_events":          {"100"}, // TODO: experiment with page size
+		"cursor":              nil,     // it is acceptable to start cursor as empty
 	}
 
 	for true {
@@ -62,7 +62,7 @@ func Events(firstEventTime time.Time, lastEventTime time.Time) (events []*PageEv
 	return events, nil
 }
 
-func getEventPage(params *url.Values, attachments *[]*PageEvent) error {
+func getEventPage(params *url.Values, attachments *[]*Event) error {
 	urlBase, _ := url.Parse(client.EventsEndpoint)
 	urlBase.RawQuery = params.Encode()
 

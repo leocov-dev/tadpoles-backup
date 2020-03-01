@@ -5,7 +5,7 @@ import (
 	"github.com/leocov-dev/tadpoles-backup/internal/schemas"
 )
 
-func eventsToAttachments(events []*api.PageEvent) (attachments []*schemas.FileAttachment) {
+func eventsToAttachments(events []*api.Event) (attachments []*schemas.FileAttachment) {
 	for _, event := range events {
 		for _, eventAttachment := range event.Attachments {
 			att := &schemas.FileAttachment{

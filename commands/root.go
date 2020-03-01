@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"github.com/leocov-dev/tadpoles-backup/internal/user_input"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -14,7 +13,6 @@ var (
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			// These run before every sub-command
 			setLoggingLevel()
-			user_input.DoLoginIfNeeded()
 		},
 	}
 	debugMode   bool

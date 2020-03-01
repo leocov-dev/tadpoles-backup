@@ -41,7 +41,7 @@ func (a *FileAttachment) GetSaveName() string {
 }
 
 func (a *FileAttachment) GetSaveDir() string {
-	return path.Join(a.backupTarget, fmt.Sprintf("%d-%02d", a.EventTime.Year(), a.EventTime.Month()))
+	return path.Join(a.backupTarget, fmt.Sprint(a.EventTime.Year()), fmt.Sprintf("%d-%02d-%02d", a.EventTime.Year(), a.EventTime.Month(), a.EventTime.Day()))
 }
 
 func (a *FileAttachment) GetSavePath() (filePath string, err error) {

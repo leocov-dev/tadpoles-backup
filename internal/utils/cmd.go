@@ -1,4 +1,4 @@
-package commands
+package utils
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func cmdFailed(cmd *cobra.Command, err error) {
+func CmdFailed(cmd *cobra.Command, err error) {
 	fmt.Printf("%s command failed..\n", cmd.Name())
 	logrus.Debug(err)
 	os.Exit(1)

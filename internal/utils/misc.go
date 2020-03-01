@@ -1,6 +1,13 @@
 package utils
 
-import "os"
+import (
+	"fmt"
+	"github.com/briandowns/spinner"
+	"os"
+	"time"
+)
+
+var SpinnerChars = []string{"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"}
 
 func Contains(slice []string, item string) bool {
 	set := make(map[string]struct{}, len(slice))
@@ -18,4 +25,11 @@ func FileExists(filename string) bool {
 		return false
 	}
 	return !info.IsDir()
+}
+
+func StartSpinner(title string) *spinner.Spinner {
+	s := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+	s.Prefix = fmt.Sprintf("%s ", title)
+	s.Color("cyan", "bold") // implicit s.Start()
+	return s
 }
