@@ -10,7 +10,7 @@ ci:
 release: tidy fmt
 	@sh -c "$(CURDIR)/scripts/release.sh"
 
-clear:
+clean:
 	@rm -rf "$(CURDIR)/bin"
 	@rm -rf "$(CURDIR)/dist"
 

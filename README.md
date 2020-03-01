@@ -13,9 +13,10 @@ Current save back-ends:
 * ~~Backblaze B2~~
 
 ## Install
-Get a prebuilt executable from the releases page.  Download and extract `tadpoles-backup` to a place of your choosing.
+Get a prebuilt executable from the releases page.
+Download the zip file for your operating system and extract `tadpoles-backup` to a place of your choosing.
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/leocov-dev/tadpoles-backup)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/leocov-dev/tadpoles-backup) [Download](https://github.com/leocov-dev/tadpoles-backup/releases/latest)
 
 ## Usage
 
