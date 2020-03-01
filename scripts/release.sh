@@ -26,7 +26,7 @@ mkdir -p bin/
 rm -rf dist/*
 mkdir -p dist/
 
-if ! which gox > /dev/null; then
+if ! command -v gox > /dev/null; then
     echo "==> Installing gox..."
     go get -u github.com/mitchellh/gox
 fi
@@ -50,29 +50,11 @@ gox \
     -output "dist/{{.OS}}_{{.Arch}}/${PWD##*/}" \
     .
 
-# Move all the compiled things to the $GOPATH/bin
-GOPATH=${GOPATH:-$(go env GOPATH)}
-case $(uname) in
-    CYGWIN*)
-        GOPATH="$(cygpath "${GOPATH}")"
-        ;;
-esac
-OLDIFS=$IFS
-IFS=: MAIN_GOPATH=("${GOPATH}")
-IFS=$OLDIFS
-
-# Create GOPATH/bin if it's doesn't exists
-if [ ! -d "${MAIN_GOPATH}"/bin ]; then
-    echo "==> Creating GOPATH/bin directory..."
-    mkdir -p "${MAIN_GOPATH}"/bin
-fi
-
 # Copy our OS/Arch to the bin/ directory
 DEV_PLATFORM="./dist/$(go env GOOS)_$(go env GOARCH)"
 if [[ -d "${DEV_PLATFORM}" ]]; then
     for F in $(find "${DEV_PLATFORM}" -mindepth 1 -maxdepth 1 -type f); do
         cp "${F}" bin/
-        cp "${F}" "${MAIN_GOPATH}"/bin/
     done
 fi
 

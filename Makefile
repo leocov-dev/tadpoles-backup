@@ -6,10 +6,14 @@ default: dev
 release: tidy fmt
 	@sh -c "$(CURDIR)/scripts/release.sh"
 
+clear:
+	@rm -rf "$(CURDIR)/bin"
+	@rm -rf "$(CURDIR)/dist"
+
 # dev creates binaries for testing locally.
-# These are put into ./bin/ as well as $GOPATH/bin
+# These are put into $GOPATH/bin
 dev: tidy fmt
-	@go install -race ./...
+	@go build -race -o "$(CURDIR)/bin/tadpoles-backup" .
 
 fmt:
 	@gofmt -w $(GOFMT_FILES)
