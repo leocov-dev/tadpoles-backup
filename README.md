@@ -9,6 +9,8 @@ This tool will allow you to save all your child's images at full resolution from
 
 Current save back-ends:
 * Local file system
+* ~~Amazon S3~~
+* ~~Backblaze B2~~
 
 ## Install
 Get a prebuilt executable from the releases page.  Download and extract `tadpoles-backup` to a place of your choosing.
@@ -17,9 +19,9 @@ Get a prebuilt executable from the releases page.  Download and extract `tadpole
 
 ## Usage
 
-**IMPORTANT:** You must have a _tadpoles.com_ account with a valid password. 
+> You **MUST** have a _tadpoles.com_ account with a valid password. 
 You **CAN NOT** log in to this tool with Google Auth.
-If you normally log into _tadpoles.com_ with gmail account verification read these [instructions](.github/GoogleAccountSignIn.md).
+If you normally log into _tadpoles.com_ with Gmail/Google account verification read these [instructions](.github/GoogleAccountSignIn.md).
 
 ```bash
 # Print help with command details:
@@ -32,12 +34,6 @@ $ tadpoles-backup stat
 $ tadpoles-backup backup "/a/directory/on/your/machine/"
 ```
 
-`tadples-backup` caches your login session cookie locally so you are not prompted repeatedly to enter your password. 
-It **DOES NOT** store or retain your email or password!
-
-It writes a file to your home directory with a temporary authentication cookie which lasts a few weeks.
-This file is located at `$HOME/.tadpoles-backup-cookie` and can be deleted whenever you choose.
-
 ## Development
 
 Install Go version specified in `.go-version` (recommended to use [goenv](https://github.com/syndbg/goenv))
@@ -46,6 +42,15 @@ Install Go version specified in `.go-version` (recommended to use [goenv](https:
 $ make dev
 $ bin/tadpoles-backup --help
 ```
+
+## Notes
+
+`tadples-backup` caches your login session cookie locally so you are not prompted repeatedly to enter your password. 
+It **DOES NOT** store or retain your email or password!
+
+It writes a file to your home directory with a temporary authentication cookie which lasts a few weeks.
+This file is located at `$HOME/.tadpoles-backup-cookie` and can be deleted whenever you choose.
+
 
 ## Inspired By
 * [twneale/tadpoles](https://github.com/twneale/tadpoles)
