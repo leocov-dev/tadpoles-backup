@@ -2,6 +2,9 @@ GOFMT_FILES?=$$(find . -type f -name '*.go')
 
 default: dev
 
+ci:
+	@sh -c "$(CURDIR)/scripts/ci.sh"
+
 # bin generates release zip packages in ./dist
 release: tidy fmt
 	@sh -c "$(CURDIR)/scripts/release.sh"

@@ -9,8 +9,10 @@ import (
 
 var (
 	rootCmd = &cobra.Command{
-		Use:   config.Name,
-		Short: "Backup photos of your child from www.tadpoles.com",
+		Use: config.Name,
+		Long: fmt.Sprintf("%s %s\nBackup photos of your child from www.tadpoles.com",
+			config.Name,
+			config.Version),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			setLoggingLevel()
 		},
