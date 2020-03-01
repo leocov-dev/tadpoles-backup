@@ -10,6 +10,4 @@ DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
 # Change into that directory
 cd "$DIR" || exit
 
-go build -o ci/tadpoles-backup .
-
-rm -rf ci
+echo "CI PROCESS STARTED"
