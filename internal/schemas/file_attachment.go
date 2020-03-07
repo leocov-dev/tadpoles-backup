@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/h2non/filetype"
 	"github.com/leocov-dev/tadpoles-backup/internal/api"
+	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	log "github.com/sirupsen/logrus"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -19,17 +21,19 @@ type FileAttachment struct {
 	ChildName     string
 	CreateTime    time.Time
 	EventTime     time.Time
-	bytes         []byte
+	tempFileName  string
 	backupTarget  string
 	Exists        bool
 }
 
-func (a *FileAttachment) SetBackupDir(backupTarget string) {
+// set the parent directory for the save target
+func (a *FileAttachment) SetBackupRoot(backupTarget string) {
 	a.backupTarget = backupTarget
 }
 
+// get the save target file name without extension
 func (a *FileAttachment) GetSaveName() string {
-	timestamp := fmt.Sprintf("%d%d%d%d%d%d",
+	timestamp := fmt.Sprintf("%d%02d%02d%02d%02d%02d",
 		a.EventTime.Year(),
 		a.EventTime.Month(),
 		a.EventTime.Day(),
@@ -40,16 +44,18 @@ func (a *FileAttachment) GetSaveName() string {
 	return fmt.Sprintf("%s_%s", timestamp, a.ChildName)
 }
 
+// get the save target directory
 func (a *FileAttachment) GetSaveDir() string {
 	return path.Join(a.backupTarget, fmt.Sprint(a.EventTime.Year()), fmt.Sprintf("%d-%02d-%02d", a.EventTime.Year(), a.EventTime.Month(), a.EventTime.Day()))
 }
 
-func (a *FileAttachment) GetSavePath() (filePath string, err error) {
+// get the path and filename for the final save location
+func (a *FileAttachment) GetSaveTarget() (filePath string, err error) {
 	if a.backupTarget == "" {
 		return "", errors.New("backup target must be set before writing")
 	}
 
-	kind, err := filetype.Match(a.bytes)
+	kind, err := filetype.MatchFile(a.tempFileName)
 	if err != nil {
 		return "", err
 	}
@@ -59,19 +65,34 @@ func (a *FileAttachment) GetSavePath() (filePath string, err error) {
 	return path.Join(dir, fileName), nil
 }
 
+// download file to a temporary directory
 func (a *FileAttachment) Download() (err error) {
 	log.Debug("Downloading: ", a.AttachmentKey)
-	data, err := api.Attachment(a.EventKey, a.AttachmentKey)
+
+	resp, err := api.Attachment(a.EventKey, a.AttachmentKey)
 	if err != nil {
 		return err
 	}
-	a.bytes = data
+
+	tempFile, err := ioutil.TempFile("", "tpbk_*")
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+	_, err = io.Copy(tempFile, resp.Body)
+	if err != nil {
+		return nil
+	}
+
+	a.tempFileName = tempFile.Name()
 	return nil
 }
 
-func (a *FileAttachment) Write() (err error) {
+// create the necessary directories and move the temporary file to the target with a new name
+func (a *FileAttachment) Save() (err error) {
 
-	savePath, err := a.GetSavePath()
+	savePath, err := a.GetSaveTarget()
 	if err != nil {
 		return err
 	}
@@ -82,7 +103,7 @@ func (a *FileAttachment) Write() (err error) {
 	}
 
 	log.Debug("Saving to: ", savePath)
-	err = ioutil.WriteFile(savePath, a.bytes, 0644)
+	err = utils.MoveFile(a.tempFileName, savePath)
 	if err != nil {
 		return err
 	}

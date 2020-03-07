@@ -6,6 +6,7 @@ import (
 	"github.com/leocov-dev/tadpoles-backup/internal/user_input"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	"github.com/spf13/cobra"
+	"time"
 )
 
 var (
@@ -34,8 +35,8 @@ func statRun(cmd *cobra.Command, args []string) {
 	s.Stop()
 
 	h.Write("Time-frame", fmt.Sprintf("%s to %s",
-		info.FirstEvent.Format("2006-01-02"),
-		info.LastEvent.Format("2006-01-02")))
+		info.FirstEvent.In(time.Local).Format("2006-01-02"),
+		info.LastEvent.In(time.Local).Format("2006-01-02")))
 
 	h.Write("Children", "")
 	for i, dep := range info.Dependants {
@@ -49,5 +50,6 @@ func statRun(cmd *cobra.Command, args []string) {
 		utils.CmdFailed(cmd, err)
 	}
 	s.Stop()
-	h.Write("Pictures/Videos", fmt.Sprintf("%d", len(attachments)))
+
+	h.Write("Pictures/Videos", fmt.Sprint(len(attachments)))
 }

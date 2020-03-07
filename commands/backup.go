@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"github.com/gookit/color"
 	"github.com/leocov-dev/tadpoles-backup/internal/tadpoles_api"
 	"github.com/leocov-dev/tadpoles-backup/internal/user_input"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
@@ -37,27 +38,41 @@ func backupArgs() cobra.PositionalArgs {
 }
 
 func backupRun(cmd *cobra.Command, args []string) {
-	fmt.Println("Backup Started...")
+	h := utils.NewHeading(":", 15)
+	s := utils.StartSpinner("Backup Started...")
 
 	backupTarget := filepath.Clean(args[0])
+	log.Debug("Backing up to: ", backupTarget)
 	err := os.MkdirAll(backupTarget, os.ModePerm)
 	if err != nil {
+		s.Stop()
 		utils.CmdFailed(cmd, err)
 	}
-	log.Debug("Backup to: ", backupTarget)
 
 	info, err := tadpoles_api.GetAccountInfo()
 	if err != nil {
+		s.Stop()
 		utils.CmdFailed(cmd, err)
 	}
+	s.Stop()
 
-	fmt.Print("Checking Events...")
+	s = utils.StartSpinner("Checking Events...")
 	log.Debug("") // newline for debug mode
 	attachments, err := tadpoles_api.GetEventAttachmentData(info.FirstEvent, info.LastEvent)
 	if err != nil {
 		utils.CmdFailed(cmd, err)
 	}
-	fmt.Println("\rFile Attachments: ", len(attachments))
+	s.Stop()
+	h.Write("Attachments", fmt.Sprint(len(attachments)))
 
-	tadpoles_api.DownloadFileAttachments(attachments, backupTarget)
+	saveErrors, err := tadpoles_api.DownloadFileAttachments(attachments, backupTarget)
+	if err != nil {
+		utils.CmdFailed(cmd, err)
+	}
+	if saveErrors != nil {
+		h.Write("Errors", "")
+		for _, e := range saveErrors {
+			color.Red.Printf("%s\n", e)
+		}
+	}
 }
