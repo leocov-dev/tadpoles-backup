@@ -30,7 +30,7 @@ func Login(email string, password string) error {
 }
 
 // Must call admit endpoint before any other requests to get proper auth cookies set
-func Admit() error {
+func Admit() (expires *time.Time, err error) {
 	log.Debug("Admit...")
 	t := time.Now()
 	zone, _ := t.Zone()
@@ -42,12 +42,16 @@ func Admit() error {
 		},
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return client.NewRequestError(resp)
+		return nil, client.NewRequestError(resp)
 	}
 
+	client.SerializeResponseCookies(resp)
+
+	inLocalTime := resp.Cookies()[0].Expires
+
 	log.Debug("Admit successful")
-	return nil
+	return &inLocalTime, nil
 }

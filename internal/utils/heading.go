@@ -1,6 +1,9 @@
 package utils
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/gookit/color"
+)
 
 type Heading struct {
 	headingLength uint
@@ -31,9 +34,9 @@ func (h *Heading) formatHeading(heading string, align Align) string {
 	} else {
 		totalWidth := padding + headingLen
 		if align == Right {
-			heading = fmt.Sprintf("%*s ", totalWidth, heading)
+			heading = color.Green.Sprintf("%*s ", totalWidth, heading)
 		} else {
-			heading = fmt.Sprintf("%-*s ", totalWidth, heading)
+			heading = color.Yellow.Sprintf("%-*s ", totalWidth, heading)
 		}
 	}
 

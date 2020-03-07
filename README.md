@@ -2,21 +2,17 @@
 
 # Tadpoles Image Backup
 
-#### **This is still a work in progress! - Non-functional**
-
 ## About
 This tool will allow you to save all your child's images at full resolution from _tadpoles.com_.  
 
 Current save back-ends:
 * Local file system
-* ~~Amazon S3~~
-* ~~Backblaze B2~~
 
 ## Install
 Get a prebuilt executable from the releases page.
-Download the zip file for your operating system and extract `tadpoles-backup` to a place of your choosing.
+Download the zip file for your operating system and extract `tadpoles-backup`.
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/leocov-dev/tadpoles-backup) [Download](https://github.com/leocov-dev/tadpoles-backup/releases/latest)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/leocov-dev/tadpoles-backup)](https://github.com/leocov-dev/tadpoles-backup/releases/latest)
 
 ## Usage
 
@@ -48,10 +44,9 @@ $ bin/tadpoles-backup --help
 
 ## Notes
 
-`tadples-backup` caches your login session cookie locally so you are not prompted repeatedly to enter your password. 
-It **DOES NOT** store or retain your email or password!
-
-It writes a file to your home directory with a temporary authentication cookie which lasts a few weeks.
+`tadples-backup` caches your login session cookie locally so you are not prompted to enter your password every time you use the tool. 
+It **DOES NOT** store or retain your actual email or password.
+Instead it writes a file to your home directory with a temporary authentication cookie which lasts for 2 weeks.
 This file is located at `$HOME/.tadpoles-backup-cookie` and can be deleted whenever you choose.
 
 
