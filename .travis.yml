@@ -1,17 +1,27 @@
 language: go
 go:
   - 1.13.x
+
+notifications:
+  email:
+    on_failure: always
+    on_success: never
+
 env:
   global:
     - GO111MODULE=on
+
 script:
   - env RELEASE_TAG=$TRAVIS_TAG make ci
+
 deploy:
   provider: releases
   api_key:
-    secure: DPPSaJ3OaJSkqfiB6BlkqgRzHXblSKaMZHsnvCxYoPbwhHJYtgFTeI50DpLC6dduaPmU1vXPtsORgZye6vRYs+Z5c4UdiDGgdNLSrMiu4Zy8HVRqhzasjPcGz1/tYQmu8KLMxvb6tmfPkQWxKDTg6KSJzt8FJHBA5kAA6+0gTQCTbRK8JEn2PFEpenSZRqGtsxrTN/LX9lv0Cmms0s79ytI22BpywjSibYiyfZuWgpfmq2ASEh4n3fxbIOFF8utmS9Y49HxU9FRz4nYJWvDMYG6ZmAZliUecXJv+3GtK8vBPyKcGj/oVioOeW2AuAIam3hSk+CUBS73OWucaPK4Kg20bccNujksOOfz4VhiWGUMU1ZDcRTibaDsE1pzZH3nqbH/oBmifLz4HlWFBbI1iQjvOP5Y7+0nxzRhBdr+MMQF0uI0nulZ1C0RyDS5N+JTWpIfAgfb49L5+13SFgix7iRyx6+lliFg9XPf6EXjWBdXV6X5TStdKU/PAJycmm/WPwwqSwMWpFtvi/1kZV3w9jeAw36f5JzEQ/NMeJalic0sPcTflkmzEldYHLzNsz15cnM8yGOOc/8WcRsonJ7f+5EhiPUyn+aZKeCdAOEauCSt7y7UyRNhL+uNxNOZf+77DDb+54Gl/tvusdlMSQpYKJfwHFclbraqb43P7aVIqAuk=
+    secure: $SECURE_GITHUB_API_KEY
   file_glob: true
   file: dist/*
   skip_cleanup: true
+  overwrite: true
   on:
+    branch: master
     tags: true
