@@ -75,7 +75,7 @@ func getEventPage(params *url.Values, attachments *[]*Event) error {
 		return client.NewRequestError(resp)
 	}
 
-	defer resp.Body.Close()
+	defer utils.CloseWithLog(resp.Body)
 	body, _ := ioutil.ReadAll(resp.Body)
 
 	var page pageResponse

@@ -3,14 +3,19 @@ package user_input
 import (
 	"bufio"
 	"fmt"
-	"github.com/gookit/color"
+	"github.com/fatih/color"
 	"github.com/leocov-dev/tadpoles-backup/internal/api"
+	"github.com/leocov-dev/tadpoles-backup/pkg/headings"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	"strings"
-	"syscall"
 	"time"
+)
+
+var (
+	defaultColorOpt = headings.WithColor(color.Bold, color.FgHiMagenta)
+	heading         = headings.NewHeading(":", 15, defaultColorOpt)
 )
 
 func DoLoginIfNeeded() {
@@ -31,24 +36,25 @@ func DoLoginIfNeeded() {
 		}
 		expires, err := api.Admit()
 		if err == nil {
-			fmt.Printf("Login expires  : %s\n\n", expires.In(time.Local).Format("Mon Jan 2 03:04:05 PM"))
+			heading.Write("Login expires", expires.In(time.Local).Format("Mon Jan 2 03:04:05 PM"))
+			fmt.Println("")
 			break
 		}
 		log.Debug("Admit Error: ", err)
-		color.Red.Println("Login failed, please try again...")
+		color.Red("Login failed, please try again...")
 	}
 }
 
 // get username and password from user user_input
 func credentials() (string, string) {
-	color.Magenta.Println("Input: tadpoles.com login required...")
+	heading.Write("Input", "tadpoles.com login required...")
 	reader := bufio.NewReader(os.Stdin)
 
-	fmt.Print("Email: ")
+	heading.Write("Email", "", headings.NoNewLine)
 	username, _ := reader.ReadString('\n')
 
-	fmt.Print("Password: ")
-	bytePassword, _ := terminal.ReadPassword(syscall.Stdin)
+	heading.Write("Password", "", headings.NoNewLine)
+	bytePassword, _ := terminal.ReadPassword(int(os.Stdin.Fd()))
 	password := string(bytePassword)
 	fmt.Println()
 

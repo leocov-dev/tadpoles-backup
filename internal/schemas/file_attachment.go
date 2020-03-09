@@ -4,9 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/h2non/filetype"
+	"github.com/h2non/filetype/matchers"
+	"github.com/h2non/filetype/types"
 	"github.com/leocov-dev/tadpoles-backup/internal/api"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	log "github.com/sirupsen/logrus"
+	"image"
+	"image/jpeg"
 	"io"
 	"io/ioutil"
 	"os"
@@ -15,15 +19,16 @@ import (
 )
 
 type FileAttachment struct {
-	Comment       string
-	AttachmentKey string
-	EventKey      string
-	ChildName     string
-	CreateTime    time.Time
-	EventTime     time.Time
-	tempFileName  string
-	backupTarget  string
-	Exists        bool
+	Comment           string
+	AttachmentKey     string
+	EventKey          string
+	ChildName         string
+	CreateTime        time.Time
+	EventTime         time.Time
+	tempFileName      string
+	backupTarget      string
+	AlreadyDownloaded bool
+	ImageType         types.Type
 }
 
 // set the parent directory for the save target
@@ -55,13 +60,13 @@ func (a *FileAttachment) GetSaveTarget() (filePath string, err error) {
 		return "", errors.New("backup target must be set before writing")
 	}
 
-	kind, err := filetype.MatchFile(a.tempFileName)
+	a.ImageType, err = filetype.MatchFile(a.tempFileName)
 	if err != nil {
 		return "", err
 	}
 
 	dir := a.GetSaveDir()
-	fileName := fmt.Sprintf("%s.%s", a.GetSaveName(), kind.Extension)
+	fileName := fmt.Sprintf("%s.%s", a.GetSaveName(), a.ImageType.Extension)
 	return path.Join(dir, fileName), nil
 }
 
@@ -79,7 +84,8 @@ func (a *FileAttachment) Download() (err error) {
 		return err
 	}
 
-	defer resp.Body.Close()
+	defer utils.CloseWithLog(tempFile)
+	defer utils.CloseWithLog(resp.Body)
 	_, err = io.Copy(tempFile, resp.Body)
 	if err != nil {
 		return nil
@@ -91,6 +97,12 @@ func (a *FileAttachment) Download() (err error) {
 
 // create the necessary directories and move the temporary file to the target with a new name
 func (a *FileAttachment) Save() (err error) {
+	if isImageType(a.ImageType) {
+		err = a.convertToJpg()
+		if err != nil {
+			return err
+		}
+	}
 
 	savePath, err := a.GetSaveTarget()
 	if err != nil {
@@ -109,4 +121,59 @@ func (a *FileAttachment) Save() (err error) {
 	}
 
 	return nil
+}
+
+func (a *FileAttachment) convertToJpg() (err error) {
+	if a.ImageType == matchers.TypeJpeg {
+		return nil
+	}
+
+	jpgTempFile, err := ioutil.TempFile("", "tpbk_*")
+	if err != nil {
+		return err
+	}
+
+	defer utils.CloseWithLog(jpgTempFile)
+
+	pngBytes, err := os.Open(a.tempFileName)
+	if err != nil {
+		return err
+	}
+
+	var img image.Image
+
+	switch a.ImageType {
+	case matchers.TypePng:
+		img, _, err = image.Decode(pngBytes)
+		if err != nil {
+			return err
+		}
+
+	default:
+		return errors.New(fmt.Sprintf("jpeg conversion not implemented for %s", a.ImageType.Extension))
+	}
+
+	err = jpeg.Encode(jpgTempFile, img, &jpeg.Options{Quality: 90})
+	if err != nil {
+		return err
+	}
+
+	err = os.Remove(a.tempFileName)
+	if err != nil {
+		return err
+	}
+
+	a.ImageType = matchers.TypeJpeg
+	a.tempFileName = jpgTempFile.Name()
+
+	return nil
+}
+
+func isImageType(t types.Type) bool {
+	for k := range matchers.Image {
+		if k == t {
+			return true
+		}
+	}
+	return false
 }

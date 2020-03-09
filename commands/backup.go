@@ -2,10 +2,11 @@ package commands
 
 import (
 	"fmt"
-	"github.com/gookit/color"
+	"github.com/fatih/color"
 	"github.com/leocov-dev/tadpoles-backup/internal/tadpoles_api"
 	"github.com/leocov-dev/tadpoles-backup/internal/user_input"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
+	"github.com/leocov-dev/tadpoles-backup/pkg/headings"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
@@ -38,7 +39,8 @@ func backupArgs() cobra.PositionalArgs {
 }
 
 func backupRun(cmd *cobra.Command, args []string) {
-	h := utils.NewHeading(":", 15)
+	hYellow := headings.NewHeading(":", 15, headings.WithColor(color.Bold, color.FgYellow))
+	hRed := headings.NewHeading(":", 15, headings.WithColor(color.Bold, color.FgHiRed))
 	s := utils.StartSpinner("Backup Started...")
 
 	backupTarget := filepath.Clean(args[0])
@@ -63,16 +65,16 @@ func backupRun(cmd *cobra.Command, args []string) {
 		utils.CmdFailed(cmd, err)
 	}
 	s.Stop()
-	h.Write("Attachments", fmt.Sprint(len(attachments)))
+	hYellow.Write("Attachments", fmt.Sprint(len(attachments)))
 
 	saveErrors, err := tadpoles_api.DownloadFileAttachments(attachments, backupTarget)
 	if err != nil {
 		utils.CmdFailed(cmd, err)
 	}
 	if saveErrors != nil {
-		h.Write("Errors", "")
+		hRed.Write("Errors", "")
 		for _, e := range saveErrors {
-			color.Red.Printf("%s\n", e)
+			color.Red("%s\n", e)
 		}
 	}
 }

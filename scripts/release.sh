@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # This script builds the application from source for multiple platforms.
 
 # Get the parent directory of where this script is.

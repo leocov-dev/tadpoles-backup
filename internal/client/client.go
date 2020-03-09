@@ -45,7 +45,7 @@ func deserializeCookies() {
 
 		// Open our jsonFile
 		jsonFile, _ := os.Open(TadpolesCookieFile)
-		defer jsonFile.Close()
+		defer utils.CloseWithLog(jsonFile)
 
 		byteValue, _ := ioutil.ReadAll(jsonFile)
 		err := json.Unmarshal(byteValue, &storedCookies)
