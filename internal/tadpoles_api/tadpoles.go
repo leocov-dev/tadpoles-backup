@@ -1,10 +1,10 @@
 package tadpoles_api
 
 import (
-	"github.com/gookit/color"
 	"github.com/gosuri/uiprogress"
 	"github.com/leocov-dev/tadpoles-backup/internal/api"
 	"github.com/leocov-dev/tadpoles-backup/internal/schemas"
+	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"path"
@@ -29,11 +29,13 @@ func GetEventAttachmentData(firstEventTime time.Time, lastEventTime time.Time) (
 		return nil, err
 	}
 
-	return eventsToAttachments(events), nil
+	attachments = eventsToAttachments(events)
+
+	return attachments, nil
 }
 
 func DownloadFileAttachments(attachments []*schemas.FileAttachment, backupTarget string) ([]string, error) {
-	err := markExisting(attachments, backupTarget)
+	err := checkAlreadyDownloaded(attachments, backupTarget)
 	if err != nil {
 		return nil, err
 	}
@@ -42,14 +44,14 @@ func DownloadFileAttachments(attachments []*schemas.FileAttachment, backupTarget
 	dwnd := uiprogress.AddBar(len(attachments)).
 		AppendCompleted().
 		PrependFunc(func(b *uiprogress.Bar) string {
-			return color.Cyan.Sprint("Downloading")
+			return utils.HiCyan.Sprint("Downloading")
 		})
 
 	wg := &sync.WaitGroup{}
 	errorChan := make(chan string, len(attachments))
 
 	for _, attachment := range attachments {
-		if attachment.Exists {
+		if attachment.AlreadyDownloaded {
 			dwnd.Incr()
 			log.Debug("Already exists: ", attachment.GetSaveName())
 			continue
@@ -71,8 +73,8 @@ func DownloadFileAttachments(attachments []*schemas.FileAttachment, backupTarget
 	return saveErrors, nil
 }
 
-// update FileAttachment.Exists based on the existence of a matching file name, minus extension
-func markExisting(attachments []*schemas.FileAttachment, backupTarget string) (err error) {
+// update FileAttachment.AlreadyDownloaded based on the existence of a matching file name, minus extension
+func checkAlreadyDownloaded(attachments []*schemas.FileAttachment, backupTarget string) (err error) {
 	attachmentNames := make(map[string]int)
 	for i, att := range attachments {
 		attachmentNames[att.GetSaveName()] = i
@@ -91,7 +93,7 @@ func markExisting(attachments []*schemas.FileAttachment, backupTarget string) (e
 			minusExtension := strings.TrimSuffix(file, filepath.Ext(file))
 
 			if i, ok := attachmentNames[minusExtension]; ok {
-				attachments[i].Exists = true
+				attachments[i].AlreadyDownloaded = true
 			}
 
 			return nil
@@ -106,12 +108,12 @@ func saveFileAttachment(attachment *schemas.FileAttachment, group *sync.WaitGrou
 
 	err := attachment.Download()
 	if err != nil {
-		c <- color.Red.Sprintf("Failed to download attachment -> %s, %s", attachment.GetSaveName(), err.Error())
+		c <- utils.HiRed.Sprintf("Failed to download attachment -> %s, %s", attachment.GetSaveName(), err.Error())
 		return
 	}
 	err = attachment.Save()
 	if err != nil {
-		c <- color.Red.Sprintf("Failed to save attachment -> %s, %s", attachment.GetSaveName(), err.Error())
+		c <- utils.HiRed.Sprintf("Failed to save attachment -> %s, %s", attachment.GetSaveName(), err.Error())
 		return
 	}
 	progress.Incr()

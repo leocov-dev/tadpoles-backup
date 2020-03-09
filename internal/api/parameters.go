@@ -35,7 +35,7 @@ func Parameters() (params *ParametersResponse, err error) {
 		return nil, client.NewRequestError(resp)
 	}
 
-	defer resp.Body.Close()
+	defer utils.CloseWithLog(resp.Body)
 	body, _ := ioutil.ReadAll(resp.Body)
 
 	err = json.Unmarshal(body, &params)

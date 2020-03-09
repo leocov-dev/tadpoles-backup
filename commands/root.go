@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"github.com/leocov-dev/tadpoles-backup/config"
+	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -26,8 +27,11 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verboseMode, "verbose", "v", false, "Print additional informational logs.")
 }
 
-func Execute() error {
-	return rootCmd.Execute()
+func Execute() {
+	err := rootCmd.Execute()
+	if err != nil {
+		_, _ = utils.HiRed.Println("Fatal: Failed to start root command...")
+	}
 }
 
 func setLoggingLevel() {
