@@ -11,6 +11,10 @@ env:
   global:
     - GO111MODULE=on
 
+branches:
+  only:
+    - master
+
 script:
   - env RELEASE_TAG=$TRAVIS_TAG make ci
 
