@@ -3,14 +3,18 @@ package schemas
 import (
 	"errors"
 	"fmt"
+	"github.com/dsoprea/go-exif/v2"
+	gjis "github.com/dsoprea/go-jpeg-image-structure"
 	"github.com/h2non/filetype"
 	"github.com/h2non/filetype/matchers"
 	"github.com/h2non/filetype/types"
+	"github.com/leocov-dev/tadpoles-backup/config"
 	"github.com/leocov-dev/tadpoles-backup/internal/api"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"image"
 	"image/jpeg"
+	"image/png"
 	"io"
 	"io/ioutil"
 	"os"
@@ -60,11 +64,6 @@ func (a *FileAttachment) GetSaveTarget() (filePath string, err error) {
 		return "", errors.New("backup target must be set before writing")
 	}
 
-	a.ImageType, err = filetype.MatchFile(a.tempFileName)
-	if err != nil {
-		return "", err
-	}
-
 	dir := a.GetSaveDir()
 	fileName := fmt.Sprintf("%s.%s", a.GetSaveName(), a.ImageType.Extension)
 	return path.Join(dir, fileName), nil
@@ -79,7 +78,7 @@ func (a *FileAttachment) Download() (err error) {
 		return err
 	}
 
-	tempFile, err := ioutil.TempFile("", "tpbk_*")
+	tempFile, err := ioutil.TempFile("", config.TempFilePattern)
 	if err != nil {
 		return err
 	}
@@ -92,6 +91,12 @@ func (a *FileAttachment) Download() (err error) {
 	}
 
 	a.tempFileName = tempFile.Name()
+
+	a.ImageType, err = filetype.MatchFile(a.tempFileName)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -128,7 +133,7 @@ func (a *FileAttachment) convertToJpg() (err error) {
 		return nil
 	}
 
-	jpgTempFile, err := ioutil.TempFile("", "tpbk_*")
+	jpgTempFile, err := ioutil.TempFile("", config.TempFilePattern)
 	if err != nil {
 		return err
 	}
@@ -144,7 +149,7 @@ func (a *FileAttachment) convertToJpg() (err error) {
 
 	switch a.ImageType {
 	case matchers.TypePng:
-		img, _, err = image.Decode(pngBytes)
+		img, err = png.Decode(pngBytes)
 		if err != nil {
 			return err
 		}
@@ -153,7 +158,7 @@ func (a *FileAttachment) convertToJpg() (err error) {
 		return errors.New(fmt.Sprintf("jpeg conversion not implemented for %s", a.ImageType.Extension))
 	}
 
-	err = jpeg.Encode(jpgTempFile, img, &jpeg.Options{Quality: 90})
+	err = jpeg.Encode(jpgTempFile, img, &jpeg.Options{Quality: 85})
 	if err != nil {
 		return err
 	}
@@ -176,4 +181,54 @@ func isImageType(t types.Type) bool {
 		}
 	}
 	return false
+}
+
+func (a *FileAttachment) writeExifTag() (err error) {
+	jmp := gjis.NewJpegMediaParser()
+
+	sl, err := jmp.ParseFile(a.tempFileName)
+	if err != nil {
+		return err
+	}
+
+	rootIb, err := sl.ConstructExifBuilder()
+	if err != nil {
+		return err
+	}
+
+	ifdIb, err := exif.GetOrCreateIbFromRootIb(rootIb, "IFD0")
+	if err != nil {
+		return err
+	}
+
+	// DateTime
+	updatedTimestampPhrase := exif.ExifFullTimestampString(a.CreateTime)
+	err = ifdIb.SetStandardWithName("DateTime", updatedTimestampPhrase)
+	if err != nil {
+		return err
+	}
+
+	// ImageDescription
+	err = ifdIb.SetStandardWithName("ImageDescription", a.Comment)
+	if err != nil {
+		return err
+	}
+
+	// Update the exif segment.
+	err = sl.SetExif(rootIb)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Open(a.tempFileName)
+	if err != nil {
+		return err
+	}
+
+	err = sl.Write(f)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

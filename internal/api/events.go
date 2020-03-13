@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/leocov-dev/tadpoles-backup/config"
 	"github.com/leocov-dev/tadpoles-backup/internal/client"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	log "github.com/sirupsen/logrus"
@@ -41,8 +42,8 @@ func Events(firstEventTime time.Time, lastEventTime time.Time) (events []*Event,
 		"direction":           {"range"},
 		"earliest_event_time": {strconv.FormatInt(firstEventTime.Unix(), 10)},
 		"latest_event_time":   {strconv.FormatInt(lastEventTime.Unix(), 10)},
-		"num_events":          {"100"}, // TODO: experiment with page size
-		"cursor":              nil,     // it is acceptable to start cursor as empty
+		"num_events":          {fmt.Sprint(config.EventsQueryPageSize)},
+		"cursor":              nil, // it is acceptable to start cursor as empty
 	}
 
 	for true {
@@ -52,6 +53,8 @@ func Events(firstEventTime time.Time, lastEventTime time.Time) (events []*Event,
 			log.Debug("Get Page Error: ", err)
 			return events, err
 		}
+		// TODO: REMOVE ME
+		break
 		// cursor will be empty when no more pages
 		if params.Get("cursor") == "" {
 			log.Debug("Get Events Done...")

@@ -4,6 +4,8 @@ go 1.14
 
 require (
 	github.com/briandowns/spinner v1.9.0
+	github.com/dsoprea/go-exif/v2 v2.0.0-20200126052615-bd04addaf40f
+	github.com/dsoprea/go-jpeg-image-structure v0.0.0-20200226095727-79f657105b06
 	github.com/fatih/color v1.7.0
 	github.com/gosuri/uilive v0.0.4 // indirect
 	github.com/gosuri/uiprogress v0.0.1
