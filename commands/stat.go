@@ -28,7 +28,10 @@ func init() {
 
 func statRun(cmd *cobra.Command, _ []string) {
 	hLeft := headings.NewHeading(":", 15, headings.WithColor(color.Bold, color.FgYellow))
-	hRight := headings.NewHeading(":", 15, headings.WithColor(color.Bold, color.FgGreen))
+	hRight := hLeft.Copy(
+		headings.AlightRight(),
+		headings.WithColor(color.Bold, color.FgGreen),
+	)
 	s := utils.StartSpinner("Getting Account Info...")
 
 	info, err := tadpoles.GetAccountInfo()
@@ -44,7 +47,7 @@ func statRun(cmd *cobra.Command, _ []string) {
 	hLeft.Write("Children", "")
 	for i, dep := range info.Dependants {
 		i += 1
-		hRight.Write(fmt.Sprintf("%d", i), dep, headings.AlignRight)
+		hRight.Write(fmt.Sprintf("%d", i), dep)
 	}
 
 	s = utils.StartSpinner("Checking Events...")
@@ -54,5 +57,9 @@ func statRun(cmd *cobra.Command, _ []string) {
 	}
 	s.Stop()
 
-	hLeft.Write("Pictures/Videos", fmt.Sprint(len(attachments)))
+	hLeft.Write("Attachments", "")
+	typeMap := tadpoles.GroupAttachmentsByType(attachments)
+	for k, v := range typeMap {
+		hRight.Write(k, fmt.Sprint(len(v)))
+	}
 }
