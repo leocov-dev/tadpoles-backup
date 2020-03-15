@@ -18,13 +18,12 @@ var (
 			setLoggingLevel()
 		},
 	}
-	debugMode   bool
-	verboseMode bool
+	debugMode bool
 )
 
 func init() {
-	rootCmd.PersistentFlags().BoolVarP(&debugMode, "debug", "d", false, "Print additional debug and informational logs. Setting this always sets --verbose as well.")
-	rootCmd.PersistentFlags().BoolVarP(&verboseMode, "verbose", "v", false, "Print additional informational logs.")
+	rootCmd.PersistentFlags().BoolVarP(&debugMode, "debug", "d", false, "Print additional debug and informational logs.")
+	rootCmd.PersistentFlags().MarkHidden("debug")
 }
 
 func Execute() {
@@ -39,8 +38,6 @@ func setLoggingLevel() {
 		log.SetLevel(log.DebugLevel)
 		fmt.Println("*** In Debug Mode ***")
 		fmt.Println()
-	} else if verboseMode {
-		log.SetLevel(log.InfoLevel)
 	} else {
 		log.SetLevel(log.WarnLevel)
 	}
