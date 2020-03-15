@@ -35,6 +35,7 @@ type FileAttachment struct {
 	backupTarget      string
 	AlreadyDownloaded bool
 	ImageType         types.Type
+	EventMime         string
 }
 
 // set the parent directory for the save target
