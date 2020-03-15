@@ -53,8 +53,7 @@ func Events(firstEventTime time.Time, lastEventTime time.Time) (events []*Event,
 			log.Debug("Get Page Error: ", err)
 			return events, err
 		}
-		// TODO: REMOVE ME
-		break
+
 		// cursor will be empty when no more pages
 		if params.Get("cursor") == "" {
 			log.Debug("Get Events Done...")
