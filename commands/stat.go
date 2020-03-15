@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 	"github.com/fatih/color"
-	"github.com/leocov-dev/tadpoles-backup/internal/tadpoles_api"
+	"github.com/leocov-dev/tadpoles-backup/internal/tadpoles"
 	"github.com/leocov-dev/tadpoles-backup/internal/user_input"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	"github.com/leocov-dev/tadpoles-backup/pkg/headings"
@@ -31,7 +31,7 @@ func statRun(cmd *cobra.Command, _ []string) {
 	hRight := headings.NewHeading(":", 15, headings.WithColor(color.Bold, color.FgGreen))
 	s := utils.StartSpinner("Getting Account Info...")
 
-	info, err := tadpoles_api.GetAccountInfo()
+	info, err := tadpoles.GetAccountInfo()
 	if err != nil {
 		utils.CmdFailed(cmd, err)
 	}
@@ -48,7 +48,7 @@ func statRun(cmd *cobra.Command, _ []string) {
 	}
 
 	s = utils.StartSpinner("Checking Events...")
-	attachments, err := tadpoles_api.GetEventAttachmentData(info.FirstEvent, info.LastEvent)
+	attachments, err := tadpoles.GetEventAttachmentData(info.FirstEvent, info.LastEvent)
 	if err != nil {
 		utils.CmdFailed(cmd, err)
 	}

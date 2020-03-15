@@ -1,9 +1,11 @@
 package schemas
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/dsoprea/go-exif/v2"
+	exifcommon "github.com/dsoprea/go-exif/v2/common"
 	gjis "github.com/dsoprea/go-jpeg-image-structure"
 	"github.com/h2non/filetype"
 	"github.com/h2non/filetype/matchers"
@@ -29,7 +31,7 @@ type FileAttachment struct {
 	ChildName         string
 	CreateTime        time.Time
 	EventTime         time.Time
-	tempFileName      string
+	tempFile          string
 	backupTarget      string
 	AlreadyDownloaded bool
 	ImageType         types.Type
@@ -72,27 +74,28 @@ func (a *FileAttachment) GetSaveTarget() (filePath string, err error) {
 // download file to a temporary directory
 func (a *FileAttachment) Download() (err error) {
 	log.Debug("Downloading: ", a.AttachmentKey)
+	log.Debugf("%s %s %s\n", a.ChildName, a.Comment, a.EventTime)
 
 	resp, err := api.Attachment(a.EventKey, a.AttachmentKey)
 	if err != nil {
 		return err
 	}
+	defer utils.CloseWithLog(resp.Body)
 
 	tempFile, err := ioutil.TempFile("", config.TempFilePattern)
 	if err != nil {
 		return err
 	}
-
 	defer utils.CloseWithLog(tempFile)
-	defer utils.CloseWithLog(resp.Body)
+
 	_, err = io.Copy(tempFile, resp.Body)
 	if err != nil {
 		return nil
 	}
 
-	a.tempFileName = tempFile.Name()
+	a.tempFile = tempFile.Name()
 
-	a.ImageType, err = filetype.MatchFile(a.tempFileName)
+	a.ImageType, err = filetype.MatchFile(a.tempFile)
 	if err != nil {
 		return err
 	}
@@ -102,8 +105,8 @@ func (a *FileAttachment) Download() (err error) {
 
 // create the necessary directories and move the temporary file to the target with a new name
 func (a *FileAttachment) Save() (err error) {
-	if isImageType(a.ImageType) {
-		err = a.convertToJpg()
+	if utils.IsImageType(a.ImageType) {
+		err = a.convertToJpgIfRequired()
 		if err != nil {
 			return err
 		}
@@ -119,8 +122,8 @@ func (a *FileAttachment) Save() (err error) {
 		return err
 	}
 
-	log.Debug("Saving to: ", savePath)
-	err = utils.MoveFile(a.tempFileName, savePath)
+	log.Debugf("Saving to: %s\n\n", savePath)
+	err = utils.MoveFile(a.tempFile, savePath)
 	if err != nil {
 		return err
 	}
@@ -128,28 +131,31 @@ func (a *FileAttachment) Save() (err error) {
 	return nil
 }
 
-func (a *FileAttachment) convertToJpg() (err error) {
+func (a *FileAttachment) convertToJpgIfRequired() (err error) {
 	if a.ImageType == matchers.TypeJpeg {
+		log.Debug("Already jpg...\n")
+
+		err = writeExifTag(a)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	}
 
-	jpgTempFile, err := ioutil.TempFile("", config.TempFilePattern)
+	log.Debugf("Not jpg, converting: %s\n\n", a.ImageType)
+
+	tempFile, err := os.OpenFile(a.tempFile, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		return err
 	}
-
-	defer utils.CloseWithLog(jpgTempFile)
-
-	pngBytes, err := os.Open(a.tempFileName)
-	if err != nil {
-		return err
-	}
+	defer utils.CloseWithLog(tempFile)
 
 	var img image.Image
 
 	switch a.ImageType {
 	case matchers.TypePng:
-		img, err = png.Decode(pngBytes)
+		img, err = png.Decode(tempFile)
 		if err != nil {
 			return err
 		}
@@ -158,58 +164,106 @@ func (a *FileAttachment) convertToJpg() (err error) {
 		return errors.New(fmt.Sprintf("jpeg conversion not implemented for %s", a.ImageType.Extension))
 	}
 
-	err = jpeg.Encode(jpgTempFile, img, &jpeg.Options{Quality: 85})
+	jpgBytes := new(bytes.Buffer)
+
+	err = jpeg.Encode(jpgBytes, img, &jpeg.Options{Quality: 85})
 	if err != nil {
 		return err
 	}
-
-	err = os.Remove(a.tempFileName)
-	if err != nil {
-		return err
-	}
-
 	a.ImageType = matchers.TypeJpeg
-	a.tempFileName = jpgTempFile.Name()
+
+	jmp := gjis.NewJpegMediaParser()
+	sl, err := jmp.ParseBytes(jpgBytes.Bytes())
+	if err != nil {
+		return err
+	}
+
+	err = setExifData(sl, a.EventTime, a.Comment)
+	if err != nil {
+		return err
+	}
+
+	_, err = tempFile.Seek(0, io.SeekStart)
+	if err != nil {
+		return err
+	}
+	err = tempFile.Truncate(0)
+	if err != nil {
+		return err
+	}
+	err = sl.Write(tempFile)
+	if err != nil {
+		log.Debug("Failed sl.Write()...\n")
+		return err
+	}
 
 	return nil
 }
 
-func isImageType(t types.Type) bool {
-	for k := range matchers.Image {
-		if k == t {
-			return true
-		}
-	}
-	return false
-}
-
-func (a *FileAttachment) writeExifTag() (err error) {
+func writeExifTag(attachment *FileAttachment) (err error) {
+	log.Debug("writeExifTag()...\n")
 	jmp := gjis.NewJpegMediaParser()
 
-	sl, err := jmp.ParseFile(a.tempFileName)
+	sl, err := jmp.ParseFile(attachment.tempFile)
 	if err != nil {
 		return err
 	}
+
+	err = setExifData(sl, attachment.EventTime, attachment.Comment)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Create(attachment.tempFile)
+	if err != nil {
+		return err
+	}
+	defer utils.CloseWithLog(f)
+
+	err = sl.Write(f)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func setExifData(sl *gjis.SegmentList, dateTime time.Time, imageDescription string) (err error) {
+	log.Debug("setExifData()...\n")
 
 	rootIb, err := sl.ConstructExifBuilder()
 	if err != nil {
-		return err
+		im := exif.NewIfdMappingWithStandard()
+		ti := exif.NewTagIndex()
+		err := exif.LoadStandardTags(ti)
+		if err != nil {
+			return err
+		}
+
+		rootIb = exif.NewIfdBuilder(im, ti, exifcommon.IfdPathStandard, exifcommon.EncodeDefaultByteOrder)
 	}
 
 	ifdIb, err := exif.GetOrCreateIbFromRootIb(rootIb, "IFD0")
+	if err != nil {
+		log.Debug("Failed exif.GetOrCreateIbFromRootIb()...\n")
+		return err
+	}
+
+	// ProcessingSoftware
+	err = ifdIb.SetStandardWithName("ProcessingSoftware", config.Name)
 	if err != nil {
 		return err
 	}
 
 	// DateTime
-	updatedTimestampPhrase := exif.ExifFullTimestampString(a.CreateTime)
+	updatedTimestampPhrase := exif.ExifFullTimestampString(dateTime)
 	err = ifdIb.SetStandardWithName("DateTime", updatedTimestampPhrase)
 	if err != nil {
 		return err
 	}
 
 	// ImageDescription
-	err = ifdIb.SetStandardWithName("ImageDescription", a.Comment)
+	err = ifdIb.SetStandardWithName("ImageDescription", imageDescription)
 	if err != nil {
 		return err
 	}
@@ -217,16 +271,7 @@ func (a *FileAttachment) writeExifTag() (err error) {
 	// Update the exif segment.
 	err = sl.SetExif(rootIb)
 	if err != nil {
-		return err
-	}
-
-	f, err := os.Open(a.tempFileName)
-	if err != nil {
-		return err
-	}
-
-	err = sl.Write(f)
-	if err != nil {
+		log.Debug("Failed sl.SetExif()...\n")
 		return err
 	}
 
