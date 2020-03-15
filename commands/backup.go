@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 	"github.com/fatih/color"
-	"github.com/leocov-dev/tadpoles-backup/internal/tadpoles_api"
+	"github.com/leocov-dev/tadpoles-backup/internal/tadpoles"
 	"github.com/leocov-dev/tadpoles-backup/internal/user_input"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	"github.com/leocov-dev/tadpoles-backup/pkg/headings"
@@ -21,6 +21,9 @@ var (
 		Args:  backupArgs(),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			user_input.DoLoginIfNeeded()
+		},
+		PostRunE: func(cmd *cobra.Command, args []string) error {
+			return utils.CleanupTempFiles()
 		},
 	}
 )
@@ -51,7 +54,7 @@ func backupRun(cmd *cobra.Command, args []string) {
 		utils.CmdFailed(cmd, err)
 	}
 
-	info, err := tadpoles_api.GetAccountInfo()
+	info, err := tadpoles.GetAccountInfo()
 	if err != nil {
 		s.Stop()
 		utils.CmdFailed(cmd, err)
@@ -60,21 +63,23 @@ func backupRun(cmd *cobra.Command, args []string) {
 
 	s = utils.StartSpinner("Checking Events...")
 	log.Debug("") // newline for debug mode
-	attachments, err := tadpoles_api.GetEventAttachmentData(info.FirstEvent, info.LastEvent)
+	attachments, err := tadpoles.GetEventAttachmentData(info.FirstEvent, info.LastEvent)
 	if err != nil {
 		utils.CmdFailed(cmd, err)
 	}
 	s.Stop()
 	hYellow.Write("Attachments", fmt.Sprint(len(attachments)))
 
-	saveErrors, err := tadpoles_api.DownloadFileAttachments(attachments, backupTarget)
+	saveErrors, err := tadpoles.DownloadFileAttachments(attachments, backupTarget)
 	if err != nil {
 		utils.CmdFailed(cmd, err)
 	}
 	if saveErrors != nil {
 		hRed.Write("Errors", "")
-		for _, e := range saveErrors {
-			color.Red("%s\n", e)
+		for i, e := range saveErrors {
+			//log.Debug("Error...")
+			hRed.Write(fmt.Sprint(i+1), e, headings.AlignRight)
 		}
+		fmt.Println("")
 	}
 }

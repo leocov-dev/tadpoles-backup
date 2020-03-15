@@ -1,15 +1,10 @@
-package tadpoles_api
+package tadpoles
 
 import (
 	"github.com/gosuri/uiprogress"
 	"github.com/leocov-dev/tadpoles-backup/internal/api"
 	"github.com/leocov-dev/tadpoles-backup/internal/schemas"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
-	log "github.com/sirupsen/logrus"
-	"os"
-	"path"
-	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 )
@@ -53,7 +48,7 @@ func DownloadFileAttachments(attachments []*schemas.FileAttachment, backupTarget
 	for _, attachment := range attachments {
 		if attachment.AlreadyDownloaded {
 			dwnd.Incr()
-			log.Debug("Already exists: ", attachment.GetSaveName())
+			//log.Debug("Already exists: ", attachment.GetSaveName())
 			continue
 		}
 
@@ -71,50 +66,4 @@ func DownloadFileAttachments(attachments []*schemas.FileAttachment, backupTarget
 	}
 
 	return saveErrors, nil
-}
-
-// update FileAttachment.AlreadyDownloaded based on the existence of a matching file name, minus extension
-func checkAlreadyDownloaded(attachments []*schemas.FileAttachment, backupTarget string) (err error) {
-	attachmentNames := make(map[string]int)
-	for i, att := range attachments {
-		attachmentNames[att.GetSaveName()] = i
-	}
-
-	err = filepath.Walk(backupTarget,
-		func(path_ string, info_ os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if info_.IsDir() {
-				return nil
-			}
-
-			file := path.Base(path_)
-			minusExtension := strings.TrimSuffix(file, filepath.Ext(file))
-
-			if i, ok := attachmentNames[minusExtension]; ok {
-				attachments[i].AlreadyDownloaded = true
-			}
-
-			return nil
-		})
-
-	return err
-}
-
-// goroutine to download the file attachment and save it
-func saveFileAttachment(attachment *schemas.FileAttachment, group *sync.WaitGroup, progress *uiprogress.Bar, c chan string) {
-	defer group.Done()
-
-	err := attachment.Download()
-	if err != nil {
-		c <- utils.HiRed.Sprintf("Failed to download attachment -> %s, %s", attachment.GetSaveName(), err.Error())
-		return
-	}
-	err = attachment.Save()
-	if err != nil {
-		c <- utils.HiRed.Sprintf("Failed to save attachment -> %s, %s", attachment.GetSaveName(), err.Error())
-		return
-	}
-	progress.Incr()
 }
