@@ -10,7 +10,6 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-	"sync"
 )
 
 func eventsToAttachments(events []*api.Event) (attachments []*schemas.FileAttachment) {
@@ -27,6 +26,7 @@ func eventsToAttachments(events []*api.Event) (attachments []*schemas.FileAttach
 				EventKey:      event.EventKey,
 				ChildName:     event.ChildName,
 				EventTime:     event.EventTime.Time(),
+				EventMime:     eventAttachment.MimeType,
 			}
 			attachments = append(attachments, att)
 		}
@@ -79,9 +79,7 @@ func checkAlreadyDownloaded(attachments []*schemas.FileAttachment, backupTarget 
 }
 
 // goroutine to download the file attachment and save it
-func saveFileAttachment(attachment *schemas.FileAttachment, group *sync.WaitGroup, progress *uiprogress.Bar, c chan string) {
-	defer group.Done()
-
+func saveFileAttachment(attachment *schemas.FileAttachment, progress *uiprogress.Bar, c chan string) {
 	err := attachment.Download()
 	if err != nil {
 		c <- fmt.Sprintf("Failed to download attachment -> %s, %s", attachment.GetSaveName(), err.Error())
@@ -92,5 +90,18 @@ func saveFileAttachment(attachment *schemas.FileAttachment, group *sync.WaitGrou
 		c <- fmt.Sprintf("Failed to save attachment -> %s, Msg: %s", attachment.GetSaveName(), err.Error())
 		return
 	}
-	progress.Incr()
+	if progress != nil {
+		progress.Incr()
+	}
+}
+
+func saveFileAttachment2(attachment *schemas.FileAttachment) {
+	err := attachment.Download()
+	if err != nil {
+		return
+	}
+	err = attachment.Save()
+	if err != nil {
+		return
+	}
 }
