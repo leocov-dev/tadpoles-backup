@@ -94,14 +94,3 @@ func saveFileAttachment(attachment *schemas.FileAttachment, progress *uiprogress
 		progress.Incr()
 	}
 }
-
-func saveFileAttachment2(attachment *schemas.FileAttachment) {
-	err := attachment.Download()
-	if err != nil {
-		return
-	}
-	err = attachment.Save()
-	if err != nil {
-		return
-	}
-}
