@@ -14,7 +14,7 @@ RELEASE_TAG="${RELEASE_TAG:-v0.0.0-dev}"
 cd "$DIR" || exit
 
 # Determine the arch/os combos we're building for
-XC_ARCH=${XC_ARCH:-"amd64 arm"}
+XC_ARCH=${XC_ARCH:-"amd64"}
 XC_OS=${XC_OS:-linux darwin windows}
 XC_EXCLUDE_OSARCH="!darwin/arm !darwin/386"
 
@@ -45,14 +45,14 @@ echo "==> Building..."
 echo "ldflags: ${LD_FLAGS}"
 
 BIN_NAME=${PWD##*/}
-BUILD_PREFIX="${BIN_NAME}-${RELEASE_TAG}_"
+BUILD_PREFIX="${BIN_NAME}-${RELEASE_TAG}-"
 
 gox \
   -os="${XC_OS}" \
   -arch="${XC_ARCH}" \
   -osarch="${XC_EXCLUDE_OSARCH}" \
   -ldflags "${LD_FLAGS}" \
-  -output "dist/${BUILD_PREFIX}{{.OS}}_{{.Arch}}/${BIN_NAME}" \
+  -output "dist/${BUILD_PREFIX}{{.OS}}-{{.Arch}}" \
   .
 
 # Copy our OS/Arch to the bin/ directory
@@ -66,24 +66,18 @@ if [[ -d "${DEV_PLATFORM}" && -z "${CI}" ]]; then
   done
 fi
 
-# Zip and copy to the dist dir
+# Packaging operations
 echo
 echo "==> Packaging..."
-for PLATFORM in $(find ./dist -mindepth 1 -maxdepth 1 -type d); do
-  OSARCH=$(basename "${PLATFORM}")
-  echo "--> ${OSARCH}"
-
-  pushd "${PLATFORM}" >/dev/null 2>&1 || exit
-
-  zip "../${OSARCH}.zip" ./*
-  zip -uj "../${OSARCH}.zip" ../../LICENSE
+for file in ./dist/*
+do
+  echo "--> ${file}"
 
   echo "  calculate hash..."
-  sha256sum "../${OSARCH}.zip" > "../${OSARCH}.zip.sha256"
-
-  rm -rf "../${OSARCH}"
-  popd >/dev/null 2>&1 || exit
+  sha256sum "./${file}" > "./${file}.sha256"
 done
+
+
 
 # Done!
 echo
