@@ -38,7 +38,7 @@ deploy:
     file: dist/*
     skip_cleanup: true
     overwrite: false
-    draft: true
+    prerelease: true
     on:
       branch: /^release-/
       tags: true
