@@ -9,7 +9,7 @@ Current save back-ends:
 * Local file system
 
 ## Install
-Get a prebuilt executable from the [releases page](https://github.com/leocov-dev/tadpoles-backup/releases).
+Get latest prebuilt executable from the [releases page](https://github.com/leocov-dev/tadpoles-backup/releases).
 
 #### Linux
 ```
