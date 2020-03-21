@@ -29,7 +29,7 @@ func init() {
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
-		_, _ = utils.HiRed.Println("Fatal: Failed to start root command...")
+		utils.WriteError("Fatal", "Failed to start root command...")
 	}
 }
 

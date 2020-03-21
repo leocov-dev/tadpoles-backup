@@ -3,13 +3,11 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"github.com/fatih/color"
 	"github.com/gosuri/uiprogress"
 	"github.com/leocov-dev/tadpoles-backup/config"
 	"github.com/leocov-dev/tadpoles-backup/internal/tadpoles"
 	"github.com/leocov-dev/tadpoles-backup/internal/user_input"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
-	"github.com/leocov-dev/tadpoles-backup/pkg/headings"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
@@ -56,13 +54,6 @@ func backupArgs() cobra.PositionalArgs {
 }
 
 func backupRun(cmd *cobra.Command, args []string) {
-	hYellow := headings.NewHeading(":", 15, headings.WithColor(color.Bold, color.FgYellow))
-	hRed := hYellow.Copy(headings.WithColor(color.Bold, color.FgHiRed))
-	hRedRight := hRed.Copy(headings.AlightRight())
-	hRight := hYellow.Copy(
-		headings.AlightRight(),
-		headings.WithColor(color.Bold, color.FgGreen),
-	)
 	s := utils.StartSpinner("Backup Started...")
 
 	backupTarget := filepath.Clean(args[0])
@@ -88,20 +79,18 @@ func backupRun(cmd *cobra.Command, args []string) {
 	}
 	s.Stop()
 
-	hYellow.Write("Attachments", fmt.Sprint(len(attachments)))
+	utils.WriteMain("Attachments", fmt.Sprint(len(attachments)))
 	typeMap := tadpoles.GroupAttachmentsByType(attachments)
 	for k, v := range typeMap {
-		hRight.Write(k, fmt.Sprint(len(v)))
+		utils.WriteSub(k, fmt.Sprint(len(v)))
 	}
-
-	boldCyan := color.New(color.FgHiCyan, color.Bold)
 
 	uiprogress.Start()
 	progressBar := uiprogress.AddBar(len(attachments)).
 		AppendCompleted().
 		PrependElapsed().
 		PrependFunc(func(b *uiprogress.Bar) string {
-			return boldCyan.Sprint("Downloading")
+			return "Downloading"
 		})
 
 	skippedCount, saveErrors, err := tadpoles.DownloadFileAttachments(attachments, backupTarget, concurrencyLimit, progressBar)
@@ -111,12 +100,12 @@ func backupRun(cmd *cobra.Command, args []string) {
 
 	uiprogress.Stop()
 
-	hYellow.Write("Skipped", fmt.Sprint(skippedCount))
+	utils.WriteMain("Skipped", fmt.Sprint(skippedCount))
 
 	if saveErrors != nil {
-		hRed.Write("Errors", "")
+		utils.WriteError("Errors", "")
 		for i, e := range saveErrors {
-			hRedRight.Write(fmt.Sprint(i+1), e)
+			utils.WriteErrorSub.Write(fmt.Sprint(i+1), e)
 		}
 		fmt.Println("")
 	}

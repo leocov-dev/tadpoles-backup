@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"github.com/briandowns/spinner"
+	"github.com/fatih/color"
 	"github.com/h2non/filetype/matchers"
 	"github.com/h2non/filetype/types"
 	"github.com/leocov-dev/tadpoles-backup/config"
@@ -16,7 +17,7 @@ import (
 func CloseWithLog(f io.Closer) {
 	err := f.Close()
 	if err != nil {
-		fmt.Println(HiRed.Sprintf("failed to close file: %s", err.Error()))
+		PrintError("failed to close file: %s", err)
 	}
 }
 
@@ -29,11 +30,11 @@ func FileExists(filename string) bool {
 }
 
 func StartSpinner(title string) *spinner.Spinner {
-	s := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+	s := spinner.New(config.SpinnerCharSet, config.SpinnerSpeed*time.Millisecond)
 	s.Prefix = fmt.Sprintf("%s ", title)
 	err := s.Color("cyan", "bold") // implicit s.Start()
 	if err != nil {
-		fmt.Println(HiRed.Sprintf("Spinner startup failed: %s", err.Error()))
+		PrintError("Spinner startup failed: %s", err)
 	}
 	return s
 }
@@ -98,4 +99,12 @@ func CleanupTempFiles() (err error) {
 	}
 
 	return nil
+}
+
+func PrintError(format string, err error) {
+	if !strings.HasSuffix(format, "\n") {
+		format += "\n"
+	}
+	red := color.New(color.FgHiRed).SprintFunc()
+	_, _ = fmt.Fprintf(color.Output, format, red(err.Error()))
 }

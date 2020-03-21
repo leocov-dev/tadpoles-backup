@@ -9,7 +9,7 @@ import (
 type Heading struct {
 	headingLength uint
 	separator     string
-	color         *color.Color
+	color         func(a ...interface{}) string
 	headingAlign  HeadingAlign
 }
 
@@ -28,7 +28,7 @@ func WithColor(color ...color.Attribute) Option {
 	}
 }
 
-func AlightRight() Option {
+func WithAlignRight() Option {
 	return func(h *Heading) {
 		h.headingAlign = AlignRight
 	}
@@ -53,7 +53,7 @@ func NewHeading(separator string, headingLength uint, opts ...Option) *Heading {
 	h := &Heading{
 		headingLength: headingLength,
 		separator:     separator,
-		color:         color.New(color.FgWhite),
+		color:         color.New(color.FgWhite).SprintFunc(),
 		headingAlign:  AlignLeft,
 	}
 
@@ -78,7 +78,7 @@ func (h *Heading) Copy(opts ...Option) *Heading {
 }
 
 func (h *Heading) Color(colors ...color.Attribute) {
-	h.color = color.New(colors...)
+	h.color = color.New(colors...).SprintFunc()
 }
 
 func (h *Heading) formatHeading(heading string) string {
@@ -104,5 +104,5 @@ func (h *Heading) Write(heading string, text string, options ...WriteOption) {
 	if !NoNewLine.In(options) {
 		text = text + "\n"
 	}
-	fmt.Printf("%s%s %s", h.color.Sprint(h.formatHeading(heading)), h.separator, text)
+	_, _ = fmt.Fprintf(color.Output, "%s%s %s", h.color(h.formatHeading(heading)), h.separator, text)
 }
