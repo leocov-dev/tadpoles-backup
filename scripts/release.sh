@@ -57,13 +57,11 @@ gox \
 
 # Copy our OS/Arch to the bin/ directory
 # only when not running in CI
-DEV_PLATFORM="./dist/${BUILD_PREFIX}$(go env GOOS)_$(go env GOARCH)"
-if [[ -d "${DEV_PLATFORM}" && -z "${CI}" ]]; then
+DEV_PLATFORM="./dist/${BUILD_PREFIX}$(go env GOOS)-$(go env GOARCH)"
+if [[ -f "${DEV_PLATFORM}" && -z "${CI}" ]]; then
   echo
   echo "==> Moving ${DEV_PLATFORM} to bin/"
-  for F in $(find "${DEV_PLATFORM}" -mindepth 1 -maxdepth 1 -type f); do
-    cp "${F}" bin/
-  done
+  cp "${DEV_PLATFORM}" "./bin/${BIN_NAME}"
 fi
 
 # Packaging operations

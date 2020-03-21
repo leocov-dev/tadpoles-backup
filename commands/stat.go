@@ -2,11 +2,9 @@ package commands
 
 import (
 	"fmt"
-	"github.com/fatih/color"
 	"github.com/leocov-dev/tadpoles-backup/internal/tadpoles"
 	"github.com/leocov-dev/tadpoles-backup/internal/user_input"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
-	"github.com/leocov-dev/tadpoles-backup/pkg/headings"
 	"github.com/spf13/cobra"
 	"time"
 )
@@ -27,11 +25,6 @@ func init() {
 }
 
 func statRun(cmd *cobra.Command, _ []string) {
-	hLeft := headings.NewHeading(":", 15, headings.WithColor(color.Bold, color.FgYellow))
-	hRight := hLeft.Copy(
-		headings.AlightRight(),
-		headings.WithColor(color.Bold, color.FgGreen),
-	)
 	s := utils.StartSpinner("Getting Account Info...")
 
 	info, err := tadpoles.GetAccountInfo()
@@ -40,14 +33,14 @@ func statRun(cmd *cobra.Command, _ []string) {
 	}
 	s.Stop()
 
-	hLeft.Write("Time-frame", fmt.Sprintf("%s to %s",
+	utils.WriteMain("Time-frame", fmt.Sprintf("%s to %s",
 		info.FirstEvent.In(time.Local).Format("2006-01-02"),
 		info.LastEvent.In(time.Local).Format("2006-01-02")))
 
-	hLeft.Write("Children", "")
+	utils.WriteMain("Children", "")
 	for i, dep := range info.Dependants {
 		i += 1
-		hRight.Write(fmt.Sprintf("%d", i), dep)
+		utils.WriteSub(fmt.Sprintf("%d", i), dep)
 	}
 
 	s = utils.StartSpinner("Checking Events...")
@@ -57,9 +50,9 @@ func statRun(cmd *cobra.Command, _ []string) {
 	}
 	s.Stop()
 
-	hLeft.Write("Attachments", "")
+	utils.WriteMain("Attachments", "")
 	typeMap := tadpoles.GroupAttachmentsByType(attachments)
 	for k, v := range typeMap {
-		hRight.Write(k, fmt.Sprint(len(v)))
+		utils.WriteSub(k, fmt.Sprint(len(v)))
 	}
 }
