@@ -11,12 +11,12 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 var (
 	homeDir, _         = os.UserHomeDir()
-	TadpolesCookieFile = path.Join(homeDir, ".tadpole-backup-cookie")
+	TadpolesCookieFile = filepath.Join(homeDir, ".tadpole-backup-cookie")
 
 	jar, _    = cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.CookieJarList})
 	ApiClient = newApiClient()

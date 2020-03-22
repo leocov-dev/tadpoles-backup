@@ -2,15 +2,18 @@ package utils
 
 import (
 	"fmt"
-	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
+	"github.com/gosuri/uiprogress"
 	"github.com/h2non/filetype/matchers"
 	"github.com/h2non/filetype/types"
 	"github.com/leocov-dev/tadpoles-backup/config"
 	"io"
 	"os"
-	"path"
+	"os/signal"
+	"path/filepath"
+	"runtime"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -29,34 +32,22 @@ func FileExists(filename string) bool {
 	return !info.IsDir()
 }
 
-func StartSpinner(title string) *spinner.Spinner {
-	s := spinner.New(config.SpinnerCharSet, config.SpinnerSpeed*time.Millisecond)
-	s.Prefix = fmt.Sprintf("%s ", title)
-	err := s.Color("cyan", "bold") // implicit s.Start()
-	if err != nil {
-		PrintError("Spinner startup failed: %s", err)
-	}
-	return s
-}
-
 func MoveFile(sourcePath, destPath string) error {
 	inputFile, err := os.Open(sourcePath)
 	if err != nil {
 		return fmt.Errorf("couldn't open source file: %s", err)
 	}
-	defer CloseWithLog(inputFile)
-
 	outputFile, err := os.Create(destPath)
 	if err != nil {
+		inputFile.Close()
 		return fmt.Errorf("couldn't open dest file: %s", err)
 	}
-	defer CloseWithLog(outputFile)
-
+	defer outputFile.Close()
 	_, err = io.Copy(outputFile, inputFile)
+	inputFile.Close()
 	if err != nil {
 		return fmt.Errorf("writing to output file failed: %s", err)
 	}
-
 	// The copy was successful, so now delete the original file
 	err = os.Remove(sourcePath)
 	if err != nil {
@@ -78,20 +69,20 @@ func CleanupTempFiles() (err error) {
 
 	tempDir := os.TempDir()
 
-	f, err := os.Open(tempDir)
+	td, err := os.Open(tempDir)
 	if err != nil {
 		return err
 	}
-	defer CloseWithLog(f)
+	defer CloseWithLog(td)
 
-	files, err := f.Readdir(0)
+	files, err := td.Readdir(0)
 	if err != nil {
 		return err
 	}
 
 	for _, file := range files {
 		if strings.HasPrefix(file.Name(), strings.TrimSuffix(config.TempFilePattern, "*")) {
-			err = os.Remove(path.Join(tempDir, file.Name()))
+			err = os.Remove(filepath.Join(tempDir, file.Name()))
 			if err != nil {
 				return err
 			}
@@ -107,4 +98,53 @@ func PrintError(format string, err error) {
 	}
 	red := color.New(color.FgHiRed).SprintFunc()
 	_, _ = fmt.Fprintf(color.Output, format, red(err.Error()))
+}
+
+func PrintErrorList(errorMsgs []string) {
+	if errorMsgs != nil {
+		WriteError("Errors", "")
+		for i, e := range errorMsgs {
+			WriteErrorSub.Write(fmt.Sprint(i+1), e)
+		}
+		fmt.Println("")
+	}
+}
+
+func WithProgressBar(title string, count int, operation func(pb *uiprogress.Bar) []string) {
+	uiprogress.Start()
+	progressBar := uiprogress.AddBar(count).
+		AppendCompleted().
+		PrependElapsed()
+	if title != "" {
+		progressBar.PrependFunc(func(b *uiprogress.Bar) string {
+			return title
+		})
+	}
+
+	errorMsgs := operation(progressBar)
+
+	uiprogress.Stop()
+
+	PrintErrorList(errorMsgs)
+}
+
+func CloseHandler() {
+	CloseHandlerWithCallback(func() {})
+}
+
+func CloseHandlerWithCallback(cb func()) {
+	c := make(chan os.Signal, 2)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		time.Sleep(1 * time.Second)
+		<-c
+		if runtime.GOOS != "windows" {
+			// makes the cursor visible
+			fmt.Print("\033[?25h")
+		}
+		fmt.Println("\rCtrl+C pressed in Terminal")
+		cb()
+		time.Sleep(1 * time.Second)
+		os.Exit(0)
+	}()
 }

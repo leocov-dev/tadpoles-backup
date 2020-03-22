@@ -23,7 +23,7 @@ var (
 
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&debugMode, "debug", "d", false, "Print additional debug and informational logs.")
-	rootCmd.PersistentFlags().MarkHidden("debug")
+	_ = rootCmd.PersistentFlags().MarkHidden("debug")
 }
 
 func Execute() {

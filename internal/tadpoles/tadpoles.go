@@ -1,25 +1,29 @@
 package tadpoles
 
 import (
+	"context"
 	"github.com/gosuri/uiprogress"
 	"github.com/korovkin/limiter"
 	"github.com/leocov-dev/tadpoles-backup/internal/api"
 	"github.com/leocov-dev/tadpoles-backup/internal/schemas"
+	"github.com/sirupsen/logrus"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
 
 func GetAccountInfo() (info *schemas.Info, err error) {
-	parameters, err := api.Parameters()
+	parameters, err := api.GetParameters()
 	if err != nil {
 		return nil, err
 	}
 
-	return translateParameters(parameters), nil
+	return schemas.NewInfoFromParams(parameters), nil
 }
 
 func GetEventAttachmentData(firstEventTime time.Time, lastEventTime time.Time) (attachments []*schemas.FileAttachment, err error) {
-	events, err := api.Events(firstEventTime, lastEventTime)
+	events, err := api.GetEvents(firstEventTime, lastEventTime)
 	if err != nil {
 		return nil, err
 	}
@@ -29,32 +33,20 @@ func GetEventAttachmentData(firstEventTime time.Time, lastEventTime time.Time) (
 	return attachments, nil
 }
 
-func DownloadFileAttachments(attachments []*schemas.FileAttachment, backupTarget string, concurrencyLimit int, progressBar *uiprogress.Bar) (int, []string, error) {
-	err := checkAlreadyDownloaded(attachments, backupTarget)
-	if err != nil {
-		return 0, nil, err
-	}
-
-	errorChan := make(chan string, len(attachments))
-
-	skipped := 0
+func DownloadFileAttachments(newAttachments []*schemas.FileAttachment, backupRoot string, ctx context.Context, concurrencyLimit int, progressBar *uiprogress.Bar) ([]string, error) {
+	errorChan := make(chan string, len(newAttachments))
 
 	limit := limiter.NewConcurrencyLimiter(concurrencyLimit)
 
-	for _, attachment := range attachments {
-		currAtt := attachment
+	for _, attachment := range newAttachments {
+		proc := schemas.NewAttachmentProc(attachment, backupRoot, errorChan, ctx)
 
-		if currAtt.AlreadyDownloaded {
+		limit.Execute(func() {
+			proc.ExecDownload()
+			proc.ExecSave()
 			if progressBar != nil {
 				progressBar.Incr()
 			}
-			skipped += 1
-			continue
-		}
-
-		currAtt.SetBackupRoot(backupTarget)
-		limit.Execute(func() {
-			saveFileAttachment(currAtt, progressBar, errorChan)
 		})
 	}
 
@@ -67,7 +59,7 @@ func DownloadFileAttachments(attachments []*schemas.FileAttachment, backupTarget
 		saveErrors = append(saveErrors, s)
 	}
 
-	return skipped, saveErrors, nil
+	return saveErrors, nil
 }
 
 func GroupAttachmentsByType(attachments []*schemas.FileAttachment) map[string][]*schemas.FileAttachment {
@@ -92,4 +84,37 @@ func GroupAttachmentsByType(attachments []*schemas.FileAttachment) map[string][]
 	}
 
 	return attachmentTypeMap
+}
+
+func PruneAlreadyDownloaded(attachments []*schemas.FileAttachment, backupTarget string) (newAttachments []*schemas.FileAttachment, err error) {
+	attachmentNames := make(map[string]*schemas.FileAttachment)
+	for _, att := range attachments {
+		attachmentNames[att.GetSaveName()] = att
+	}
+
+	err = filepath.Walk(backupTarget,
+		func(path_ string, info_ os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info_.IsDir() {
+				return nil
+			}
+
+			file := filepath.Base(path_)
+			minusExtension := strings.TrimSuffix(file, filepath.Ext(file))
+			logrus.Debugf("minusExtension: %s\n", minusExtension)
+
+			if _, ok := attachmentNames[minusExtension]; ok {
+				delete(attachmentNames, minusExtension)
+			}
+
+			return nil
+		})
+
+	for _, v := range attachmentNames {
+		newAttachments = append(newAttachments, v)
+	}
+
+	return newAttachments, err
 }

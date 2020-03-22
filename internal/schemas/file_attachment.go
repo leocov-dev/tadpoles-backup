@@ -20,7 +20,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 )
 
@@ -32,15 +32,9 @@ type FileAttachment struct {
 	CreateTime        time.Time
 	EventTime         time.Time
 	tempFile          string
-	backupTarget      string
 	AlreadyDownloaded bool
 	ImageType         types.Type
 	EventMime         string
-}
-
-// set the parent directory for the save target
-func (a *FileAttachment) SetBackupRoot(backupTarget string) {
-	a.backupTarget = backupTarget
 }
 
 // get the save target file name without extension
@@ -56,20 +50,11 @@ func (a *FileAttachment) GetSaveName() string {
 	return fmt.Sprintf("%s_%s", timestamp, a.ChildName)
 }
 
-// get the save target directory
-func (a *FileAttachment) GetSaveDir() string {
-	return path.Join(a.backupTarget, fmt.Sprint(a.EventTime.Year()), fmt.Sprintf("%d-%02d-%02d", a.EventTime.Year(), a.EventTime.Month(), a.EventTime.Day()))
-}
-
 // get the path and filename for the final save location
-func (a *FileAttachment) GetSaveTarget() (filePath string, err error) {
-	if a.backupTarget == "" {
-		return "", errors.New("backup target must be set before writing")
-	}
-
-	dir := a.GetSaveDir()
+func (a *FileAttachment) GetSaveTarget(backupRoot string) (filePath string, err error) {
+	dir := filepath.Join(backupRoot, fmt.Sprint(a.EventTime.Year()), fmt.Sprintf("%d-%02d-%02d", a.EventTime.Year(), a.EventTime.Month(), a.EventTime.Day()))
 	fileName := fmt.Sprintf("%s.%s", a.GetSaveName(), a.ImageType.Extension)
-	return path.Join(dir, fileName), nil
+	return filepath.Join(dir, fileName), nil
 }
 
 // download file to a temporary directory
@@ -77,7 +62,7 @@ func (a *FileAttachment) Download() (err error) {
 	log.Debug("Downloading: ", a.AttachmentKey)
 	log.Debugf("%s %s %s\n", a.ChildName, a.Comment, a.EventTime)
 
-	resp, err := api.Attachment(a.EventKey, a.AttachmentKey)
+	resp, err := api.GetAttachment(a.EventKey, a.AttachmentKey)
 	if err != nil {
 		return err
 	}
@@ -105,7 +90,7 @@ func (a *FileAttachment) Download() (err error) {
 }
 
 // create the necessary directories and move the temporary file to the target with a new name
-func (a *FileAttachment) Save() (err error) {
+func (a *FileAttachment) Save(backupRoot string) (err error) {
 	if utils.IsImageType(a.ImageType) {
 		err = a.convertToJpgIfRequired()
 		if err != nil {
@@ -113,17 +98,18 @@ func (a *FileAttachment) Save() (err error) {
 		}
 	}
 
-	savePath, err := a.GetSaveTarget()
+	savePath, err := a.GetSaveTarget(backupRoot)
 	if err != nil {
 		return err
 	}
 
-	err = os.MkdirAll(path.Dir(savePath), os.ModePerm)
+	err = os.MkdirAll(filepath.Dir(savePath), os.ModePerm)
 	if err != nil {
 		return err
 	}
 
 	log.Debugf("Saving to: %s\n\n", savePath)
+
 	err = utils.MoveFile(a.tempFile, savePath)
 	if err != nil {
 		return err

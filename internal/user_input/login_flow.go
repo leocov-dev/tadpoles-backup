@@ -14,7 +14,7 @@ import (
 )
 
 func DoLoginIfNeeded() {
-	_, err := api.Admit()
+	_, err := api.PostAdmit()
 
 	if err == nil {
 		// serialized credential cookie was valid!
@@ -25,11 +25,11 @@ func DoLoginIfNeeded() {
 
 	for {
 		email, password := credentials()
-		err := api.Login(email, password)
+		err := api.PostLogin(email, password)
 		if err != nil {
 			log.Debug("Login Error: ", err)
 		}
-		expires, err := api.Admit()
+		expires, err := api.PostAdmit()
 		if err == nil {
 			utils.WriteInfo("Login expires", expires.In(time.Local).Format("Mon Jan 2 03:04:05 PM"))
 			fmt.Println("")

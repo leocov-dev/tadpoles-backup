@@ -26,7 +26,7 @@ type dependants struct {
 	Key         string `json:"person"`
 }
 
-func Parameters() (params *ParametersResponse, err error) {
+func GetParameters() (params *ParametersResponse, err error) {
 	resp, err := client.ApiClient.Get(client.ParametersEndpoint)
 	if err != nil {
 		return nil, err

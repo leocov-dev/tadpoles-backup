@@ -57,6 +57,8 @@ $ make dev
 $ bin/tadpoles-backup --help
 ```
 
+The latest development branch is always in the format: `release-v1.0.0`.
+
 ## Notes
 
 `tadples-backup` caches your login session cookie locally so you are not prompted to enter your password every time you use the tool.

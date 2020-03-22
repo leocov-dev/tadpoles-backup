@@ -35,7 +35,7 @@ type Event struct {
 	Member      string             `json:"member"`
 }
 
-func Events(firstEventTime time.Time, lastEventTime time.Time) (events []*Event, err error) {
+func GetEvents(firstEventTime time.Time, lastEventTime time.Time) (events []*Event, err error) {
 	log.Debug(fmt.Sprintf("EventsURL: %s", client.EventsEndpoint))
 
 	params := url.Values{

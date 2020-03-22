@@ -1,19 +1,20 @@
 package commands
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gosuri/uiprogress"
 	"github.com/leocov-dev/tadpoles-backup/config"
+	"github.com/leocov-dev/tadpoles-backup/internal/schemas"
 	"github.com/leocov-dev/tadpoles-backup/internal/tadpoles"
 	"github.com/leocov-dev/tadpoles-backup/internal/user_input"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
+	"github.com/leocov-dev/tadpoles-backup/internal/utils/spinners"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"golang.org/x/net/context"
 	"os"
 	"path/filepath"
 	"runtime"
-	"strconv"
 )
 
 var (
@@ -23,20 +24,25 @@ var (
 		Run:   backupRun,
 		Args:  backupArgs(),
 		PreRun: func(cmd *cobra.Command, args []string) {
+			utils.CloseHandlerWithCallback(func() {
+				cancelBackup()
+			})
 			user_input.DoLoginIfNeeded()
-		},
-		PostRunE: func(cmd *cobra.Command, args []string) error {
-			return utils.CleanupTempFiles()
+			err := utils.CleanupTempFiles()
+			if err != nil {
+				utils.PrintError("Error cleaning up temp files: %s", err)
+			}
 		},
 	}
 
+	ctx, cancelBackup  = context.WithCancel(context.Background())
 	concurrencyLimit   int
 	defaultConcurrency = runtime.NumCPU() + (runtime.NumCPU() / 2)
 )
 
 func init() {
 	backupCmd.Flags().VarP(
-		newConcurrencyValue(defaultConcurrency, &concurrencyLimit),
+		schemas.NewConcurrencyValue(defaultConcurrency, &concurrencyLimit),
 		"concurrency",
 		"c",
 		fmt.Sprintf("The number of simultaneous downloads allowed, 1 - %d.", config.MaxConcurrency),
@@ -54,7 +60,7 @@ func backupArgs() cobra.PositionalArgs {
 }
 
 func backupRun(cmd *cobra.Command, args []string) {
-	s := utils.StartSpinner("Backup Started...")
+	s := spinners.StartNewSpinner("Getting Account Info...")
 
 	backupTarget := filepath.Clean(args[0])
 	log.Debug("Backing up to: ", backupTarget)
@@ -71,70 +77,50 @@ func backupRun(cmd *cobra.Command, args []string) {
 	}
 	s.Stop()
 
-	s = utils.StartSpinner("Checking Events...")
-	log.Debug("") // newline for debug mode
+	s = spinners.StartNewSpinner("Checking Events...")
 	attachments, err := tadpoles.GetEventAttachmentData(info.FirstEvent, info.LastEvent)
 	if err != nil {
 		utils.CmdFailed(cmd, err)
 	}
 	s.Stop()
 
-	utils.WriteMain("Attachments", fmt.Sprint(len(attachments)))
-	typeMap := tadpoles.GroupAttachmentsByType(attachments)
-	for k, v := range typeMap {
-		utils.WriteSub(k, fmt.Sprint(len(v)))
-	}
-
-	uiprogress.Start()
-	progressBar := uiprogress.AddBar(len(attachments)).
-		AppendCompleted().
-		PrependElapsed().
-		PrependFunc(func(b *uiprogress.Bar) string {
-			return "Downloading"
-		})
-
-	skippedCount, saveErrors, err := tadpoles.DownloadFileAttachments(attachments, backupTarget, concurrencyLimit, progressBar)
+	newAttachments, err := tadpoles.PruneAlreadyDownloaded(attachments, backupTarget)
 	if err != nil {
 		utils.CmdFailed(cmd, err)
 	}
 
-	uiprogress.Stop()
+	utils.WriteMain("New Attachments", fmt.Sprint(len(newAttachments)))
+	typeMap := tadpoles.GroupAttachmentsByType(newAttachments)
+	for k, v := range typeMap {
+		utils.WriteSub(k, fmt.Sprint(len(v)))
+	}
 
-	utils.WriteMain("Skipped", fmt.Sprint(skippedCount))
+	count := len(newAttachments)
+	if count > 0 {
+		//	utils.WithProgressBar("Downloading", len(newAttachments), func(pb *uiprogress.Bar) []string {
+		//		saveErrors, err := tadpoles.DownloadFileAttachments(newAttachments, backupTarget, ctx, concurrencyLimit, pb)
+		//		if err != nil {
+		//			utils.CmdFailed(cmd, err)
+		//		}
+		//		return saveErrors
+		//	})
 
-	if saveErrors != nil {
-		utils.WriteError("Errors", "")
-		for i, e := range saveErrors {
-			utils.WriteErrorSub.Write(fmt.Sprint(i+1), e)
+		uiprogress.Start()
+		pb := uiprogress.AddBar(count).
+			AppendCompleted().
+			PrependElapsed().
+			PrependFunc(func(b *uiprogress.Bar) string {
+				return fmt.Sprintf("Downloading (%d/%d)", b.Current(), count)
+			})
+
+		saveErrors, err := tadpoles.DownloadFileAttachments(newAttachments, backupTarget, ctx, concurrencyLimit, pb)
+		if err != nil {
+			utils.CmdFailed(cmd, err)
 		}
-		fmt.Println("")
-	}
-}
 
-// custom concurrency flag for validation
-type concurrencyValue int
+		uiprogress.Stop()
 
-func newConcurrencyValue(val int, p *int) *concurrencyValue {
-	*p = val
-	return (*concurrencyValue)(p)
-}
-
-func (i *concurrencyValue) Set(s string) error {
-	v, err := strconv.ParseInt(s, 0, 64)
-	if err != nil {
-		return err
+		utils.PrintErrorList(saveErrors)
 	}
 
-	if v > config.MaxConcurrency || v < 1 {
-		return errors.New(fmt.Sprintf("value must be 1 - %d", config.MaxConcurrency))
-	}
-
-	*i = concurrencyValue(v)
-	return nil
 }
-
-func (i *concurrencyValue) Type() string {
-	return "int"
-}
-
-func (i *concurrencyValue) String() string { return strconv.FormatInt(int64(*i), 10) }
