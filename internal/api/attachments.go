@@ -6,7 +6,7 @@ import (
 	"net/url"
 )
 
-func Attachment(eventKey string, attachmentKey string) (resp *http.Response, err error) {
+func GetAttachment(eventKey string, attachmentKey string) (resp *http.Response, err error) {
 	params := url.Values{
 		"obj": {eventKey},
 		"key": {attachmentKey},

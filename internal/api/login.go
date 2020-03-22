@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func Login(email string, password string) error {
+func PostLogin(email string, password string) error {
 	log.Debug("Login...")
 	resp, err := client.ApiClient.PostForm(
 		client.LoginEndpoint,
@@ -30,7 +30,7 @@ func Login(email string, password string) error {
 }
 
 // Must call admit endpoint before any other requests to get proper auth cookies set
-func Admit() (expires *time.Time, err error) {
+func PostAdmit() (expires *time.Time, err error) {
 	log.Debug("Admit...")
 	t := time.Now()
 	zone, _ := t.Zone()
