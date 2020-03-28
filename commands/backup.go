@@ -24,14 +24,11 @@ var (
 		Run:   backupRun,
 		Args:  backupArgs(),
 		PreRun: func(cmd *cobra.Command, args []string) {
+			log.Debug("Backup PersistentPreRun")
 			utils.CloseHandlerWithCallback(func() {
 				cancelBackup()
 			})
 			user_input.DoLoginIfNeeded()
-			err := utils.CleanupTempFiles()
-			if err != nil {
-				utils.PrintError("Error cleaning up temp files: %s", err)
-			}
 		},
 	}
 
@@ -97,14 +94,6 @@ func backupRun(cmd *cobra.Command, args []string) {
 
 	count := len(newAttachments)
 	if count > 0 {
-		//	utils.WithProgressBar("Downloading", len(newAttachments), func(pb *uiprogress.Bar) []string {
-		//		saveErrors, err := tadpoles.DownloadFileAttachments(newAttachments, backupTarget, ctx, concurrencyLimit, pb)
-		//		if err != nil {
-		//			utils.CmdFailed(cmd, err)
-		//		}
-		//		return saveErrors
-		//	})
-
 		uiprogress.Start()
 		pb := uiprogress.AddBar(count).
 			AppendCompleted().

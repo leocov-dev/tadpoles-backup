@@ -64,7 +64,7 @@ The latest development branch is always in the format: `release-v1.0.0`.
 `tadples-backup` caches your login session cookie locally so you are not prompted to enter your password every time you use the tool.
 It **DOES NOT** store or retain your actual email or password.
 Instead it writes a file to your home directory with a temporary authentication cookie which lasts for 2 weeks.
-This file is located at `$HOME/.tadpoles-backup-cookie` and can be deleted whenever you choose.
+This file is located in `$HOME/.tadpoles-backup/` and can be deleted whenever you choose.
 
 
 ## Inspired By

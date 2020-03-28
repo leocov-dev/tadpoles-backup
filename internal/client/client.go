@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/leocov-dev/tadpoles-backup/config"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/weppos/publicsuffix-go/publicsuffix"
@@ -11,13 +12,9 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"os"
-	"path/filepath"
 )
 
 var (
-	homeDir, _         = os.UserHomeDir()
-	TadpolesCookieFile = filepath.Join(homeDir, ".tadpole-backup-cookie")
-
 	jar, _    = cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.CookieJarList})
 	ApiClient = newApiClient()
 
@@ -41,10 +38,10 @@ func newApiClient() *http.Client {
 // load cookies from serialized json on disk if able.
 func deserializeCookies() {
 	var storedCookies []*http.Cookie
-	if utils.FileExists(TadpolesCookieFile) {
+	if utils.FileExists(config.TadpolesCookieFile) {
 
 		// Open our jsonFile
-		jsonFile, _ := os.Open(TadpolesCookieFile)
+		jsonFile, _ := os.Open(config.TadpolesCookieFile)
 		defer utils.CloseWithLog(jsonFile)
 
 		byteValue, _ := ioutil.ReadAll(jsonFile)
@@ -54,7 +51,7 @@ func deserializeCookies() {
 			log.Debug("Failed to deserialize cookies...", err)
 			return
 		}
-		log.Debug(fmt.Sprintf("Deserialized cookies from file: %s", TadpolesCookieFile))
+		log.Debug(fmt.Sprintf("Deserialized cookies from file: %s", config.TadpolesCookieFile))
 	}
 	// load cookies to cookie jar that api client will use
 	jar.SetCookies(TadpolesUrl, storedCookies)
@@ -64,7 +61,7 @@ func SerializeResponseCookies(response *http.Response) {
 	cookiesData := response.Cookies()
 	jsonString, _ := json.MarshalIndent(cookiesData, "", "  ")
 
-	err := ioutil.WriteFile(TadpolesCookieFile, jsonString, 0644)
+	err := ioutil.WriteFile(config.TadpolesCookieFile, jsonString, 0600)
 
 	if err != nil {
 		log.Debug("Failed to serialize cookies to file...", err)
