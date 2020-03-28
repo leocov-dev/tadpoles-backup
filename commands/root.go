@@ -3,9 +3,9 @@ package commands
 import (
 	"fmt"
 	"github.com/leocov-dev/tadpoles-backup/config"
-	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var (
@@ -17,6 +17,9 @@ var (
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			setLoggingLevel()
 		},
+		PersistentPostRun: func(cmd *cobra.Command, args []string) {
+			_ = os.RemoveAll(config.TempDir)
+		},
 	}
 	debugMode bool
 )
@@ -27,10 +30,7 @@ func init() {
 }
 
 func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		utils.WriteError("Fatal", "Failed to start root command...")
-	}
+	_ = rootCmd.Execute()
 }
 
 func setLoggingLevel() {

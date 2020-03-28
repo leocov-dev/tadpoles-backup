@@ -68,7 +68,7 @@ func (a *FileAttachment) Download() (err error) {
 	}
 	defer utils.CloseWithLog(resp.Body)
 
-	tempFile, err := ioutil.TempFile("", config.TempFilePattern)
+	tempFile, err := ioutil.TempFile(config.TempDir, config.TempFilePattern)
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,8 @@ func (a *FileAttachment) Save(backupRoot string) (err error) {
 
 	log.Debugf("Saving to: %s\n\n", savePath)
 
-	err = utils.MoveFile(a.tempFile, savePath)
+	time.Sleep(2 * time.Second)
+	err = utils.CopyFile(a.tempFile, savePath)
 	if err != nil {
 		return err
 	}
@@ -118,6 +119,7 @@ func (a *FileAttachment) Save(backupRoot string) (err error) {
 	return nil
 }
 
+// TODO: this is messy
 func (a *FileAttachment) convertToJpgIfRequired() (err error) {
 	if a.ImageType == matchers.TypeJpeg {
 		log.Debug("Already jpg...\n")
@@ -132,7 +134,7 @@ func (a *FileAttachment) convertToJpgIfRequired() (err error) {
 
 	log.Debugf("Not jpg, converting: %s\n\n", a.ImageType)
 
-	tempFile, err := os.OpenFile(a.tempFile, os.O_RDWR|os.O_CREATE, 0666)
+	tempFile, err := os.OpenFile(a.tempFile, os.O_RDWR|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		return err
 	}

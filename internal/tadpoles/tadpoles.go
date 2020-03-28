@@ -38,6 +38,8 @@ func DownloadFileAttachments(newAttachments []*schemas.FileAttachment, backupRoo
 
 	limit := limiter.NewConcurrencyLimiter(concurrencyLimit)
 
+	// TODO: investigate other approaches, maybe fixed # of goroutines that handle pull from a
+	//  shared channel of FileAttachments
 	for _, attachment := range newAttachments {
 		proc := schemas.NewAttachmentProc(attachment, backupRoot, errorChan, ctx)
 

@@ -2,6 +2,14 @@ language: go
 go:
   - 1.14.x
 
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod
+
+git:
+  depth: 1
+
 notifications:
   email:
     on_failure: always

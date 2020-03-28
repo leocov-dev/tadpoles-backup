@@ -40,12 +40,3 @@ func StartNewSpinner(title string) *spinner.Spinner {
 	}
 	return s
 }
-
-func StopAll() {
-	for _, s := range SpinnerManager.Spinners {
-		if !s.Active() {
-			continue
-		}
-		s.Stop()
-	}
-}
