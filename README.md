@@ -13,20 +13,20 @@ Get latest prebuilt executable from the [releases page](https://github.com/leoco
 
 #### Linux
 ```
-$ sudo wget https://github.com/leocov-dev/tadpoles-backup/releases/download/v1.0.0/tadpoles-backup-v1.0.0_linux_amd64 -O /usr/local/bin/tadpoles-backup
+$ sudo wget https://github.com/leocov-dev/tadpoles-backup/releases/latest/download/tadpoles-backup-linux-amd64 -O /usr/local/bin/tadpoles-backup
 $ sudo chmod +x /usr/local/bin/tadpoles-backup
 ```
 
 #### OS X
 ```
-$ sudo curl -Lo /usr/local/bin/tadpoles-backup https://github.com/leocov-dev/tadpoles-backup/releases/download/v1.0.0/tadpoles-backup-v1.0.0_darwin_amd64
+$ sudo curl -Lo /usr/local/bin/tadpoles-backup https://github.com/leocov-dev/tadpoles-backup/releases/latest/download/tadpoles-backup-darwin-amd64
 $ sudo chmod +x /usr/local/bin/tadpoles-backup
 ```
 
 #### Windows
 ```
 # PowerShell:
-$ Invoke-WebRequest -OutFile $env:USERPROFILE\tadpoles-backup https://github.com/leocov-dev/tadpoles-backup/releases/download/v1.0.0/tadpoles-backup-v1.0.0_windows_amd64
+$ Invoke-WebRequest -OutFile $env:USERPROFILE\tadpoles-backup.exe https://github.com/leocov-dev/tadpoles-backup/releases/latest/download/tadpoles-backup-windows-amd64.exe
 ```
 
 ## Usage

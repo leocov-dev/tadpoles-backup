@@ -45,7 +45,7 @@ echo "==> Building..."
 echo "ldflags: ${LD_FLAGS}"
 
 BIN_NAME=${PWD##*/}
-BUILD_PREFIX="${BIN_NAME}-${RELEASE_TAG}-"
+BUILD_PREFIX="${BIN_NAME}-"
 
 gox \
   -os="${XC_OS}" \
