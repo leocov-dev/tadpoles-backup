@@ -48,4 +48,5 @@ deploy:
     prerelease: true
     on:
       branch: /^release-/
+      tags: true
 
