@@ -67,18 +67,21 @@ if [[ -f "${DEV_PLATFORM}" && -z "${CI}" ]]; then
 fi
 
 # Packaging operations
-echo
-echo "==> Packaging..."
-echo
-for file in ./dist/*; do
-    echo "--> ${file}"
+# only if not a pull request
+if [[ "${TRAVIS_PULL_REQUEST}" != "false" ]]; then
+    echo
+    echo "==> Packaging..."
+    echo
+    for file in ./dist/*; do
+        echo "--> ${file}"
 
-    echo "    calculate hash..."
-    sha256sum "./${file}" >"./${file}.sha256"
-done
+        echo "    calculate hash..."
+        sha256sum "./${file}" >"./${file}.sha256"
+    done
 
-# Done!
-echo
-echo "==> Results:"
-echo
-ls -hl dist/*
+    # Done!
+    echo
+    echo "==> Results:"
+    echo
+    ls -hl dist/*
+fi
