@@ -68,8 +68,7 @@ fi
 
 # Packaging operations
 # only if not a pull request
-echo "TRAVIS_PULL_REQUEST: ${TRAVIS_PULL_REQUEST}"
-if [[ "${TRAVIS_PULL_REQUEST}" != "false" ]]; then
+if [[ -z "${CI}" || "${TRAVIS_PULL_REQUEST}" == "false" ]]; then
     echo
     echo "==> Packaging..."
     echo
