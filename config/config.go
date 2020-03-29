@@ -22,7 +22,6 @@ var makeDirs = []string{TempDir, DataDir}
 
 func init() {
 	for _, dir := range makeDirs {
-		fmt.Printf("Making: %s\n", dir)
 		err := os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
 			fmt.Printf("Failed to make dir '%s' %s\n", dir, err.Error())

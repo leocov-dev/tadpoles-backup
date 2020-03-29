@@ -3,54 +3,58 @@ package schemas
 import (
 	"context"
 	"fmt"
+	"github.com/gosuri/uiprogress"
 )
 
 type AttachmentProc struct {
-	BackupRoot     string
-	Context        context.Context
-	ErrorChannel   chan string
-	FileAttachment *FileAttachment
+	backupRoot     string
+	ctx            context.Context
+	errorChannel   chan string
+	fileAttachment *FileAttachment
+	progressBar    *uiprogress.Bar
 }
 
-func NewAttachmentProc(attachment *FileAttachment, backupRoot string, errorChannel chan string, ctx context.Context) *AttachmentProc {
-	attClone := attachment
+func NewAttachmentProc(attachment *FileAttachment, backupRoot string, errorChannel chan string, ctx context.Context, progressBar *uiprogress.Bar) *AttachmentProc {
 	proc := &AttachmentProc{
-		BackupRoot:     backupRoot,
-		Context:        ctx,
-		ErrorChannel:   errorChannel,
-		FileAttachment: attClone,
+		backupRoot:     backupRoot,
+		ctx:            ctx,
+		errorChannel:   errorChannel,
+		fileAttachment: attachment,
+		progressBar:    progressBar,
 	}
 
 	return proc
 }
 
-func (proc *AttachmentProc) ExecSave() {
-	saveName := proc.FileAttachment.GetSaveName()
+func (proc *AttachmentProc) Execute() {
+	saveName := proc.fileAttachment.GetSaveName()
+
+	defer func() {
+		if proc.progressBar != nil {
+			proc.progressBar.Incr()
+		}
+	}()
 
 	select {
-	case <-proc.Context.Done():
-		proc.ErrorChannel <- fmt.Sprintf("Save canceled: %s", saveName)
+	case <-proc.ctx.Done():
+		proc.errorChannel <- fmt.Sprintf("Donwload canceled: %s", saveName)
 		return
 	default:
-		err := proc.FileAttachment.Save(proc.BackupRoot)
+		err := proc.fileAttachment.Download()
 		if err != nil {
-			proc.ErrorChannel <- fmt.Sprintf("Failed to save attachment -> %s, Msg: %s", saveName, err.Error())
+			proc.errorChannel <- fmt.Sprintf("Failed to download attachment -> %s, %s", saveName, err.Error())
 			return
 		}
 	}
-}
-
-func (proc *AttachmentProc) ExecDownload() {
-	saveName := proc.FileAttachment.GetSaveName()
 
 	select {
-	case <-proc.Context.Done():
-		proc.ErrorChannel <- fmt.Sprintf("Donwload canceled: %s", saveName)
+	case <-proc.ctx.Done():
+		proc.errorChannel <- fmt.Sprintf("Save canceled: %s", saveName)
 		return
 	default:
-		err := proc.FileAttachment.Download()
+		err := proc.fileAttachment.Save(proc.backupRoot)
 		if err != nil {
-			proc.ErrorChannel <- fmt.Sprintf("Failed to download attachment -> %s, %s", saveName, err.Error())
+			proc.errorChannel <- fmt.Sprintf("Failed to save attachment -> %s, Msg: %s", saveName, err.Error())
 			return
 		}
 	}

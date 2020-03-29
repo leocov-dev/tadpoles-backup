@@ -3,7 +3,6 @@ package tadpoles
 import (
 	"context"
 	"github.com/gosuri/uiprogress"
-	"github.com/korovkin/limiter"
 	"github.com/leocov-dev/tadpoles-backup/internal/api"
 	"github.com/leocov-dev/tadpoles-backup/internal/schemas"
 	"github.com/sirupsen/logrus"
@@ -34,25 +33,15 @@ func GetEventAttachmentData(firstEventTime time.Time, lastEventTime time.Time) (
 }
 
 func DownloadFileAttachments(newAttachments []*schemas.FileAttachment, backupRoot string, ctx context.Context, concurrencyLimit int, progressBar *uiprogress.Bar) ([]string, error) {
-	errorChan := make(chan string, len(newAttachments))
+	errorChan := make(chan string)
 
-	limit := limiter.NewConcurrencyLimiter(concurrencyLimit)
+	downloadPool := schemas.NewDownloadPool(concurrencyLimit)
 
-	// TODO: investigate other approaches, maybe fixed # of goroutines that handle pull from a
-	//  shared channel of FileAttachments
 	for _, attachment := range newAttachments {
-		proc := schemas.NewAttachmentProc(attachment, backupRoot, errorChan, ctx)
-
-		limit.Execute(func() {
-			proc.ExecDownload()
-			proc.ExecSave()
-			if progressBar != nil {
-				progressBar.Incr()
-			}
-		})
+		proc := schemas.NewAttachmentProc(attachment, backupRoot, errorChan, ctx, progressBar)
+		downloadPool.Add(proc)
 	}
-
-	limit.Wait()
+	downloadPool.Process()
 
 	close(errorChan)
 

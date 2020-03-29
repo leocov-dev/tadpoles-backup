@@ -217,7 +217,7 @@ func writeExifTag(attachment *FileAttachment) (err error) {
 	return nil
 }
 
-func setExifData(sl *gjis.SegmentList, dateTime time.Time, imageDescription string) (err error) {
+func setExifData(sl *gjis.SegmentList, dateTime time.Time, userComment string) (err error) {
 	log.Debug("setExifData()...\n")
 
 	rootIb, err := sl.ConstructExifBuilder()
@@ -238,12 +238,6 @@ func setExifData(sl *gjis.SegmentList, dateTime time.Time, imageDescription stri
 		return err
 	}
 
-	// ProcessingSoftware
-	err = ifdIb.SetStandardWithName("ProcessingSoftware", config.Name)
-	if err != nil {
-		return err
-	}
-
 	// DateTime
 	updatedTimestampPhrase := exif.ExifFullTimestampString(dateTime)
 	err = ifdIb.SetStandardWithName("DateTime", updatedTimestampPhrase)
@@ -252,7 +246,7 @@ func setExifData(sl *gjis.SegmentList, dateTime time.Time, imageDescription stri
 	}
 
 	// ImageDescription
-	err = ifdIb.SetStandardWithName("ImageDescription", imageDescription)
+	err = ifdIb.SetStandardWithName("ImageDescription", userComment)
 	if err != nil {
 		return err
 	}
