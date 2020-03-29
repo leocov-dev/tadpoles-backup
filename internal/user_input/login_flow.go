@@ -2,23 +2,35 @@ package user_input
 
 import (
 	"bufio"
+	"crypto/x509"
+	"errors"
 	"fmt"
 	"github.com/leocov-dev/tadpoles-backup/internal/api"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	"github.com/leocov-dev/tadpoles-backup/pkg/headings"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh/terminal"
+	"net/url"
 	"os"
 	"strings"
 	"time"
 )
 
-func DoLoginIfNeeded() {
+func DoLoginIfNeeded() error {
 	_, err := api.PostAdmit()
 
 	if err == nil {
 		// serialized credential cookie was valid!
-		return
+		return nil
+	}
+
+	if err, ok := err.(*url.Error); ok {
+		switch e := err.Unwrap().(type) {
+		case x509.CertificateInvalidError:
+			return errors.New(fmt.Sprintf("cannot connect to tadpoles.com: %s", e.Error()))
+		default:
+			return err
+		}
 	}
 
 	log.Debug("Admit Error: ", err)
@@ -38,6 +50,8 @@ func DoLoginIfNeeded() {
 		log.Debug("Admit Error: ", err)
 		utils.WriteError("Login failed", "Please try again...")
 	}
+
+	return nil
 }
 
 // get username and password from user user_input

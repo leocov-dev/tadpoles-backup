@@ -28,7 +28,10 @@ var (
 			utils.CloseHandlerWithCallback(func() {
 				cancelBackup()
 			})
-			user_input.DoLoginIfNeeded()
+			err := user_input.DoLoginIfNeeded()
+			if err != nil {
+				utils.CmdFailed(cmd, err)
+			}
 		},
 	}
 

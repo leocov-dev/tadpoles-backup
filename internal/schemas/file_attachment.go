@@ -91,8 +91,12 @@ func (a *FileAttachment) Download() (err error) {
 
 // create the necessary directories and move the temporary file to the target with a new name
 func (a *FileAttachment) Save(backupRoot string) (err error) {
+	if a.tempFile == "" {
+		return errors.New("must call Download() before Save()")
+	}
+
 	if utils.IsImageType(a.ImageType) {
-		err = a.convertToJpgIfRequired()
+		err = a.processImageFile()
 		if err != nil {
 			return err
 		}
@@ -119,26 +123,46 @@ func (a *FileAttachment) Save(backupRoot string) (err error) {
 	return nil
 }
 
-// TODO: this is messy
-func (a *FileAttachment) convertToJpgIfRequired() (err error) {
-	if a.ImageType == matchers.TypeJpeg {
-		log.Debug("Already jpg...\n")
+func (a *FileAttachment) processImageFile() (err error) {
+	jmp := gjis.NewJpegMediaParser()
+	var sl *gjis.SegmentList
 
-		err = writeExifTag(a)
+	if a.ImageType != matchers.TypeJpeg {
+		// handle Non-jpeg files
+		log.Debugf("Not jpg, converting: %s\n\n", a.ImageType)
+
+		jpegBytes, err := a.convertToJpeg()
 		if err != nil {
 			return err
 		}
 
-		return nil
+		sl, err = jmp.ParseBytes(jpegBytes)
+		if err != nil {
+			return err
+		}
+	} else {
+		// handle jpeg files
+		sl, err = jmp.ParseFile(a.tempFile)
+		if err != nil {
+			return err
+		}
 	}
 
-	log.Debugf("Not jpg, converting: %s\n\n", a.ImageType)
-
-	tempFile, err := os.OpenFile(a.tempFile, os.O_RDWR|os.O_CREATE, os.ModePerm)
+	err = a.writeExifTag(sl)
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+// decode images from other formats to raw image object
+func (a *FileAttachment) convertToJpeg() (jpegBytes []byte, err error) {
+	tempFile, err := os.OpenFile(a.tempFile, os.O_RDWR|os.O_CREATE, os.ModePerm)
 	defer utils.CloseWithLog(tempFile)
+	if err != nil {
+		return nil, err
+	}
 
 	var img image.Image
 
@@ -146,64 +170,31 @@ func (a *FileAttachment) convertToJpgIfRequired() (err error) {
 	case matchers.TypePng:
 		img, err = png.Decode(tempFile)
 		if err != nil {
-			return err
+			return nil, err
 		}
-
 	default:
-		return errors.New(fmt.Sprintf("jpeg conversion not implemented for %s", a.ImageType.Extension))
+		return nil, errors.New(fmt.Sprintf("jpeg conversion not implemented for %s", a.ImageType.Extension))
 	}
 
-	jpgBytes := new(bytes.Buffer)
+	jpgBuffer := new(bytes.Buffer)
 
-	err = jpeg.Encode(jpgBytes, img, &jpeg.Options{Quality: 85})
+	err = jpeg.Encode(jpgBuffer, img, &jpeg.Options{Quality: 85})
 	if err != nil {
-		return err
+		return nil, err
 	}
+
 	a.ImageType = matchers.TypeJpeg
 
-	jmp := gjis.NewJpegMediaParser()
-	sl, err := jmp.ParseBytes(jpgBytes.Bytes())
-	if err != nil {
-		return err
-	}
+	return jpgBuffer.Bytes(), nil
+}
 
+func (a *FileAttachment) writeExifTag(sl *gjis.SegmentList) (err error) {
 	err = setExifData(sl, a.EventTime, a.Comment)
 	if err != nil {
 		return err
 	}
 
-	_, err = tempFile.Seek(0, io.SeekStart)
-	if err != nil {
-		return err
-	}
-	err = tempFile.Truncate(0)
-	if err != nil {
-		return err
-	}
-	err = sl.Write(tempFile)
-	if err != nil {
-		log.Debug("Failed sl.Write()...\n")
-		return err
-	}
-
-	return nil
-}
-
-func writeExifTag(attachment *FileAttachment) (err error) {
-	log.Debug("writeExifTag()...\n")
-	jmp := gjis.NewJpegMediaParser()
-
-	sl, err := jmp.ParseFile(attachment.tempFile)
-	if err != nil {
-		return err
-	}
-
-	err = setExifData(sl, attachment.EventTime, attachment.Comment)
-	if err != nil {
-		return err
-	}
-
-	f, err := os.Create(attachment.tempFile)
+	f, err := os.Create(a.tempFile)
 	if err != nil {
 		return err
 	}
@@ -217,6 +208,7 @@ func writeExifTag(attachment *FileAttachment) (err error) {
 	return nil
 }
 
+// https://github.com/dsoprea/go-jpeg-image-structure/blob/master/jpeg_test.go
 func setExifData(sl *gjis.SegmentList, dateTime time.Time, userComment string) (err error) {
 	log.Debug("setExifData()...\n")
 

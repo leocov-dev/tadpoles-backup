@@ -1,3 +1,5 @@
+// https://medium.com/@zufolo/a-pattern-for-limiting-the-number-of-goroutines-in-execution-56e13b226e72
+
 package schemas
 
 import "sync"
