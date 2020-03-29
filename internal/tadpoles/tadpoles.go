@@ -80,7 +80,7 @@ func GroupAttachmentsByType(attachments []*schemas.FileAttachment) map[string][]
 func PruneAlreadyDownloaded(attachments []*schemas.FileAttachment, backupTarget string) (newAttachments []*schemas.FileAttachment, err error) {
 	attachmentNames := make(map[string]*schemas.FileAttachment)
 	for _, att := range attachments {
-		attachmentNames[att.GetSaveName()] = att
+		attachmentNames[att.SaveName()] = att
 	}
 
 	err = filepath.Walk(backupTarget,
@@ -108,4 +108,19 @@ func PruneAlreadyDownloaded(attachments []*schemas.FileAttachment, backupTarget 
 	}
 
 	return newAttachments, err
+}
+
+func eventsToAttachments(events []*api.Event) (attachments []*schemas.FileAttachment) {
+	for _, event := range events {
+		for _, eventAttachment := range event.Attachments {
+			// skip pdf files
+			if eventAttachment.MimeType == "application/pdf" {
+				logrus.Debugf("skipping pdf: %s@%s \n", event.ChildName, event.EventTime)
+				continue
+			}
+			att := schemas.NewFileAttachment(event, eventAttachment)
+			attachments = append(attachments, att)
+		}
+	}
+	return attachments
 }

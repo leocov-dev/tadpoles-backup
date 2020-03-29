@@ -47,7 +47,7 @@ func NewFileAttachment(event *api.Event, eventAttachment *api.EventAttachment) *
 }
 
 // get the save target file name without extension
-func (a *FileAttachment) GetSaveName() string {
+func (a *FileAttachment) SaveName() string {
 	timestamp := fmt.Sprintf("%d%02d%02d%02d%02d%02d",
 		a.EventTime.Year(),
 		a.EventTime.Month(),
@@ -60,12 +60,12 @@ func (a *FileAttachment) GetSaveName() string {
 }
 
 // get the path and filename for the final save location
-func (a *FileAttachment) GetSaveTarget(backupRoot string) (filePath string, err error) {
+func (a *FileAttachment) saveTarget(backupRoot string) (filePath string, err error) {
 	if a.imageType.Extension == "" {
 		return "", errors.New("must call Download() in order to establish file extension")
 	}
 	dir := filepath.Join(backupRoot, fmt.Sprint(a.EventTime.Year()), fmt.Sprintf("%d-%02d-%02d", a.EventTime.Year(), a.EventTime.Month(), a.EventTime.Day()))
-	fileName := fmt.Sprintf("%s.%s", a.GetSaveName(), a.imageType.Extension)
+	fileName := fmt.Sprintf("%s.%s", a.SaveName(), a.imageType.Extension)
 	return filepath.Join(dir, fileName), nil
 }
 
@@ -114,7 +114,7 @@ func (a *FileAttachment) Save(backupRoot string) (err error) {
 		}
 	}
 
-	savePath, err := a.GetSaveTarget(backupRoot)
+	savePath, err := a.saveTarget(backupRoot)
 	if err != nil {
 		return err
 	}
