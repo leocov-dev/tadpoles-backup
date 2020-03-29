@@ -9,8 +9,9 @@ Current save back-ends:
 * Local file system
 
 ## Install
-Get latest prebuilt executable from the [releases page](https://github.com/leocov-dev/tadpoles-backup/releases).
+Get [latest](https://github.com/leocov-dev/tadpoles-backup/releases/latest) prebuilt executable from the [releases](https://github.com/leocov-dev/tadpoles-backup/releases) page.
 
+Or use one of these commands:
 #### Linux
 ```
 $ sudo wget https://github.com/leocov-dev/tadpoles-backup/releases/latest/download/tadpoles-backup-linux-amd64 -O /usr/local/bin/tadpoles-backup
