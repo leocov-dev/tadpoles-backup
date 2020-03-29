@@ -4,10 +4,12 @@ default: dev
 
 ci:
 	@sh -c "$(CURDIR)/scripts/ci.sh"
-	@sh -c "$(CURDIR)/scripts/release.sh"
+
+test:
+	@sh -c "$(CURDIR)/scripts/test.sh"
 
 # bin generates release zip packages in ./dist
-release: tidy fmt
+release: tidy
 	@sh -c "$(CURDIR)/scripts/release.sh"
 
 clean:

@@ -25,16 +25,25 @@ import (
 )
 
 type FileAttachment struct {
-	Comment           string
-	AttachmentKey     string
-	EventKey          string
-	ChildName         string
-	CreateTime        time.Time
-	EventTime         time.Time
-	tempFile          string
-	AlreadyDownloaded bool
-	ImageType         types.Type
-	EventMime         string
+	Comment       string
+	AttachmentKey string
+	EventKey      string
+	ChildName     string
+	EventTime     time.Time
+	tempFile      string
+	imageType     types.Type
+	EventMime     string
+}
+
+func NewFileAttachment(event *api.Event, eventAttachment *api.EventAttachment) *FileAttachment {
+	return &FileAttachment{
+		Comment:       event.Comment,
+		AttachmentKey: eventAttachment.AttachmentKey,
+		EventKey:      event.EventKey,
+		ChildName:     event.ChildName,
+		EventTime:     event.EventTime.Time(),
+		EventMime:     eventAttachment.MimeType,
+	}
 }
 
 // get the save target file name without extension
@@ -52,8 +61,11 @@ func (a *FileAttachment) GetSaveName() string {
 
 // get the path and filename for the final save location
 func (a *FileAttachment) GetSaveTarget(backupRoot string) (filePath string, err error) {
+	if a.imageType.Extension == "" {
+		return "", errors.New("must call Download() in order to establish file extension")
+	}
 	dir := filepath.Join(backupRoot, fmt.Sprint(a.EventTime.Year()), fmt.Sprintf("%d-%02d-%02d", a.EventTime.Year(), a.EventTime.Month(), a.EventTime.Day()))
-	fileName := fmt.Sprintf("%s.%s", a.GetSaveName(), a.ImageType.Extension)
+	fileName := fmt.Sprintf("%s.%s", a.GetSaveName(), a.imageType.Extension)
 	return filepath.Join(dir, fileName), nil
 }
 
@@ -81,7 +93,7 @@ func (a *FileAttachment) Download() (err error) {
 
 	a.tempFile = tempFile.Name()
 
-	a.ImageType, err = filetype.MatchFile(a.tempFile)
+	a.imageType, err = filetype.MatchFile(a.tempFile)
 	if err != nil {
 		return err
 	}
@@ -95,7 +107,7 @@ func (a *FileAttachment) Save(backupRoot string) (err error) {
 		return errors.New("must call Download() before Save()")
 	}
 
-	if utils.IsImageType(a.ImageType) {
+	if utils.IsImageType(a.imageType) {
 		err = a.processImageFile()
 		if err != nil {
 			return err
@@ -127,9 +139,9 @@ func (a *FileAttachment) processImageFile() (err error) {
 	jmp := gjis.NewJpegMediaParser()
 	var sl *gjis.SegmentList
 
-	if a.ImageType != matchers.TypeJpeg {
+	if a.imageType != matchers.TypeJpeg {
 		// handle Non-jpeg files
-		log.Debugf("Not jpg, converting: %s\n\n", a.ImageType)
+		log.Debugf("Not jpg, converting: %s\n\n", a.imageType)
 
 		jpegBytes, err := a.convertToJpeg()
 		if err != nil {
@@ -166,14 +178,14 @@ func (a *FileAttachment) convertToJpeg() (jpegBytes []byte, err error) {
 
 	var img image.Image
 
-	switch a.ImageType {
+	switch a.imageType {
 	case matchers.TypePng:
 		img, err = png.Decode(tempFile)
 		if err != nil {
 			return nil, err
 		}
 	default:
-		return nil, errors.New(fmt.Sprintf("jpeg conversion not implemented for %s", a.ImageType.Extension))
+		return nil, errors.New(fmt.Sprintf("jpeg conversion not implemented for %s", a.imageType.Extension))
 	}
 
 	jpgBuffer := new(bytes.Buffer)
@@ -183,7 +195,7 @@ func (a *FileAttachment) convertToJpeg() (jpegBytes []byte, err error) {
 		return nil, err
 	}
 
-	a.ImageType = matchers.TypeJpeg
+	a.imageType = matchers.TypeJpeg
 
 	return jpgBuffer.Bytes(), nil
 }
