@@ -27,7 +27,7 @@ func NewAttachmentProc(attachment *FileAttachment, backupRoot string, errorChann
 }
 
 func (proc *AttachmentProc) Execute() {
-	saveName := proc.fileAttachment.GetSaveName()
+	saveName := proc.fileAttachment.SaveName()
 
 	defer func() {
 		if proc.progressBar != nil {
