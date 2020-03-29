@@ -51,14 +51,12 @@ $ tadpoles-backup backup "/a/directory/on/your/machine/"
 
 ## Development
 
-Install Go version specified in `.go-version` (recommended to use [goenv](https://github.com/syndbg/goenv))
+Install Go version specified in `go.mod` or use [goenv](https://github.com/syndbg/goenv) to manage go versions.
 
 ```
-$ make dev
-$ bin/tadpoles-backup --help
+# build for your platform only and run.
+$ make && bin/tadpoles-backup --help
 ```
-
-The latest development branch is always in the format: `release-v1.0.0`.
 
 ## Notes
 

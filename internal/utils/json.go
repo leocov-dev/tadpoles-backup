@@ -1,8 +1,8 @@
 package utils
 
 import (
+	"math"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -10,35 +10,38 @@ import (
 type JsonTime time.Time
 
 // MarshalJSON is used to convert the timestamp to JSON
-func (t JsonTime) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.FormatInt(time.Time(t).Unix(), 10)), nil
+func (jt JsonTime) MarshalJSON() ([]byte, error) {
+	return []byte(strconv.FormatInt(time.Time(jt).Unix(), 10)), nil
 }
 
 // UnmarshalJSON is used to convert the timestamp from JSON
-func (t *JsonTime) UnmarshalJSON(s []byte) (err error) {
+func (jt *JsonTime) UnmarshalJSON(s []byte) (err error) {
 	r := string(s)
-	r = strings.Split(r, ".")[0]
-	q, err := strconv.ParseInt(r, 10, 64)
+
+	f, err := strconv.ParseFloat(r, 64)
 	if err != nil {
 		return err
 	}
-	*(*time.Time)(t) = time.Unix(q, 0)
+
+	sec, dec := math.Modf(f)
+	*(*time.Time)(jt) = time.Unix(int64(sec), int64(dec*(1e9)))
+
 	return nil
 }
 
 // Unix returns t as a Unix time, the number of seconds elapsed
 // since January 1, 1970 UTC. The result does not depend on the
 // location associated with t.
-func (t JsonTime) Unix() int64 {
-	return time.Time(t).Unix()
+func (jt JsonTime) Unix() int64 {
+	return time.Time(jt).Unix()
 }
 
 // JsonTime returns the JSON time as a time.JsonTime instance in UTC
-func (t JsonTime) Time() time.Time {
-	return time.Time(t).UTC()
+func (jt JsonTime) Time() time.Time {
+	return time.Time(jt).UTC()
 }
 
 // String returns t as a formatted string
-func (t JsonTime) String() string {
-	return t.Time().String()
+func (jt JsonTime) String() string {
+	return jt.Time().String()
 }

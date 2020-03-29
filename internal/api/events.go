@@ -19,17 +19,16 @@ type pageResponse struct {
 	Events []*Event `json:"events"`
 }
 
-type eventAttachment struct {
+type EventAttachment struct {
 	AttachmentKey string `json:"key"`
 	MimeType      string `json:"mime_type"`
 }
 
 type Event struct {
 	Comment     string             `json:"comment"`
-	Attachments []*eventAttachment `json:"new_attachments"`
+	Attachments []*EventAttachment `json:"new_attachments"`
 	ChildName   string             `json:"parent_member_display"`
-	CreateTime  utils.JsonTime     `json:"create_time"`
-	EventTime   utils.JsonTime     `json:"event_time"`
+	EventTime   *utils.JsonTime    `json:"event_time"`
 	TimeZone    string             `json:"tz"`
 	EventKey    string             `json:"key"`
 	Member      string             `json:"member"`

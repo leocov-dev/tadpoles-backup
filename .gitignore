@@ -3,3 +3,5 @@ dist/
 
 # PyCharm
 .idea/
+
+coverage.txt

@@ -14,14 +14,7 @@ func eventsToAttachments(events []*api.Event) (attachments []*schemas.FileAttach
 				log.Debugf("skipping pdf: %s@%s \n", event.ChildName, event.EventTime)
 				continue
 			}
-			att := &schemas.FileAttachment{
-				Comment:       event.Comment,
-				AttachmentKey: eventAttachment.AttachmentKey,
-				EventKey:      event.EventKey,
-				ChildName:     event.ChildName,
-				EventTime:     event.EventTime.Time(),
-				EventMime:     eventAttachment.MimeType,
-			}
+			att := schemas.NewFileAttachment(event, eventAttachment)
 			attachments = append(attachments, att)
 		}
 	}

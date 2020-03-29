@@ -17,7 +17,10 @@ var (
 		Run:   statRun,
 		PreRun: func(cmd *cobra.Command, args []string) {
 			utils.CloseHandler()
-			user_input.DoLoginIfNeeded()
+			err := user_input.DoLoginIfNeeded()
+			if err != nil {
+				utils.CmdFailed(cmd, err)
+			}
 		},
 	}
 )
