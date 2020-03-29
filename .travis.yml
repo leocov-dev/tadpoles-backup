@@ -7,7 +7,6 @@ go:
 
 cache:
   directories:
-    - $HOME/.cache/go-build
     - $HOME/gopath/pkg/mod
 
 git:
@@ -25,15 +24,13 @@ env:
 branches:
   only:
     - master
-    - /^release-/
     - /^v\d+\.\d+\.\d+.*$/
 
 script:
   - env RELEASE_TAG=$TRAVIS_TAG make ci
 
 deploy:
-  - &master
-    provider: releases
+  - provider: releases
     edge: true
     token:
       secure: "gFA6P+SwTnfHm1zNRdOM5s2snvhZehD9sMAeXCftxOb5OA07XHmbNIdzAz5PNOXelSXzayhq9HkDi+5VkOeWa+5PHHHcGo7YLVwdiI5Hgf0EwgFkTELjwgIpl+quCFpQzzS+OefhqbaPZw7g6wJB01vZXTXd1WXjzYDxjetQ6RrgPrufqYKuz5oZm3QZwQh2uwuqfq1gL9D6UpQIrbFU3ql04aYw+oLai8SBGpQ5bTpN6T3M9LlHLDWuA+6vKMm9bLyZsnSdUe10AgTFEXhaAjfsdYmoZ26AG37U60WhDTdrYIHD8+ZyndIuVNYMRxLtXmjB3N5AjyCiKqJd9modhqJgk2M7XHgU+5FfRviCUwbxC41O6goijqJY/xmvnIAdk+kzJfd8k/btGw9+wbouERAUQf0fdC2ujGmIkPgQzCUVrIuEGMRQ7IJUscOdkc6Otdn4mT5CDBPCBoUSo7P72olBOH1Of6taGCDx33AWU3Dc5+btclAxvktIK/CtYu5jky08DKUDJ5sLVX4dW3+jO/At1TF+xYsqMjAJEiig9XAIP93UI8hCWLz0PP/yNocHCJrYonva/GjMw46q29yyILhx1W551PfeewX2ChPJ8mimbqmSMC5SYo3v3Wq9wCW+J4W02+12H9m9/gQ5XjhbMnM+sbOPD/cMx5kFtafMNX8="
@@ -41,12 +38,6 @@ deploy:
     file: dist/*
     overwrite: false
     on:
-      branch: master
+      branch: /^v\d+\.\d+\.\d+.*$/
       tags: true
-  - <<: *master
-    overwrite: true
     prerelease: true
-    on:
-      branch: /^release-/
-      tags: true
-
