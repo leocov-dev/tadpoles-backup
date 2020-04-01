@@ -25,6 +25,7 @@ env:
 branches:
   only:
     - master
+    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
 
 script:
   - env RELEASE_TAG=$TRAVIS_TAG make ci
