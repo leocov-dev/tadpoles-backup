@@ -40,6 +40,7 @@ _aliases:
     file: dist/*
 
 before_deploy:
+  - gem install github_changelog_generator
   - scripts/changelog.sh
 
 deploy:

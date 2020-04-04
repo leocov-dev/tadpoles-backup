@@ -12,7 +12,7 @@ cd "$DIR" || exit
 
 re="^(.+)[\/](.+)$"
 
-if [[ $TRAVIS_BRANCH == "master" &&
+if [[ -n "${TRAVIS_TAG}" &&
       -n "${CHANGELOG_GITHUB_TOKEN}" &&
       $TRAVIS_REPO_SLUG =~ $re
 ]]; then
