@@ -11,6 +11,7 @@ require (
 	github.com/gosuri/uiprogress v0.0.1
 	github.com/h2non/filetype v1.0.10
 	github.com/mattn/go-isatty v0.0.12 // indirect
+	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.3.0 // indirect
