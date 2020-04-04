@@ -39,10 +39,6 @@ _aliases:
     file_glob: true
     file: dist/*
 
-before_deploy:
-  - gem install github_changelog_generator
-  - scripts/changelog.sh
-
 deploy:
   - <<: *github_deploy
     on:
