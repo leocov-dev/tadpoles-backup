@@ -11,7 +11,7 @@ cache:
     - $HOME/gopath/pkg/mod
 
 git:
-  depth: 1
+  quiet: true
 
 notifications:
   email:
@@ -38,6 +38,9 @@ _aliases:
       secure: "FuM0nFGVDMxQcmsM9Zox8EC34oaHidNPvU+s/NdRVzhMGtQw2UaclGfO4Anu0HqN0Lqz3PmkpTjT0n2U0fCX9+oQ/gYSEEx2AOSlg2p72kqqZAIZ0IGkgi7xUbCqC6JpK4Yp4kfTC8dSFc6YYNPAt/GCmsqtGcKQFv+67wUpVBEN6MFAkVTD6NUbcLOb4PLayNrNjY4rUx3pCr6dMZL4w8FpTkjDW4BnU2nIZ/y//M2Kro7vmvy9Zo+hpc271fGg2IoM+qurFeZC5dS/Ke/H28gZGQJMhT7xRyNvDkXYCxkO2M7BZ5sLjXHOcyLsmY2+QNYRWybkPY20cJMfATv2b3CBNSOEUsziPg99UU1N27/XsObS78QNEw9iNSuJ+7bUqNUEbkZ03TmMpFwlh+hHQHGxhXKwo/OYullh5x0GMQb/s+lnmXhTmtxF68Rg06RhkQRaT8LVQjOTbh9gWy3TPNt0Plv/PuDeFUKGfhIZw92RwftdqCQiwiLZqZzzmQleb/W9GQp9CmxLua1Z/qfKlJXMKMf0MLxy/4J7LBAbFwPEyZLSNt9fTmxYCRR1jkXZDNTvI0iwdqtpxqcd/xY9bzRgn7gESR4Z3r0rzW0wCfiXlrxKXJKzvUoQO3DcKjZ05SkDaqs6XJSfwJpp6EfkE7x1e4cQemMkwNecXer0QsM="
     file_glob: true
     file: dist/*
+
+before_deploy:
+  - scripts/changelog.sh
 
 deploy:
   - <<: *github_deploy
