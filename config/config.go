@@ -16,6 +16,7 @@ var userHomeDir, _ = os.UserHomeDir()
 var TempDir = filepath.Join(os.TempDir(), DotName)
 var DataDir = filepath.Join(userHomeDir, DotName)
 var TadpolesCookieFile = filepath.Join(DataDir, fmt.Sprintf("%s-cookie", DotName))
+var TadpolesDatabaseFile = filepath.Join(DataDir, fmt.Sprintf("%s-cache", DotName))
 
 // Helpers
 var makeDirs = []string{TempDir, DataDir}
@@ -27,4 +28,12 @@ func init() {
 			fmt.Printf("Failed to make dir '%s' %s\n", dir, err.Error())
 		}
 	}
+}
+
+func ClearCookiesFile() error {
+	return os.Remove(TadpolesCookieFile)
+}
+
+func ClearDatabaseFile() error {
+	return os.Remove(TadpolesDatabaseFile)
 }

@@ -3,6 +3,8 @@ package commands
 import (
 	"fmt"
 	"github.com/leocov-dev/tadpoles-backup/config"
+	"github.com/leocov-dev/tadpoles-backup/internal/db"
+	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
@@ -16,6 +18,10 @@ var (
 			config.Version),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			setLoggingLevel()
+			err := db.RunMigrations()
+			if err != nil {
+				utils.CmdFailed(cmd, err)
+			}
 		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
 			_ = os.RemoveAll(config.TempDir)

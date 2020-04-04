@@ -19,7 +19,7 @@ import (
 
 var (
 	backupCmd = &cobra.Command{
-		Use:   "backup [target-directory]",
+		Use:   "backup <target-directory>",
 		Short: "Backup New Images.",
 		Run:   backupRun,
 		Args:  backupArgs(),
@@ -53,7 +53,7 @@ func init() {
 func backupArgs() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			return fmt.Errorf("[target-directory] argument missing")
+			return fmt.Errorf("<target-directory> argument missing")
 		}
 		return nil
 	}
