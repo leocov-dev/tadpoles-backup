@@ -78,13 +78,13 @@ func backupRun(cmd *cobra.Command, args []string) {
 	s.Stop()
 
 	s = spinners.StartNewSpinner("Checking Events...")
-	attachments, err := tadpoles.GetEventAttachmentData(info.FirstEvent, info.LastEvent)
+	fileAttachments, err := tadpoles.GetEventFileAttachmentData(info.FirstEvent, info.LastEvent)
 	if err != nil {
 		utils.CmdFailed(cmd, err)
 	}
 	s.Stop()
 
-	newAttachments, err := tadpoles.PruneAlreadyDownloaded(attachments, backupTarget)
+	newAttachments, err := tadpoles.PruneAlreadyDownloaded(fileAttachments, backupTarget)
 	if err != nil {
 		utils.CmdFailed(cmd, err)
 	}

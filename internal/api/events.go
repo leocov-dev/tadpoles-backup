@@ -14,24 +14,34 @@ import (
 	"time"
 )
 
-type pageResponse struct {
-	Cursor string   `json:"cursor"`
-	Events []*Event `json:"events"`
-}
-
-type EventAttachment struct {
+type Attachment struct {
 	AttachmentKey string `json:"key"`
 	MimeType      string `json:"mime_type"`
 }
 
 type Event struct {
-	Comment     string             `json:"comment"`
-	Attachments []*EventAttachment `json:"new_attachments"`
-	ChildName   string             `json:"parent_member_display"`
-	EventTime   *utils.JsonTime    `json:"event_time"`
-	TimeZone    string             `json:"tz"`
-	EventKey    string             `json:"key"`
-	Member      string             `json:"member"`
+	Comment         string         `json:"comment"`
+	Attachments     []*Attachment  `json:"new_attachments"`
+	ChildName       string         `json:"parent_member_display"`
+	EventTime       utils.JsonTime `json:"event_time"`
+	CreateTime      utils.JsonTime `json:"create_time"`
+	TimeZone        string         `json:"tz"`
+	EventKey        string         `json:"key"`
+	LocationDisplay string         `json:"location_display"`
+}
+
+func (e *Event) String() string {
+	val, err := json.MarshalIndent(e, "", "    ")
+	if err != nil {
+		log.Error(err)
+		return ""
+	}
+	return string(val)
+}
+
+type pageResponse struct {
+	Cursor string   `json:"cursor"`
+	Events []*Event `json:"events"`
 }
 
 func GetEvents(firstEventTime time.Time, lastEventTime time.Time) (events []*Event, err error) {
@@ -63,7 +73,7 @@ func GetEvents(firstEventTime time.Time, lastEventTime time.Time) (events []*Eve
 	return events, nil
 }
 
-func getEventPage(params *url.Values, attachments *[]*Event) error {
+func getEventPage(params *url.Values, events *[]*Event) error {
 	urlBase, _ := url.Parse(client.EventsEndpoint)
 	urlBase.RawQuery = params.Encode()
 
@@ -84,7 +94,7 @@ func getEventPage(params *url.Values, attachments *[]*Event) error {
 
 	params.Set("cursor", page.Cursor)
 
-	*attachments = append(*attachments, page.Events...)
+	*events = append(*events, page.Events...)
 
 	return nil
 }

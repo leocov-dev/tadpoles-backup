@@ -49,7 +49,8 @@ func statRun(cmd *cobra.Command, _ []string) {
 	}
 
 	s = spinners.StartNewSpinner("Checking Events...")
-	attachments, err := tadpoles.GetEventAttachmentData(info.FirstEvent, info.LastEvent)
+
+	attachments, err := tadpoles.GetEventFileAttachmentData(info.FirstEvent, info.LastEvent)
 	if err != nil {
 		utils.CmdFailed(cmd, err)
 	}

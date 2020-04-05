@@ -35,7 +35,7 @@ type FileAttachment struct {
 	EventMime     string
 }
 
-func NewFileAttachment(event *api.Event, eventAttachment *api.EventAttachment) *FileAttachment {
+func NewFileAttachment(event *api.Event, eventAttachment *api.Attachment) *FileAttachment {
 	return &FileAttachment{
 		Comment:       event.Comment,
 		AttachmentKey: eventAttachment.AttachmentKey,

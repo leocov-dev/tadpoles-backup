@@ -9,7 +9,7 @@ import (
 var Name = "tadpoles-backup"
 var DotName = fmt.Sprintf(".%s", Name)
 var Version string
-var EventsQueryPageSize = 100
+var EventsQueryPageSize = 300
 var TempFilePattern = fmt.Sprintf("%s-*", Name)
 var MaxConcurrency int64 = 128
 var userHomeDir, _ = os.UserHomeDir()

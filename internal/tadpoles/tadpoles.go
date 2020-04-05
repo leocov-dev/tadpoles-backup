@@ -4,8 +4,9 @@ import (
 	"context"
 	"github.com/gosuri/uiprogress"
 	"github.com/leocov-dev/tadpoles-backup/internal/api"
+	"github.com/leocov-dev/tadpoles-backup/internal/db"
 	"github.com/leocov-dev/tadpoles-backup/internal/schemas"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,15 +22,35 @@ func GetAccountInfo() (info *schemas.Info, err error) {
 	return schemas.NewInfoFromParams(parameters), nil
 }
 
-func GetEventAttachmentData(firstEventTime time.Time, lastEventTime time.Time) (attachments []*schemas.FileAttachment, err error) {
-	events, err := api.GetEvents(firstEventTime, lastEventTime)
+func GetEventFileAttachmentData(firstEventTime time.Time, lastEventTime time.Time) (fileAttachments []*schemas.FileAttachment, err error) {
+	events, err := db.RetrieveEvents()
 	if err != nil {
 		return nil, err
 	}
 
-	attachments = eventsToAttachments(events)
+	lastCachedTime, err := db.GetMaxStoredCacheTimestamp()
+	if err != nil {
+		return nil, err
+	}
 
-	return attachments, nil
+	if lastCachedTime.After(firstEventTime) {
+		firstEventTime = lastCachedTime.Add(1 * time.Second)
+	}
+
+	newEvents, err := api.GetEvents(firstEventTime, lastEventTime)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.StoreEvents(newEvents)
+	if err != nil {
+		return nil, err
+	}
+
+	events = append(events, newEvents...)
+	fileAttachments = eventsToFileAttachments(events)
+
+	return fileAttachments, nil
 }
 
 func DownloadFileAttachments(newAttachments []*schemas.FileAttachment, backupRoot string, ctx context.Context, concurrencyLimit int, progressBar *uiprogress.Bar) ([]string, error) {
@@ -94,7 +115,7 @@ func PruneAlreadyDownloaded(attachments []*schemas.FileAttachment, backupTarget 
 
 			file := filepath.Base(path_)
 			minusExtension := strings.TrimSuffix(file, filepath.Ext(file))
-			logrus.Debugf("minusExtension: %s\n", minusExtension)
+			log.Debugf("minusExtension: %s\n", minusExtension)
 
 			if _, ok := attachmentNames[minusExtension]; ok {
 				delete(attachmentNames, minusExtension)
@@ -110,12 +131,12 @@ func PruneAlreadyDownloaded(attachments []*schemas.FileAttachment, backupTarget 
 	return newAttachments, err
 }
 
-func eventsToAttachments(events []*api.Event) (attachments []*schemas.FileAttachment) {
+func eventsToFileAttachments(events []*api.Event) (attachments []*schemas.FileAttachment) {
 	for _, event := range events {
 		for _, eventAttachment := range event.Attachments {
 			// skip pdf files
 			if eventAttachment.MimeType == "application/pdf" {
-				logrus.Debugf("skipping pdf: %s@%s \n", event.ChildName, event.EventTime)
+				log.Debugf("skipping pdf: %s@%s \n", event.ChildName, event.EventTime)
 				continue
 			}
 			att := schemas.NewFileAttachment(event, eventAttachment)
