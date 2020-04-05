@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"database/sql/driver"
 	"math"
 	"strconv"
 	"time"
@@ -38,10 +39,24 @@ func (jt JsonTime) Unix() int64 {
 
 // JsonTime returns the JSON time as a time.JsonTime instance in UTC
 func (jt JsonTime) Time() time.Time {
-	return time.Time(jt).UTC()
+	return (time.Time)(jt).UTC()
+}
+
+// Value - Implementation of valuer for database/sql
+func (jt JsonTime) Value() (driver.Value, error) {
+	return string(jt.MarshalText()), nil
+}
+
+// Scan - Implementation of scanner for database/sql
+func (jt *JsonTime) Scan(v interface{}) error {
+	if v == nil {
+		return nil
+	}
+	return (*time.Time)(jt).UnmarshalText([]byte(v.(string)))
 }
 
 // String returns t as a formatted string
-func (jt JsonTime) String() string {
-	return jt.Time().String()
+func (jt JsonTime) MarshalText() []byte {
+	val, _ := jt.Time().MarshalText()
+	return val
 }

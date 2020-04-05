@@ -68,4 +68,4 @@ This file is located in `$HOME/.tadpoles-backup/` and can be deleted whenever yo
 
 ## Inspired By
 * [twneale/tadpoles](https://github.com/twneale/tadpoles)
-* [huckMac/tadpoles-scraper](https://github.com/ChuckMac/tadpoles-scraper)
+* [ChuckMac/tadpoles-scraper](https://github.com/ChuckMac/tadpoles-scraper)

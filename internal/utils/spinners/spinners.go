@@ -5,6 +5,7 @@ import (
 	"github.com/briandowns/spinner"
 	"github.com/leocov-dev/tadpoles-backup/config"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
+	log "github.com/sirupsen/logrus"
 	"sync"
 	"time"
 )
@@ -32,6 +33,10 @@ func StartNewSpinner(title string) *spinner.Spinner {
 	}
 	s := spinner.New(config.SpinnerCharSet, config.SpinnerSpeed*time.Millisecond, options...)
 	SpinnerManager.AppendSpinner(s)
+
+	if log.GetLevel() == log.DebugLevel {
+		return s
+	}
 
 	s.Prefix = fmt.Sprintf("%s ", title)
 	err := s.Color("cyan", "bold") // NOTE implicit s.Start()
