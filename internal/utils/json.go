@@ -10,6 +10,10 @@ import (
 // JsonTime defines a timestamp encoded as epoch seconds in JSON
 type JsonTime time.Time
 
+func (jt JsonTime) String() string {
+	return jt.Time().String()
+}
+
 // MarshalJSON is used to convert the timestamp to JSON
 func (jt JsonTime) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(time.Time(jt).Unix(), 10)), nil
