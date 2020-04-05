@@ -26,6 +26,7 @@ branches:
   only:
     - master
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+    - /^dev-/
 
 script:
   - env RELEASE_TAG=$TRAVIS_TAG make ci
@@ -44,7 +45,7 @@ deploy:
     on:
       branch: master
       tags: true
-    overwrite: false
+    overwrite: true
 
   - <<: *github_deploy
     on:
