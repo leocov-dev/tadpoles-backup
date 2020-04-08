@@ -52,6 +52,6 @@ deploy:
 
   - <<: *github_deploy
     on:
-      branch: /^dev-/
+      branch: /^dev-.*/
     overwrite: true
     prerelease: true
