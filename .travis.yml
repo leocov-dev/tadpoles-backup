@@ -29,7 +29,7 @@ branches:
     - /^dev-/
 
 before_script:
-  - scripts/travis_prerelease.sh
+  - source scripts/travis_prerelease.sh
 
 script:
   - env RELEASE_TAG=$TRAVIS_TAG make ci
