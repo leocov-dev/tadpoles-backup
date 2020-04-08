@@ -28,6 +28,9 @@ branches:
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
     - /^dev-/
 
+before_script:
+  - scripts/travis_prerelease.sh
+
 script:
   - env RELEASE_TAG=$TRAVIS_TAG make ci
 
