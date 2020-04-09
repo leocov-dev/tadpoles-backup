@@ -7,8 +7,8 @@ go:
 
 cache:
   directories:
-    - "$HOME/.cache/go-build"
-    - "$HOME/gopath/pkg/mod"
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod
 
 git:
   quiet: true
@@ -26,8 +26,8 @@ env:
 branches:
   only:
     - master
-    - "/^v\d+\.\d+(\.\d+)?(-\S*)?$/"
-    - "/^dev-/"
+    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+    - /^dev-/
 
 before_script:
   - source scripts/travis_prerelease.sh
@@ -53,6 +53,6 @@ deploy:
 
   - <<: *github_deploy
     on:
-      branch: "/^dev-.*/"
+      branch: /^dev-.*/
     overwrite: true
     prerelease: true
