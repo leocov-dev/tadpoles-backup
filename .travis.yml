@@ -7,8 +7,8 @@ go:
 
 cache:
   directories:
-    - $HOME/.cache/go-build
-    - $HOME/gopath/pkg/mod
+    - "$HOME/.cache/go-build"
+    - "$HOME/gopath/pkg/mod"
 
 git:
   quiet: true
@@ -21,12 +21,13 @@ notifications:
 env:
   global:
     - GO111MODULE=on
+    - secure: "GcLqd9MXONRUVidpM9Uto3rFPLlKsnDau6XpS+KwH3+8kQLuiCjMhSjArdFW+n/P+MZcVXsaZQaU8liw6V7MB1k4s5btl44h1cnmeQ5IVKu3kAX9cAG6TW1EtD7/bnX3jvPu5NBjqmhvs4NGQKrhuBLxEeiBxQd04rDQ1gFj3EkTvrfbBCx/ENwC2HiV2DHZ/aRhGJEPmNUPIF6452S81Vv05ECFZO34UnW/pajVnX6M3eAhrhR0nXN3LAKXLDcCs3V1HXguRYlZofPNPUvfGfR5rPzYVdU/BbiAalkCcEW6IA0jT4D88YtgpWMedTCYyxw8tApUPdGM1PKH0MBeHVZwv2FOz3DOruVnyHOwMctegJUNHYdk6XvUpDsbwP1KtLVzpYRtqxYz2g6zP7DvjZZhVK9e+oddmodQWxNWWmFgmlcuuODGP2WS5Mbyih3hwPDomUW9nR8VTpcNK76Q+Sqom66kCbyuB/A+tI7z2IoYzEye2vBXYcvCHA7okeUf8CwwTKq2IddpLG41GRyfNNcKuNKTm1nEwTSOCi4PZB9ZKSF+A/c13gjDV3oJmUFm8EBsS1pYJiYQpWmf9Q1SUHt3/0fjeNp2+DESpo0+7qCdP9y7o8rmVThcPEXpzMb9LEvtId4d8qtawfS/IIMjby5UJ0vlIikcGuoU/xUBp1w="
 
 branches:
   only:
     - master
-    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
-    - /^dev-/
+    - "/^v\d+\.\d+(\.\d+)?(-\S*)?$/"
+    - "/^dev-/"
 
 before_script:
   - source scripts/travis_prerelease.sh
@@ -52,6 +53,6 @@ deploy:
 
   - <<: *github_deploy
     on:
-      branch: /^dev-.*/
+      branch: "/^dev-.*/"
     overwrite: true
     prerelease: true
