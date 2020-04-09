@@ -2,10 +2,12 @@ package commands
 
 import (
 	"fmt"
+	"github.com/leocov-dev/tadpoles-backup/internal/cache"
 	"github.com/leocov-dev/tadpoles-backup/internal/tadpoles"
 	"github.com/leocov-dev/tadpoles-backup/internal/user_input"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils/spinners"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"time"
 )
@@ -60,5 +62,11 @@ func statRun(cmd *cobra.Command, _ []string) {
 	typeMap := tadpoles.GroupAttachmentsByType(attachments)
 	for k, v := range typeMap {
 		utils.WriteSub(k, fmt.Sprint(len(v)))
+	}
+
+	//TODO
+	_, err = cache.Read()
+	if err != nil {
+		log.Error(err)
 	}
 }

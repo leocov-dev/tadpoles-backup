@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/gosuri/uiprogress"
 	"github.com/leocov-dev/tadpoles-backup/internal/api"
-	"github.com/leocov-dev/tadpoles-backup/internal/db"
+	"github.com/leocov-dev/tadpoles-backup/internal/cache"
 	"github.com/leocov-dev/tadpoles-backup/internal/schemas"
 	log "github.com/sirupsen/logrus"
 	"os"
@@ -23,26 +23,28 @@ func GetAccountInfo() (info *schemas.Info, err error) {
 }
 
 func GetEventFileAttachmentData(firstEventTime time.Time, lastEventTime time.Time) (fileAttachments []*schemas.FileAttachment, err error) {
-	events, err := db.RetrieveEvents()
-	if err != nil {
-		return nil, err
-	}
-
-	lastCachedTime, err := db.GetMaxStoredCacheTimestamp()
-	if err != nil {
-		return nil, err
-	}
-
-	if lastCachedTime.After(firstEventTime) {
-		firstEventTime = lastCachedTime.Add(1 * time.Second)
-	}
+	var events []*api.Event
+	// TODO
+	//events, err := cache.RetrieveEvents()
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//lastCachedTime, err := cache.GetMaxStoredCacheTimestamp()
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//if lastCachedTime.After(firstEventTime) {
+	//	firstEventTime = lastCachedTime.Add(1 * time.Second)
+	//}
 
 	newEvents, err := api.GetEvents(firstEventTime, lastEventTime)
 	if err != nil {
 		return nil, err
 	}
 
-	err = db.StoreEvents(newEvents)
+	err = cache.StoreEvents(newEvents)
 	if err != nil {
 		return nil, err
 	}

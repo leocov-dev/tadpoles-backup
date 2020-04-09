@@ -34,7 +34,7 @@ if ! command -v gox >/dev/null; then
 fi
 
 # Instruct gox to build statically linked binaries
-export CGO_ENABLED=1
+export CGO_ENABLED=0
 
 LD_FLAGS="-s -w -X 'github.com/leocov-dev/tadpoles-backup/config.Version=${RELEASE_TAG}'"
 

@@ -27,6 +27,7 @@ type Event struct {
 	CreateTime      utils.JsonTime `json:"create_time"`
 	TimeZone        string         `json:"tz"`
 	EventKey        string         `json:"key"`
+	EventType       string         `json:"type"`
 	LocationDisplay string         `json:"location_display"`
 }
 

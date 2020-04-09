@@ -11,11 +11,11 @@ require (
 	github.com/gosuri/uiprogress v0.0.1
 	github.com/h2non/filetype v1.0.10
 	github.com/mattn/go-isatty v0.0.12 // indirect
-	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.3.0 // indirect
 	github.com/weppos/publicsuffix-go v0.13.0
+	go.etcd.io/bbolt v1.3.4
 	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
 )
