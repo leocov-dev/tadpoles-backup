@@ -28,11 +28,13 @@ func GetEventFileAttachmentData(firstEventTime time.Time, lastEventTime time.Tim
 		return nil, err
 	}
 
-	lastCachedTime := events[len(events)-1].EventTime.Time()
-	log.Debugf("lastCachedTime: %s\n", lastCachedTime)
+	if len(events) > 0 {
+		lastCachedTime := events[len(events)-1].EventTime.Time()
+		log.Debugf("lastCachedTime: %s\n", lastCachedTime)
 
-	if lastCachedTime.After(firstEventTime) {
-		firstEventTime = lastCachedTime.Add(1 * time.Second)
+		if lastCachedTime.After(firstEventTime) {
+			firstEventTime = lastCachedTime.Add(1 * time.Second)
+		}
 	}
 
 	newEvents, err := api.GetEvents(firstEventTime, lastEventTime)
