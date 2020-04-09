@@ -37,3 +37,17 @@ func ClearCookiesFile() error {
 func ClearCacheFile() error {
 	return os.Remove(TadpolesCacheFile)
 }
+
+func ClearAll() error {
+	all := []string{
+		TadpolesCookieFile,
+		TadpolesCacheFile,
+	}
+	for _, item := range all {
+		err := os.Remove(item)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}

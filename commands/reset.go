@@ -59,11 +59,7 @@ func resetRun(cmd *cobra.Command, args []string) {
 	case "cache":
 		err = config.ClearCacheFile()
 	default:
-		err = config.ClearCacheFile()
-		if err != nil {
-			break
-		}
-		err = config.ClearCookiesFile()
+		err = config.ClearAll()
 	}
 
 	if err != nil {
