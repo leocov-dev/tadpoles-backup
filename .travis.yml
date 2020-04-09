@@ -56,3 +56,5 @@ deploy:
       branch: /^dev-.*/
     overwrite: true
     prerelease: true
+    name: "Prerelease $TRAVIS_TAG"
+    body: '$(date "+%Y/%m/%d %H:%M:%S") This is a development preview, use with discretion.'
