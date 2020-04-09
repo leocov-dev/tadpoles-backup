@@ -23,8 +23,7 @@ if [[ -n "${TRAVIS_BRANCH}" &&
 
     git config --global user.name "Travis CI"
     git config --global user.email "builds@travis-ci.com"
-    git tag -fa "$TRAVIS_TAG" -m "[skip ci]" -m "Prerelease ${TRAVIS_TAG}" -m "This is a development preview, use with discretion."
-    git push -qf "https://${TAG_TOKEN}@github.com/${TRAVIS_REPO_SLUG}" --tags
+    git tag -fa "$TRAVIS_TAG" -m "Prerelease ${TRAVIS_TAG}" -m "$(date "+%Y/%m/%d %H:%M:%S")" -m "This is a development preview, use with discretion."
 
     echo
 fi
