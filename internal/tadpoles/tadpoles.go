@@ -23,21 +23,17 @@ func GetAccountInfo() (info *schemas.Info, err error) {
 }
 
 func GetEventFileAttachmentData(firstEventTime time.Time, lastEventTime time.Time) (fileAttachments []*schemas.FileAttachment, err error) {
-	var events []*api.Event
-	// TODO
-	//events, err := cache.RetrieveEvents()
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//lastCachedTime, err := cache.GetMaxStoredCacheTimestamp()
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//if lastCachedTime.After(firstEventTime) {
-	//	firstEventTime = lastCachedTime.Add(1 * time.Second)
-	//}
+	events, err := cache.ReadCache()
+	if err != nil {
+		return nil, err
+	}
+
+	lastCachedTime := events[len(events)-1].EventTime.Time()
+	log.Debugf("lastCachedTime: %s\n", lastCachedTime)
+
+	if lastCachedTime.After(firstEventTime) {
+		firstEventTime = lastCachedTime.Add(1 * time.Second)
+	}
 
 	newEvents, err := api.GetEvents(firstEventTime, lastEventTime)
 	if err != nil {
@@ -117,7 +113,6 @@ func PruneAlreadyDownloaded(attachments []*schemas.FileAttachment, backupTarget 
 
 			file := filepath.Base(path_)
 			minusExtension := strings.TrimSuffix(file, filepath.Ext(file))
-			log.Debugf("minusExtension: %s\n", minusExtension)
 
 			if _, ok := attachmentNames[minusExtension]; ok {
 				delete(attachmentNames, minusExtension)
@@ -138,7 +133,7 @@ func eventsToFileAttachments(events []*api.Event) (attachments []*schemas.FileAt
 		for _, eventAttachment := range event.Attachments {
 			// skip pdf files
 			if eventAttachment.MimeType == "application/pdf" {
-				log.Debugf("skipping pdf: %s@%s \n", event.ChildName, event.EventTime)
+				log.Debugf("skipping pdf: %s @ %s \n", event.ChildName, event.EventTime)
 				continue
 			}
 			att := schemas.NewFileAttachment(event, eventAttachment)

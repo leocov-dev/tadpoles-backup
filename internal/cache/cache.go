@@ -5,8 +5,8 @@ import (
 	"github.com/leocov-dev/tadpoles-backup/config"
 	"github.com/leocov-dev/tadpoles-backup/internal/api"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
-	log "github.com/sirupsen/logrus"
 	bolt "go.etcd.io/bbolt"
+	"sort"
 )
 
 var (
@@ -31,7 +31,14 @@ func InitializeCache() error {
 	})
 }
 
-func Read() (*api.Event, error) {
+type ByEventTime []*api.Event
+
+func (a ByEventTime) Len() int           { return len(a) }
+func (a ByEventTime) Less(i, j int) bool { return a[i].EventTime.Time().Before(a[j].EventTime.Time()) }
+func (a ByEventTime) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+
+// return a list sorted by event time,
+func ReadCache() (events []*api.Event, err error) {
 	db, err := bolt.Open(config.TadpolesCacheFile, 0600,
 		&bolt.Options{
 			ReadOnly: true,
@@ -47,20 +54,14 @@ func Read() (*api.Event, error) {
 
 		c := b.Cursor()
 
-		k, v := c.First()
-		log.Debugf("key=%s, value=%s\n", k, v)
-		k, v = c.Next()
-		log.Debugf("key=%s, value=%s\n", k, v)
-		k, v = c.Next()
-		log.Debugf("key=%s, value=%s\n", k, v)
-		k, v = c.Next()
-		log.Debugf("key=%s, value=%s\n", k, v)
-		k, v = c.Next()
-		log.Debugf("key=%s, value=%s\n", k, v)
-		k, v = c.Next()
-		log.Debugf("key=%s, value=%s\n", k, v)
-		k, v = c.Next()
-		log.Debugf("key=%s, value=%s\n", k, v)
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			var event api.Event
+			err := json.Unmarshal(v, &event)
+			if err != nil {
+				return err
+			}
+			events = append(events, &event)
+		}
 
 		return nil
 	})
@@ -68,7 +69,9 @@ func Read() (*api.Event, error) {
 		return nil, err
 	}
 
-	return nil, nil
+	sort.Sort(ByEventTime(events))
+
+	return events, nil
 }
 
 func StoreEvents(events []*api.Event) error {
