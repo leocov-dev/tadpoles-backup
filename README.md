@@ -9,6 +9,8 @@ Current save back-ends:
 * Local file system
 
 ## Install
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/leocov-dev/tadpoles-backup)
+
 Get [latest](https://github.com/leocov-dev/tadpoles-backup/releases/latest) prebuilt executable from the [releases](https://github.com/leocov-dev/tadpoles-backup/releases) page.
 
 Or use one of these commands:
