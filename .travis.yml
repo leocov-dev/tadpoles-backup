@@ -26,10 +26,6 @@ branches:
   only:
     - master
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
-    - /^dev-/
-
-before_script:
-  - source scripts/travis_prerelease.sh
 
 script:
   - env RELEASE_TAG=$TRAVIS_TAG make ci
@@ -49,11 +45,3 @@ deploy:
       branch: master
       tags: true
     overwrite: true
-
-  - <<: *github_deploy
-    on:
-      branch: /^dev-.*/
-    overwrite: true
-    prerelease: true
-    name: "Prerelease $TRAVIS_TAG"
-    body: '$(date "+%Y/%m/%d %H:%M:%S") This is a development preview, use with discretion.'
