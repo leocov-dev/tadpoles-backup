@@ -11,6 +11,3 @@
 1. Open a new GitHub pull request.
 
 2. Ensure the PR description clearly describes the problem and solution. Include the related issue number if applicable.
-
-
-Thanks you!
