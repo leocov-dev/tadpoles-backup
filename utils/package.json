@@ -11,7 +11,6 @@
   "license": "MIT",
   "dependencies": {
     "bookmarklet": "^1.0.4",
-    "fetch": "^1.1.0",
     "fs-extra": "^9.0.0",
     "mkdir-recursive": "^0.4.0",
     "mustache": "^4.0.1"
