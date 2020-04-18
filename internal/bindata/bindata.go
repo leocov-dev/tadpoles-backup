@@ -92,7 +92,7 @@ func utilsDistResetTadpolesPasswordHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "utils/dist/reset-tadpoles-password.html", size: 3696, mode: os.FileMode(420), modTime: time.Unix(1587242385, 0)}
+	info := bindataFileInfo{name: "utils/dist/reset-tadpoles-password.html", size: 3696, mode: os.FileMode(420), modTime: time.Unix(1587248355, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
