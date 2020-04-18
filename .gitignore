@@ -7,8 +7,8 @@
 
 # tests
 coverage.txt
-node.log
 
 # node
+node.log
 /utils/node_modules
 !/utis/dist/*
