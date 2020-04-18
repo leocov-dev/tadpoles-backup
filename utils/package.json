@@ -1,0 +1,19 @@
+{
+  "name": "tadpoles-backup-utils",
+  "version": "0.0.1",
+  "description": "misc utils for tadpoles-backup",
+  "repository": "http://github.com/leocov-dev/tadpoles-backup",
+  "scripts": {
+    "build": "node build.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Leo Covarrubias",
+  "license": "MIT",
+  "dependencies": {
+    "bookmarklet": "^1.0.4",
+    "fetch": "^1.1.0",
+    "fs-extra": "^9.0.0",
+    "mkdir-recursive": "^0.4.0",
+    "mustache": "^4.0.1"
+  }
+}

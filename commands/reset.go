@@ -2,67 +2,31 @@ package commands
 
 import (
 	"fmt"
-	"github.com/leocov-dev/tadpoles-backup/config"
+	"github.com/jinzhu/copier"
 	"github.com/leocov-dev/tadpoles-backup/internal/utils"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 var (
-	resetOptions    = []string{"cookie", "cache"}
-	resetOptsString = strings.Join(resetOptions, " | ")
-
-	resetCmd = &cobra.Command{
-		Use:   fmt.Sprintf("reset [%s]", resetOptsString),
-		Short: "Reset all or indicated local data",
-		Args:  resetArgs(),
-		Run:   resetRun,
-	}
+	resetCmd           = &cobra.Command{}
+	resetDeprecatedMsg = "Use 'clear' command instead - 'reset' will be removed in next major release."
 )
 
 func init() {
+	err := copier.Copy(&resetCmd, &clearCmd)
+	if err != nil {
+		log.Fatalf(`Unexpected error, report to developer.\n%s\n`, err)
+	}
+
+	resetCmd.Run = resetRun
+	resetCmd.Use = fmt.Sprintf("reset [%s]", resetOptsString)
+	resetCmd.Hidden = true
+	resetCmd.Short = fmt.Sprintf("DEPRECATED: %s\n\n%s\n", resetDeprecatedMsg, clearCmd.Short)
 	rootCmd.AddCommand(resetCmd)
 }
 
-func resetArgs() cobra.PositionalArgs {
-	return func(cmd *cobra.Command, args []string) error {
-		if len(args) >= 1 {
-			choice := args[0]
-
-			found := false
-			for _, item := range resetOptions {
-				if item == choice {
-					found = true
-				}
-			}
-
-			if !found {
-				return fmt.Errorf("specify one of [%s] or leave blank to reset all", resetOptsString)
-			}
-
-		}
-		return nil
-	}
-}
-
 func resetRun(cmd *cobra.Command, args []string) {
-	var err error
-	var choice string
-
-	if len(args) > 0 {
-		choice = args[0]
-	}
-
-	switch choice {
-	case "cookie":
-		err = config.ClearCookiesFile()
-	case "cache":
-		err = config.ClearCacheFile()
-	default:
-		err = config.ClearAll()
-	}
-
-	if err != nil {
-		utils.CmdFailed(cmd, err)
-	}
+	utils.WriteInfo("DEPRECATED", resetDeprecatedMsg)
+	clearRun(cmd, args)
 }

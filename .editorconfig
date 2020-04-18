@@ -13,3 +13,9 @@ indent_style = tab
 [*.sh]
 indent_size = 4
 indent_style = space
+
+[*.js]
+indent_size = 4
+indent_style = space
+ij_javascript_force_semicolon_style = true
+ij_javascript_use_semicolon_after_statement = true

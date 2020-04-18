@@ -1,7 +1,14 @@
-bin/
-dist/
+# builds
+/bin/
+/dist/
 
 # PyCharm
 .idea/
 
+# tests
 coverage.txt
+node.log
+
+# node
+/utils/node_modules
+!/utis/dist/*

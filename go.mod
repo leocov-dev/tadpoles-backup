@@ -10,7 +10,9 @@ require (
 	github.com/gosuri/uilive v0.0.4 // indirect
 	github.com/gosuri/uiprogress v0.0.1
 	github.com/h2non/filetype v1.0.10
+	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
 	github.com/mattn/go-isatty v0.0.12 // indirect
+	github.com/pkg/browser v0.0.0-20180916011732-0a3d74bf9ce4
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.3.0 // indirect

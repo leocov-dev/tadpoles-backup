@@ -3,16 +3,20 @@
 set -e
 
 # This script builds the application from source for multiple platforms.
-echo "==> Build for release..."
 
 # Get the parent directory of where this script is.
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do SOURCE="$(readlink "$SOURCE")"; done
 DIR="$(cd -P "$(dirname "$SOURCE")/.." && pwd)"
-RELEASE_TAG="${RELEASE_TAG:-v0.0.0-dev}"
-
-# Change into that directory
 cd "$DIR" || exit
+
+# Starting...
+echo
+if [[ -z $RELEASE_TAG ]]; then
+    echo "==> Build for UNTAGGED release"
+else
+    echo "==> Build for release ${RELEASE_TAG}"
+fi
 
 # Determine the arch/os combos we're building for
 XC_ARCH=${XC_ARCH:-"amd64"}

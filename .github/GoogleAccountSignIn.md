@@ -8,30 +8,43 @@ Do not use or alter your Google specific account information while using this to
 
 ---
 
-Follow these steps if you do not already have a _tadpoles.com_ specific password, that is a password specifically for the _tadpoles.com_ website!
+Follow these steps to reset or create a tadpoles.com specific password. If you would rather not use the helper utility you can follow the manual steps [here](./GoogleAccountSignInManual.md).
 
-When on the _tadpoles.com_ sign in page:
+1. Execute the command line tool with the `reset-password` command
 
-![Account](img/login-1.png)
+    `$ tadpoles-backup reset-password`
 
-If you normally log in with the **Google Sign in** button you need to follow these steps to add a _tadpoles.com_ specific password to your tadpoles account.
+    `$ tadpoles-backup.exe reset-password`
 
-1. Go to the [login](https://www.tadpoles.com/home_or_work) page, and choose **families**.
+2. It will ask you to press **ENTER** to open up your default web browser. This has been tested with the latest versions of Google Chrome and Mozilla Firefox, but is still considered an experimental feature.
 
-2. Click the **tadpoles** account button.
+3. You should see a page like this with instructions.
 
-3. Click the **Forgot your password?** link.
+    ![reset-util-1](img/reset-util/reset-util-1.png)
 
-![Sign-in](img/login-2.png)
+4. Drag the `reset-tadpoles-password` button to your bookmarks bar.
 
-Follow the steps to reset the account password.
-After entering a gmail account to the reset password form you will see "Please visit your google account page to change your password" and the submit button is hidden. Using inspect element go to button class pull-right btn btn-primary and change "display none" to "display visible". You can now click submit and follow directions in email to reset password.
-This allows you to set a password on an account using a gmail address that did not have a password set already. 
-This is for your _tadpoles.com_ password only!
-Do not make any changes to your gmail account.
+    ![reset-util-2](img/reset-util/reset-util-2.png)
 
-![Reset](img/reset-1.png)
+5. Click the `reset-tadpoles-password` bookmark from the bar. It will display a pop-up saying the page will be redirected to tadpoles.com, click OK.
 
-Use this _tadpoles.com_ password for the `tadpoles-backup` tool when prompted.
+    ![reset-util-3](img/reset-util/reset-util-3.png)
 
-See **[Usage](../README.md#usage)** section for additional details.
+6. You should now be on this page: `tadpoles.com/home_or_work`. Click the `reset-tadpoles-password` bookmark from the bar. It will automatically navigate you to the password reset form.
+
+    ![reset-util-4](img/reset-util/reset-util-4.png)
+
+7. Enter your email, and if the submit button disappears click on the `reset-tadpoles-password` bookmark from the bar to show it again.
+
+    ![reset-util-5](img/reset-util/reset-util-5.png)
+
+8. Click the submit button and check your email inbox for the reset link email.
+
+    ![reset-util-6](img/reset-util/reset-util-6.png)
+
+9. Delete the bookmarklet `reset-tadpoles-password` from your bookmarks bar.
+
+10. You can now use the password you create via the reset email to log into the `tadpoles-backup` cli tool.
+
+   See **[Usage](../README.md#usage)** section for additional details.
+

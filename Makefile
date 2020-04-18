@@ -8,6 +8,15 @@ ci:
 test:
 	@sh -c "$(CURDIR)/scripts/test.sh"
 
+node-install:
+	@echo "\n==> NPM Install"
+	@cd utils && npm install --no-progress > ../node.log
+
+node-build:
+	@echo "\n==> Build html templates"
+	@cd utils && npm run build >> ../node.log
+	@go generate ./main.go
+
 # bin generates release zip packages in ./dist
 release: tidy
 	@sh -c "$(CURDIR)/scripts/release.sh"
