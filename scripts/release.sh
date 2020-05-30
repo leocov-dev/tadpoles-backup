@@ -19,9 +19,9 @@ else
 fi
 
 # Determine the arch/os combos we're building for
-XC_ARCH=${XC_ARCH:-"amd64"}
-XC_OS=${XC_OS:-linux darwin windows}
-XC_EXCLUDE_OSARCH="!darwin/arm !darwin/386"
+XC_ARCH=${XC_ARCH:-"arm arm64 amd64"}
+XC_OS=${XC_OS:-"linux darwin windows"}
+XC_EXCLUDE_OSARCH="!darwin/arm !darwin/arm64 !windows/arm !windows/arm64"
 
 # Delete the old dir
 echo
