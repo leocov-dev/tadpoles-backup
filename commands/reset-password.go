@@ -26,7 +26,7 @@ func resetPasswordRun(cmd *cobra.Command, args []string) {
 	_, err := fmt.Fprintf(color.Output,
 		"%s\n%s\n%s\n%s",
 		color.HiMagentaString("** Experimental **"),
-		"For details visit: https://github.com/leocov-dev/tadpoles-backup/blob/master/.github/GoogleAccountSignIn.md",
+		"For details visit: https://github.com/leocov-dev/tadpoles-backup/blob/main/.github/GoogleAccountSignIn.md",
 		"Do you want to open a web-browser begin the password reset form?",
 		color.HiMagentaString("Press ENTER to continue, Ctrl+C to cancel..."),
 	)
