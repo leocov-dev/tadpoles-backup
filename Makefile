@@ -2,9 +2,6 @@ GOFMT_FILES?=$$(find . -type f -name '*.go')
 
 default: dev
 
-ci:
-	@sh -c "$(CURDIR)/scripts/ci.sh"
-
 test:
 	@sh -c "$(CURDIR)/scripts/test.sh"
 

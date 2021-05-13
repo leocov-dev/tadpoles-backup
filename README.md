@@ -1,4 +1,4 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT) ![GitHub go.mod Go version (branch)](https://img.shields.io/github/go-mod/go-version/leocov-dev/tadpoles-backup/main) [![Build Status](https://travis-ci.com/leocov-dev/tadpoles-backup.svg?branch=main)](https://travis-ci.org/leocov-dev/tadpoles-backup)
+[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT) ![GitHub go.mod Go version (branch)](https://img.shields.io/github/go-mod/go-version/leocov-dev/tadpoles-backup/main) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/leocov-dev/tadpoles-backup/ci)
 
 # Tadpoles Image Backup
 
