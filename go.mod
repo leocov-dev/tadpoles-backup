@@ -32,5 +32,5 @@ require (
 	github.com/stretchr/testify v1.3.0 // indirect
 	golang.org/x/sys v0.0.0-20221006211917-84dc82d7e875 // indirect
 	golang.org/x/text v0.3.0 // indirect
-	gopkg.in/yaml.v2 v2.2.7 // indirect
+	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
