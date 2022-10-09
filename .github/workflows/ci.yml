@@ -55,6 +55,8 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           go-version: 1.19
+      - name: Deps
+        run: go install github.com/mitchellh/gox@latest
       - name: Build
         run: env RELEASE_TAG=${{ steps.branch_info.outputs.TAG }} make release
       - name: Build Files
