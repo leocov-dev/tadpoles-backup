@@ -10,9 +10,9 @@
   "author": "Leo Covarrubias",
   "license": "MIT",
   "dependencies": {
-    "bookmarklet": "^1.0.4",
-    "fs-extra": "^9.0.1",
+    "bookmarklet": "^3.0.0",
+    "fs-extra": "^10.1.0",
     "mkdir-recursive": "^0.4.0",
-    "mustache": "^4.0.1"
+    "mustache": "^4.2.0"
   }
 }

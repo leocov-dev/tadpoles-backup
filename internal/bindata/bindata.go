@@ -87,13 +87,13 @@ func utilsDistResetTadpolesPasswordHtmlBytes() ([]byte, error) {
 }
 
 func utilsDistResetTadpolesPasswordHtml() (*asset, error) {
-	bytes, err := utilsDistResetTadpolesPasswordHtmlBytes()
+	htmlBytes, err := utilsDistResetTadpolesPasswordHtmlBytes()
 	if err != nil {
 		return nil, err
 	}
 
 	info := bindataFileInfo{name: "utils/dist/reset-tadpoles-password.html", size: 3696, mode: os.FileMode(420), modTime: time.Unix(1587248355, 0)}
-	a := &asset{bytes: bytes, info: info}
+	a := &asset{bytes: htmlBytes, info: info}
 	return a, nil
 }
 
@@ -156,11 +156,13 @@ var _bindata = map[string]func() (*asset, error){
 // directory embedded in the file by go-bindata.
 // For example if you run go-bindata on data/... and data contains the
 // following hierarchy:
-//     data/
-//       foo.txt
-//       img/
-//         a.png
-//         b.png
+//
+//	data/
+//	  foo.txt
+//	  img/
+//	    a.png
+//	    b.png
+//
 // then AssetDir("data") would return []string{"foo.txt", "img"}
 // AssetDir("data/img") would return []string{"a.png", "b.png"}
 // AssetDir("foo.txt") and AssetDir("notexist") would return an error
