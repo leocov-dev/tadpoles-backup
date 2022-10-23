@@ -23,12 +23,13 @@ XC_ARCH=${XC_ARCH:-"arm arm64 amd64"}
 XC_OS=${XC_OS:-"linux darwin windows"}
 XC_EXCLUDE_OSARCH="!darwin/arm !windows/arm"
 
-# Delete the old dir
-echo
-echo "==> Removing old directory..."
-rm -rf bin/*
-mkdir -p bin/
-rm -rf dist/*
+if [[ -d ./bin || -d ./dist ]]; then
+    echo
+    echo "==> Clearing Old Builds..."
+    rm -rf bin/*
+    rm -rf dist/*
+fi
+
 mkdir -p dist/
 
 if ! command -v gox >/dev/null; then
@@ -51,42 +52,67 @@ echo
 echo "==> Building..."
 echo "ldflags: ${LD_FLAGS}"
 
-BIN_NAME=${PWD##*/}
-BUILD_PREFIX="${BIN_NAME}-"
+BIN_NAME="tadpoles-backup"
+BUILD_PREFIX="${BIN_NAME}"
 
 gox \
     -os="${XC_OS}" \
     -arch="${XC_ARCH}" \
     -osarch="${XC_EXCLUDE_OSARCH}" \
     -ldflags "${LD_FLAGS}" \
-    -output "dist/${BUILD_PREFIX}{{.OS}}-{{.Arch}}" \
+    -output "dist/${BUILD_PREFIX}-{{.OS}}-{{.Arch}}" \
     .
 
 # Copy our OS/Arch to the bin/ directory
 # only when not running in CI
 DEV_PLATFORM="./dist/${BUILD_PREFIX}$(go env GOOS)-$(go env GOARCH)"
 if [[ -f "${DEV_PLATFORM}" && -z "${CI}" ]]; then
+    mkdir -p bin/
     echo
-    echo "==> Moving ${DEV_PLATFORM} to bin/"
+    echo "==> Copy ${DEV_PLATFORM} to bin/"
     cp "${DEV_PLATFORM}" "./bin/${BIN_NAME}"
 fi
 
 # Packaging operations
-# only if not a pull request
-if [[ -z "${CI}" || "${TRAVIS_PULL_REQUEST}" == "false" ]]; then
-    echo
-    echo "==> Packaging..."
-    echo
-    for file in ./dist/*; do
-        echo "--> ${file}"
+if [[ -n "${CI}" ]]; then
+  echo
+  echo "==> Packaging..."
+  echo
+  for file in ./dist/*; do
+    echo "--> ${file}"
 
-        echo "    calculate hash..."
-        sha256sum "./${file}" >"./${file}.sha256"
-    done
+    echo "    calculate hash..."
+    sha256sum "./${file}" >"./${file}.sha256"
 
-    # Done!
-    echo
-    echo "==> Results:"
-    echo
-    ls -hl dist/*
+    # IF there is a file extension, find and store it
+    if [[ ${file##*/} =~ \. ]]; then
+      ext="${file##*.}"
+      if [[ -n ${ext} ]]; then
+        ext=".${ext}"
+      fi
+    fi
+
+    build="./dist/${BUILD_PREFIX}${ext}"
+    sha="./dist/${BUILD_PREFIX}${ext}.sha256"
+
+    echo "build: ${build}"
+    echo "sha:   ${sha}"
+
+    mv -f "${file}" "${build}"
+    mv -f "${file}.sha256" "${sha}"
+
+    if [[ -n $ext ]]; then
+      zip -j "${file%.*}" "${build}" "${sha}"
+    else
+      zip -j "${file}" "${build}" "${sha}"
+    fi
+
+    rm -f "${build}" "${sha}"
+  done
+
+  # Done!
+  echo
+  echo "==> Results:"
+  echo
+  ls -hl dist/*
 fi
