@@ -1,4 +1,4 @@
-module github.com/leocov-dev/tadpoles-backup
+module tadpoles-backup
 
 go 1.19
 
@@ -10,6 +10,7 @@ require (
 	github.com/gosuri/uiprogress v0.0.1
 	github.com/h2non/filetype v1.0.10
 	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
+	github.com/leocov-dev/tadpoles-backup v1.0.9
 	github.com/pkg/browser v0.0.0-20180916011732-0a3d74bf9ce4
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
@@ -29,7 +30,6 @@ require (
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/spf13/pflag v1.0.3 // indirect
-	github.com/stretchr/testify v1.3.0 // indirect
 	golang.org/x/sys v0.0.0-20221006211917-84dc82d7e875 // indirect
 	golang.org/x/text v0.3.0 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect

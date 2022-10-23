@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/fatih/color"
-	"github.com/leocov-dev/tadpoles-backup/pkg/headings"
+	"tadpoles-backup/pkg/headings"
 )
 
 var (

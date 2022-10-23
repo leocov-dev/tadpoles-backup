@@ -2,12 +2,12 @@ package commands
 
 import (
 	"fmt"
-	"github.com/leocov-dev/tadpoles-backup/config"
-	"github.com/leocov-dev/tadpoles-backup/internal/cache"
-	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
+	"tadpoles-backup/config"
+	"tadpoles-backup/internal/cache"
+	"tadpoles-backup/internal/utils"
 )
 
 var (
@@ -15,7 +15,7 @@ var (
 		Use: config.Name,
 		Long: fmt.Sprintf("%s %s\nBackup photos of your child from www.tadpoles.com",
 			config.Name,
-			config.Version),
+			config.GetVersion()),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			setLoggingLevel()
 			err := cache.InitializeCache()

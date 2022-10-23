@@ -3,8 +3,8 @@ package schemas
 import (
 	"errors"
 	"fmt"
-	"github.com/leocov-dev/tadpoles-backup/config"
 	"strconv"
+	"tadpoles-backup/config"
 )
 
 // custom cobra flag for concurrency value validation

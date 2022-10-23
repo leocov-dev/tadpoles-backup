@@ -6,20 +6,31 @@ import (
 	"path/filepath"
 )
 
-var Name = "tadpoles-backup"
-var DotName = fmt.Sprintf(".%s", Name)
-var Version string
-var EventsQueryPageSize = 300
-var TempFilePattern = fmt.Sprintf("%s-*", Name)
-var MaxConcurrency int64 = 128
-var userHomeDir, _ = os.UserHomeDir()
-var TempDir = filepath.Join(os.TempDir(), DotName)
-var DataDir = filepath.Join(userHomeDir, DotName)
-var TadpolesCookieFile = filepath.Join(DataDir, fmt.Sprintf("%s-cookie", DotName))
-var TadpolesCacheFile = filepath.Join(DataDir, fmt.Sprintf("%s-cache", DotName))
+var (
+	exePath, _          = os.Executable()
+	Name                = filepath.Base(exePath)
+	DotName             = fmt.Sprintf(".%s", Name)
+	Version             string
+	EventsQueryPageSize       = 300
+	TempFilePattern           = fmt.Sprintf("%s-*", Name)
+	MaxConcurrency      int64 = 128
+	userHomeDir, _            = os.UserHomeDir()
+	TempDir                   = filepath.Join(os.TempDir(), DotName)
+	DataDir                   = filepath.Join(userHomeDir, DotName)
+	TadpolesCookieFile        = filepath.Join(DataDir, fmt.Sprintf("%s-cookie", DotName))
+	TadpolesCacheFile         = filepath.Join(DataDir, fmt.Sprintf("%s-cache", DotName))
 
-// Helpers
-var makeDirs = []string{TempDir, DataDir}
+	// Helpers
+	makeDirs = []string{TempDir, DataDir}
+)
+
+func GetVersion() string {
+	if Version != "" {
+		return Version
+	}
+
+	return "0.0.0-dev"
+}
 
 func init() {
 	for _, dir := range makeDirs {

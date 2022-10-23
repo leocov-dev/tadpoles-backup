@@ -1,9 +1,9 @@
 package api
 
 import (
-	"github.com/leocov-dev/tadpoles-backup/internal/client"
 	"net/http"
 	"net/url"
+	"tadpoles-backup/internal/client"
 )
 
 func GetAttachment(eventKey string, attachmentKey string) (resp *http.Response, err error) {

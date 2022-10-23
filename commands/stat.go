@@ -2,11 +2,11 @@ package commands
 
 import (
 	"fmt"
-	"github.com/leocov-dev/tadpoles-backup/internal/tadpoles"
-	"github.com/leocov-dev/tadpoles-backup/internal/user_input"
-	"github.com/leocov-dev/tadpoles-backup/internal/utils"
-	"github.com/leocov-dev/tadpoles-backup/internal/utils/spinners"
 	"github.com/spf13/cobra"
+	"tadpoles-backup/internal/tadpoles"
+	"tadpoles-backup/internal/user_input"
+	"tadpoles-backup/internal/utils"
+	"tadpoles-backup/internal/utils/spinners"
 	"time"
 )
 

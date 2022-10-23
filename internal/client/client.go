@@ -3,8 +3,6 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/leocov-dev/tadpoles-backup/config"
-	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/weppos/publicsuffix-go/publicsuffix"
 	"io/ioutil"
@@ -12,6 +10,8 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"os"
+	"tadpoles-backup/config"
+	"tadpoles-backup/internal/utils"
 )
 
 var (

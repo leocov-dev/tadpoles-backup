@@ -3,13 +3,13 @@ package tadpoles
 import (
 	"context"
 	"github.com/gosuri/uiprogress"
-	"github.com/leocov-dev/tadpoles-backup/internal/api"
-	"github.com/leocov-dev/tadpoles-backup/internal/cache"
-	"github.com/leocov-dev/tadpoles-backup/internal/schemas"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 	"strings"
+	"tadpoles-backup/internal/api"
+	"tadpoles-backup/internal/cache"
+	"tadpoles-backup/internal/schemas"
 	"time"
 )
 

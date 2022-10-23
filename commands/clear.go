@@ -2,10 +2,10 @@ package commands
 
 import (
 	"fmt"
-	"github.com/leocov-dev/tadpoles-backup/config"
-	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	"github.com/spf13/cobra"
 	"strings"
+	"tadpoles-backup/config"
+	"tadpoles-backup/internal/utils"
 )
 
 var (

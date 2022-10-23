@@ -9,27 +9,27 @@ Current save back-ends:
 * Local file system
 
 ## Install
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/leocov-dev/tadpoles-backup)](https://github.com/leocov-dev/tadpoles-backup/releases/latest)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/leocov-dev/tadpoles-backup)](https://tadpoles-backup/releases/latest)
 
-Get [latest](https://github.com/leocov-dev/tadpoles-backup/releases/latest) prebuilt executable from the [releases](https://github.com/leocov-dev/tadpoles-backup/releases) page.
+Get [latest](https://tadpoles-backup/releases/latest) prebuilt executable from the [releases](https://tadpoles-backup/releases) page.
 
 Or use one of these commands:
 #### Linux
 ```
-$ sudo wget https://github.com/leocov-dev/tadpoles-backup/releases/latest/download/tadpoles-backup-linux-amd64 -O /usr/local/bin/tadpoles-backup
+$ sudo wget https://tadpoles-backup/releases/latest/download/tadpoles-backup-linux-amd64 -O /usr/local/bin/tadpoles-backup
 $ sudo chmod +x /usr/local/bin/tadpoles-backup
 ```
 
 #### OS X
 ```
-$ sudo curl -Lo /usr/local/bin/tadpoles-backup https://github.com/leocov-dev/tadpoles-backup/releases/latest/download/tadpoles-backup-darwin-amd64
+$ sudo curl -Lo /usr/local/bin/tadpoles-backup https://tadpoles-backup/releases/latest/download/tadpoles-backup-darwin-amd64
 $ sudo chmod +x /usr/local/bin/tadpoles-backup
 ```
 
 #### Windows
 ```
 # PowerShell:
-$ Invoke-WebRequest -OutFile $env:USERPROFILE\tadpoles-backup.exe https://github.com/leocov-dev/tadpoles-backup/releases/latest/download/tadpoles-backup-windows-amd64.exe
+$ Invoke-WebRequest -OutFile $env:USERPROFILE\tadpoles-backup.exe https://tadpoles-backup/releases/latest/download/tadpoles-backup-windows-amd64.exe
 ```
 
 ## Usage
@@ -53,9 +53,9 @@ $ tadpoles-backup backup "/a/directory/on/your/machine/"
 
 ## Development
 
-See the contributing guide [here](https://github.com/leocov-dev/tadpoles-backup/blob/main/CONTRIBUTING.md).
+See the contributing guide [here](https://tadpoles-backup/blob/main/CONTRIBUTING.md).
 
-Install the Go version defined in [go.mod](https://github.com/leocov-dev/tadpoles-backup/blob/main/go.mod) or use [goenv](https://github.com/syndbg/goenv) to manage Go (as set by `.go-version`).
+Install the Go version defined in [go.mod](https://tadpoles-backup/blob/main/go.mod) or use [goenv](https://github.com/syndbg/goenv) to manage Go (as set by `.go-version`).
 
 ```
 # build for your platform only and run.

@@ -1,10 +1,10 @@
 package api
 
 import (
-	"github.com/leocov-dev/tadpoles-backup/internal/client"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
+	"tadpoles-backup/internal/client"
 	"time"
 )
 

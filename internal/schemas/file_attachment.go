@@ -10,9 +10,6 @@ import (
 	"github.com/h2non/filetype"
 	"github.com/h2non/filetype/matchers"
 	"github.com/h2non/filetype/types"
-	"github.com/leocov-dev/tadpoles-backup/config"
-	"github.com/leocov-dev/tadpoles-backup/internal/api"
-	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"image"
 	"image/jpeg"
@@ -21,6 +18,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"tadpoles-backup/config"
+	"tadpoles-backup/internal/api"
+	"tadpoles-backup/internal/utils"
 	"time"
 )
 

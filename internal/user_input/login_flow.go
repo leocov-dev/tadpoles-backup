@@ -5,14 +5,14 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"github.com/leocov-dev/tadpoles-backup/internal/api"
-	"github.com/leocov-dev/tadpoles-backup/internal/utils"
-	"github.com/leocov-dev/tadpoles-backup/pkg/headings"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh/terminal"
 	"net/url"
 	"os"
 	"strings"
+	"tadpoles-backup/internal/api"
+	"tadpoles-backup/internal/utils"
+	"tadpoles-backup/pkg/headings"
 	"time"
 )
 

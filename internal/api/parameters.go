@@ -2,10 +2,10 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/leocov-dev/tadpoles-backup/internal/client"
-	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	"io/ioutil"
 	"net/http"
+	"tadpoles-backup/internal/client"
+	"tadpoles-backup/internal/utils"
 )
 
 // Response from API

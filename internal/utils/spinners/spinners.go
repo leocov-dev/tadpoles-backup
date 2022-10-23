@@ -3,10 +3,10 @@ package spinners
 import (
 	"fmt"
 	"github.com/briandowns/spinner"
-	"github.com/leocov-dev/tadpoles-backup/config"
-	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"sync"
+	"tadpoles-backup/config"
+	"tadpoles-backup/internal/utils"
 	"time"
 )
 

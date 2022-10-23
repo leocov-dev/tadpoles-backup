@@ -2,9 +2,9 @@
 
 #### **Bugs?**
 
-1. **Check if the bug was not already reported** by searching  [Issues](https://github.com/leocov-dev/tadpoles-backup/issues).
+1. **Check if the bug was not already reported** by searching  [Issues](https://tadpoles-backup/issues).
 
-2. Open a [new issue](https://github.com/leocov-dev/tadpoles-backup/issues/new/choose). Be sure to fill out the **bug template**.
+2. Open a [new issue](https://tadpoles-backup/issues/new/choose). Be sure to fill out the **bug template**.
 
 #### **Fixes and Contributions?**
 

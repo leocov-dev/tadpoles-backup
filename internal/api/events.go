@@ -3,14 +3,14 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/leocov-dev/tadpoles-backup/config"
-	"github.com/leocov-dev/tadpoles-backup/internal/client"
-	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
+	"tadpoles-backup/config"
+	"tadpoles-backup/internal/client"
+	"tadpoles-backup/internal/utils"
 	"time"
 )
 

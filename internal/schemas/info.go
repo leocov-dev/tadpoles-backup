@@ -1,7 +1,7 @@
 package schemas
 
 import (
-	"github.com/leocov-dev/tadpoles-backup/internal/api"
+	"tadpoles-backup/internal/api"
 	"time"
 )
 

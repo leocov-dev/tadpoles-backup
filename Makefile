@@ -22,8 +22,6 @@ clean:
 	@rm -rf "$(CURDIR)/bin"
 	@rm -rf "$(CURDIR)/dist"
 
-# dev creates binaries for testing locally.
-# These are put into $GOPATH/bin
 dev: tidy fmt
 	@go build -race -o "$(CURDIR)/bin/tadpoles-backup" .
 

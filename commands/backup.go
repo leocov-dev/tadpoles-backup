@@ -3,18 +3,18 @@ package commands
 import (
 	"fmt"
 	"github.com/gosuri/uiprogress"
-	"github.com/leocov-dev/tadpoles-backup/config"
-	"github.com/leocov-dev/tadpoles-backup/internal/schemas"
-	"github.com/leocov-dev/tadpoles-backup/internal/tadpoles"
-	"github.com/leocov-dev/tadpoles-backup/internal/user_input"
-	"github.com/leocov-dev/tadpoles-backup/internal/utils"
-	"github.com/leocov-dev/tadpoles-backup/internal/utils/spinners"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"os"
 	"path/filepath"
 	"runtime"
+	"tadpoles-backup/config"
+	"tadpoles-backup/internal/schemas"
+	"tadpoles-backup/internal/tadpoles"
+	"tadpoles-backup/internal/user_input"
+	"tadpoles-backup/internal/utils"
+	"tadpoles-backup/internal/utils/spinners"
 )
 
 var (

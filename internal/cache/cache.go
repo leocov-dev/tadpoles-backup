@@ -2,11 +2,11 @@ package cache
 
 import (
 	"encoding/json"
-	"github.com/leocov-dev/tadpoles-backup/config"
-	"github.com/leocov-dev/tadpoles-backup/internal/api"
-	"github.com/leocov-dev/tadpoles-backup/internal/utils"
 	bolt "go.etcd.io/bbolt"
 	"sort"
+	"tadpoles-backup/config"
+	"tadpoles-backup/internal/api"
+	"tadpoles-backup/internal/utils"
 )
 
 var (

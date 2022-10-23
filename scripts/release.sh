@@ -40,7 +40,7 @@ fi
 # Instruct gox to build statically linked binaries
 export CGO_ENABLED=0
 
-LD_FLAGS="-s -w -X 'github.com/leocov-dev/tadpoles-backup/config.Version=${RELEASE_TAG}'"
+LD_FLAGS="-s -w -X 'tadpoles-backup/config.Version=${RELEASE_TAG}'"
 
 # Ensure all remote modules are downloaded and cached before build so that
 # the concurrent builds launched by gox won't race to redundantly download them.
