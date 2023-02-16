@@ -51,6 +51,14 @@ $ tadpoles-backup stat
 $ tadpoles-backup backup "/a/directory/on/your/machine/"
 ```
 
+With docker:
+
+```
+docker build -t tadpoles .
+mkdir ~/tadpoles_bk
+docker run -it -v$HOME/tadpoles_bk:/usr/src/app/data --rm tadpoles bin/tadpoles-backup backup data
+```
+
 ## Development
 
 See the contributing guide [here](https://tadpoles-backup/blob/main/CONTRIBUTING.md).
