@@ -36,10 +36,10 @@ func (w *WrappedSpinner) SetPrefix(prefix string) {
 	}
 }
 
-func (w *WrappedSpinner) Color(colors ...string) error {
+func (w *WrappedSpinner) Start(colors ...string) error {
 	if w.activeSpinner != nil {
 		return w.activeSpinner.Color(colors...) // Implicit Start()
-	} else {
+	} else if !config.JsonOutput {
 		fmt.Println(w.Text)
 	}
 	return nil
@@ -56,6 +56,8 @@ func NewWrapper(title string) *WrappedSpinner {
 		}
 		w.activeSpinner = spinner.New(config.SpinnerCharSet, config.SpinnerSpeed*time.Millisecond, options...)
 	}
+
+	w.SetPrefix(fmt.Sprintf("%s ", title))
 
 	return w
 }
@@ -74,8 +76,7 @@ func StartNewSpinner(title string) *WrappedSpinner {
 		return s
 	}
 
-	s.SetPrefix(fmt.Sprintf("%s ", title))
-	err := s.Color("cyan", "bold") // NOTE implicit Start()
+	err := s.Start("cyan", "bold") // NOTE implicit Start()
 	if err != nil {
 		utils.PrintError("Spinner startup failed: %s", err)
 	}

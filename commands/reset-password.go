@@ -31,22 +31,22 @@ func resetPasswordRun(cmd *cobra.Command, args []string) {
 		color.HiMagentaString("Press ENTER to continue, Ctrl+C to cancel..."),
 	)
 	if err != nil {
-		utils.CmdFailed(cmd, err)
+		utils.CmdFailed(err)
 	}
 
 	reader := bufio.NewReader(os.Stdin)
 	_, err = reader.ReadString('\n')
 	if err != nil {
-		utils.CmdFailed(cmd, err)
+		utils.CmdFailed(err)
 	}
 
 	fileData, err := bindata.Asset("utils/dist/reset-tadpoles-password.html")
 	if err != nil {
-		utils.CmdFailed(cmd, err)
+		utils.CmdFailed(err)
 	}
 	htmlFile := bytes.NewBuffer(fileData)
 	err = browser.OpenReader(htmlFile)
 	if err != nil {
-		utils.CmdFailed(cmd, err)
+		utils.CmdFailed(err)
 	}
 }

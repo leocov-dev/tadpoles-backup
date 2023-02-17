@@ -31,6 +31,8 @@ type Event struct {
 	LocationDisplay string         `json:"location_display"`
 }
 
+type Events []*Event
+
 func (e *Event) String() string {
 	val, err := json.MarshalIndent(e, "", "    ")
 	if err != nil {
@@ -41,11 +43,11 @@ func (e *Event) String() string {
 }
 
 type pageResponse struct {
-	Cursor string   `json:"cursor"`
-	Events []*Event `json:"events"`
+	Cursor string `json:"cursor"`
+	Events Events `json:"events"`
 }
 
-func GetEvents(firstEventTime time.Time, lastEventTime time.Time) (events []*Event, err error) {
+func GetEvents(firstEventTime time.Time, lastEventTime time.Time) (events Events, err error) {
 	log.Debug(fmt.Sprintf("EventsURL: %s", client.EventsEndpoint))
 
 	params := url.Values{
@@ -74,7 +76,7 @@ func GetEvents(firstEventTime time.Time, lastEventTime time.Time) (events []*Eve
 	return events, nil
 }
 
-func getEventPage(params *url.Values, events *[]*Event) error {
+func getEventPage(params *url.Values, events *Events) error {
 	urlBase, _ := url.Parse(client.EventsEndpoint)
 	urlBase.RawQuery = params.Encode()
 

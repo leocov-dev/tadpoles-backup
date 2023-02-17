@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strings"
 	"syscall"
+	"tadpoles-backup/config"
 	"time"
 )
 
@@ -69,7 +70,7 @@ func PrintError(format string, err error) {
 }
 
 func PrintErrorList(errorMsgs []string) {
-	if errorMsgs != nil {
+	if errorMsgs != nil && !config.JsonOutput {
 		WriteError("Errors", "")
 		for i, e := range errorMsgs {
 			WriteErrorSub.Write(fmt.Sprint(i+1), e)

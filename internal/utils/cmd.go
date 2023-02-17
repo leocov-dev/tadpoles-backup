@@ -1,11 +1,25 @@
 package utils
 
 import (
-	"github.com/spf13/cobra"
+	"encoding/json"
+	"fmt"
 	"os"
+	"tadpoles-backup/config"
 )
 
-func CmdFailed(cmd *cobra.Command, err error) {
-	WriteError("Cmd Error", err.Error())
+type jsonError struct {
+	Error string `json:"error"`
+}
+
+func CmdFailed(err error) {
+	if config.JsonOutput {
+		errorInt := jsonError{
+			Error: err.Error(),
+		}
+		jsonString, _ := json.Marshal(errorInt)
+		fmt.Println(string(jsonString))
+	} else {
+		WriteError("Cmd Error", err.Error())
+	}
 	os.Exit(1)
 }

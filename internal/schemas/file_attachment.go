@@ -264,3 +264,18 @@ func setExifData(sl *gjis.SegmentList, dateTime time.Time, userComment string) (
 
 	return nil
 }
+
+type FileAttachments []*FileAttachment
+
+type FileAttachmentMap map[string]FileAttachments
+
+func (fam FileAttachmentMap) PrettyPrint(heading string) {
+	if config.JsonOutput {
+		return
+	}
+
+	utils.WriteMain(heading, "")
+	for k, v := range fam {
+		utils.WriteSub(k, fmt.Sprint(len(v)))
+	}
+}
