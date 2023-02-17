@@ -7,16 +7,14 @@ import (
 	"tadpoles-backup/config"
 )
 
-type jsonError struct {
-	Error string `json:"error"`
-}
-
 func CmdFailed(err error) {
 	if config.JsonOutput {
-		errorInt := jsonError{
+		errorData := struct {
+			Error string `json:"error"`
+		}{
 			Error: err.Error(),
 		}
-		jsonString, _ := json.Marshal(errorInt)
+		jsonString, _ := json.Marshal(errorData)
 		fmt.Println(string(jsonString))
 	} else {
 		WriteError("Cmd Error", err.Error())
