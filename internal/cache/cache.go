@@ -13,8 +13,12 @@ var (
 	eventsBucket = []byte("EVENTS")
 )
 
+func OpenCacheDB(options *bolt.Options) (*bolt.DB, error) {
+	return bolt.Open(config.GetCacheDbFile(), 0600, options)
+}
+
 func InitializeCache() error {
-	db, err := bolt.Open(config.TadpolesCacheFile, 0600, nil)
+	db, err := OpenCacheDB(nil)
 	if err != nil {
 		return err
 	}
@@ -41,10 +45,7 @@ func (a ByEventTime) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 // read the local bolt-db cache file and
 // return a list of api events sorted by event time
 func ReadEventCache() (events []*api.Event, err error) {
-	db, err := bolt.Open(config.TadpolesCacheFile, 0600,
-		&bolt.Options{
-			ReadOnly: true,
-		})
+	db, err := OpenCacheDB(&bolt.Options{ReadOnly: true})
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +80,7 @@ func ReadEventCache() (events []*api.Event, err error) {
 // WriteEventCache
 // write a list of api events to the local bolt-db cache file
 func WriteEventCache(events []*api.Event) error {
-	db, err := bolt.Open(config.TadpolesCacheFile, 0600, nil)
+	db, err := OpenCacheDB(nil)
 	if err != nil {
 		return err
 	}

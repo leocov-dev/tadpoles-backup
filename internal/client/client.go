@@ -37,11 +37,13 @@ func newApiClient() *http.Client {
 
 // load cookies from serialized json on disk if able.
 func deserializeCookies() {
+	cookieFile := config.GetTadpolesCookieFile()
+
 	var storedCookies []*http.Cookie
-	if utils.FileExists(config.TadpolesCookieFile) {
+	if utils.FileExists(cookieFile) {
 
 		// Open our jsonFile
-		jsonFile, _ := os.Open(config.TadpolesCookieFile)
+		jsonFile, _ := os.Open(cookieFile)
 		defer utils.CloseWithLog(jsonFile)
 
 		byteValue, _ := ioutil.ReadAll(jsonFile)
@@ -51,7 +53,7 @@ func deserializeCookies() {
 			log.Debug("Failed to deserialize cookies...", err)
 			return
 		}
-		log.Debug(fmt.Sprintf("Deserialized cookies from file: %s", config.TadpolesCookieFile))
+		log.Debug(fmt.Sprintf("Deserialized cookies from file: %s", cookieFile))
 	}
 	// load cookies to cookie jar that api client will use
 	jar.SetCookies(TadpolesUrl, storedCookies)
@@ -61,7 +63,7 @@ func SerializeResponseCookies(response *http.Response) {
 	cookiesData := response.Cookies()
 	jsonString, _ := json.MarshalIndent(cookiesData, "", "  ")
 
-	err := os.WriteFile(config.TadpolesCookieFile, jsonString, 0600)
+	err := os.WriteFile(config.GetTadpolesCookieFile(), jsonString, 0600)
 
 	if err != nil {
 		log.Debug("Failed to serialize cookies to file...", err)
