@@ -48,7 +48,7 @@ func init() {
 		"c",
 		fmt.Sprintf("The number of simultaneous downloads allowed, 1 - %d.", config.MaxConcurrency),
 	)
-	statCmd.Flags().BoolVarP(
+	backupCmd.Flags().BoolVarP(
 		&detailedBackupJson,
 		"with-files",
 		"w",

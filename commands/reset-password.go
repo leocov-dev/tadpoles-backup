@@ -5,9 +5,11 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/fatih/color"
+	"github.com/go-errors/errors"
 	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
 	"os"
+	"tadpoles-backup/config"
 	"tadpoles-backup/internal/bindata"
 	"tadpoles-backup/internal/utils"
 )
@@ -16,6 +18,11 @@ var resetPasswordCmd = &cobra.Command{
 	Use:   "reset-password",
 	Short: "Reset your tadpoles.com password",
 	Run:   resetPasswordRun,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if config.NonInteractiveMode {
+			utils.CmdFailed(errors.New("Can't run this command in non-interactive mode."))
+		}
+	},
 }
 
 func init() {
