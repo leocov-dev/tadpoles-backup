@@ -6,7 +6,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"sync"
 	"tadpoles-backup/config"
-	"tadpoles-backup/internal/utils"
 	"time"
 )
 
@@ -78,7 +77,7 @@ func StartNewSpinner(title string) *WrappedSpinner {
 
 	err := s.Start("cyan", "bold") // NOTE implicit Start()
 	if err != nil {
-		utils.PrintError("Spinner startup failed: %s", err)
+		log.Error("Spinner startup failed: %s", err)
 	}
 	return s
 }

@@ -13,12 +13,13 @@ type BackupOutput struct {
 	Errors          []string `json:"errors,omitempty"`
 }
 
-func NewBackupOutput(files FileAttachments, fileMap FileAttachmentMap) BackupOutput {
+func NewBackupOutput(files FileAttachments, fileMap FileAttachmentMap, errors []string) BackupOutput {
 	return BackupOutput{
 		FileAttachments: files,
 		Images:          len(fileMap["Images"]),
 		Videos:          len(fileMap["Videos"]),
 		Unknown:         len(fileMap["Unknown"]),
+		Errors:          errors,
 	}
 }
 

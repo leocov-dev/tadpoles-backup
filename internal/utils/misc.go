@@ -2,23 +2,21 @@ package utils
 
 import (
 	"fmt"
-	"github.com/fatih/color"
 	"github.com/h2non/filetype/matchers"
 	"github.com/h2non/filetype/types"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"os/signal"
 	"runtime"
-	"strings"
 	"syscall"
-	"tadpoles-backup/config"
 	"time"
 )
 
 func CloseWithLog(f io.Closer) {
 	err := f.Close()
 	if err != nil {
-		PrintError("failed to close file: %s", err)
+		log.Error("failed to close file: %s", err)
 	}
 }
 
@@ -59,24 +57,6 @@ func IsImageType(t types.Type) bool {
 		}
 	}
 	return false
-}
-
-func PrintError(format string, err error) {
-	if !strings.HasSuffix(format, "\n") {
-		format += "\n"
-	}
-	red := color.New(color.FgHiRed).SprintFunc()
-	_, _ = fmt.Fprintf(color.Output, format, red(err.Error()))
-}
-
-func PrintErrorList(errorMsgs []string) {
-	if errorMsgs != nil && !config.JsonOutput {
-		WriteError("Errors", "")
-		for i, e := range errorMsgs {
-			WriteErrorSub.Write(fmt.Sprint(i+1), e)
-		}
-		fmt.Println("")
-	}
 }
 
 func CloseHandler() {
