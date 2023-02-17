@@ -16,7 +16,7 @@ import (
 func CloseWithLog(f io.Closer) {
 	err := f.Close()
 	if err != nil {
-		log.Error("failed to close file: %s", err)
+		log.Errorf("failed to close file: %s", err)
 	}
 }
 
