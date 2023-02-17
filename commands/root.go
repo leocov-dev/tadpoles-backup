@@ -20,7 +20,7 @@ var (
 			setLoggingLevel()
 			err := cache.InitializeCache()
 			if err != nil {
-				utils.CmdFailed(cmd, err)
+				utils.CmdFailed(err)
 			}
 		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
@@ -32,6 +32,8 @@ var (
 
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&config.NonInteractiveMode, "non-interactive", "n", false, "Don't use interactive prompts or show dynamic elements.")
+
+	rootCmd.PersistentFlags().BoolVarP(&config.JsonOutput, "json", "j", false, "Output as JSON.")
 
 	rootCmd.PersistentFlags().BoolVarP(&debugMode, "debug", "d", false, "Print additional debug and informational logs.")
 	_ = rootCmd.PersistentFlags().MarkHidden("debug")

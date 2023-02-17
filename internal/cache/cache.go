@@ -37,8 +37,10 @@ func (a ByEventTime) Len() int           { return len(a) }
 func (a ByEventTime) Less(i, j int) bool { return a[i].EventTime.Time().Before(a[j].EventTime.Time()) }
 func (a ByEventTime) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
-// return a list sorted by event time,
-func ReadCache() (events []*api.Event, err error) {
+// ReadEventCache
+// read the local bolt-db cache file and
+// return a list of api events sorted by event time
+func ReadEventCache() (events []*api.Event, err error) {
 	db, err := bolt.Open(config.TadpolesCacheFile, 0600,
 		&bolt.Options{
 			ReadOnly: true,
@@ -74,7 +76,9 @@ func ReadCache() (events []*api.Event, err error) {
 	return events, nil
 }
 
-func StoreEvents(events []*api.Event) error {
+// WriteEventCache
+// write a list of api events to the local bolt-db cache file
+func WriteEventCache(events []*api.Event) error {
 	db, err := bolt.Open(config.TadpolesCacheFile, 0600, nil)
 	if err != nil {
 		return err
@@ -84,6 +88,8 @@ func StoreEvents(events []*api.Event) error {
 	for _, event := range events {
 		err := db.Update(func(tx *bolt.Tx) error {
 			b := tx.Bucket(eventsBucket)
+			// TODO: maybe there is a way to store without marshaling
+			//  to reduce processing on read-back
 			j, err := json.Marshal(event)
 			if err != nil {
 				return err

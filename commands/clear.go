@@ -63,6 +63,6 @@ func clearRun(cmd *cobra.Command, args []string) {
 	}
 
 	if err != nil {
-		utils.CmdFailed(cmd, err)
+		utils.CmdFailed(err)
 	}
 }

@@ -1,13 +1,12 @@
 package commands
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
+	"tadpoles-backup/internal/schemas"
 	"tadpoles-backup/internal/tadpoles"
 	"tadpoles-backup/internal/user_input"
 	"tadpoles-backup/internal/utils"
 	"tadpoles-backup/internal/utils/spinners"
-	"time"
 )
 
 var (
@@ -19,13 +18,15 @@ var (
 			utils.CloseHandler()
 			err := user_input.DoLoginIfNeeded()
 			if err != nil {
-				utils.CmdFailed(cmd, err)
+				utils.CmdFailed(err)
 			}
 		},
 	}
+	detailedStatJson bool
 )
 
 func init() {
+	statCmd.Flags().BoolVarP(&detailedStatJson, "with-files", "w", false, "JSON output includes detailed list of files (this is a large amount of data).")
 	rootCmd.AddCommand(statCmd)
 }
 
@@ -34,31 +35,26 @@ func statRun(cmd *cobra.Command, _ []string) {
 
 	info, err := tadpoles.GetAccountInfo()
 	if err != nil {
-		utils.CmdFailed(cmd, err)
+		utils.CmdFailed(err)
 	}
 	s.Stop()
 
-	utils.WriteMain("Time-frame", fmt.Sprintf("%s to %s",
-		info.FirstEvent.In(time.Local).Format("2006-01-02"),
-		info.LastEvent.In(time.Local).Format("2006-01-02")))
-
-	utils.WriteMain("Children", "")
-	for i, dep := range info.Dependants {
-		i += 1
-		utils.WriteSub(fmt.Sprintf("%d", i), dep)
-	}
+	info.PrettyPrint()
 
 	s = spinners.StartNewSpinner("Checking Events...")
 
 	attachments, err := tadpoles.GetEventFileAttachmentData(info.FirstEvent, info.LastEvent)
 	if err != nil {
-		utils.CmdFailed(cmd, err)
+		utils.CmdFailed(err)
 	}
 	s.Stop()
 
-	utils.WriteMain("All Attachments", "")
-	typeMap := tadpoles.GroupAttachmentsByType(attachments)
-	for k, v := range typeMap {
-		utils.WriteSub(k, fmt.Sprint(len(v)))
+	attachmentMap := tadpoles.GroupAttachmentsByType(attachments)
+	attachmentMap.PrettyPrint("All Attachments")
+
+	statOutput := schemas.NewStatOutput(info, attachments, attachmentMap)
+	err = statOutput.JsonPrint(detailedStatJson)
+	if err != nil {
+		utils.CmdFailed(err)
 	}
 }

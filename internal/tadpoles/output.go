@@ -1,5 +1,5 @@
 package tadpoles
 
-func PrintAccountInfo() {
+func FormatAccountInfo(format string) {
 
 }

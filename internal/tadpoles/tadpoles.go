@@ -22,8 +22,8 @@ func GetAccountInfo() (info *schemas.Info, err error) {
 	return schemas.NewInfoFromParams(parameters), nil
 }
 
-func GetEventFileAttachmentData(firstEventTime time.Time, lastEventTime time.Time) (fileAttachments []*schemas.FileAttachment, err error) {
-	events, err := cache.ReadCache()
+func GetEventFileAttachmentData(firstEventTime time.Time, lastEventTime time.Time) (fileAttachments schemas.FileAttachments, err error) {
+	events, err := cache.ReadEventCache()
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func GetEventFileAttachmentData(firstEventTime time.Time, lastEventTime time.Tim
 		return nil, err
 	}
 
-	err = cache.StoreEvents(newEvents)
+	err = cache.WriteEventCache(newEvents)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func GetEventFileAttachmentData(firstEventTime time.Time, lastEventTime time.Tim
 }
 
 func DownloadFileAttachments(
-	newAttachments []*schemas.FileAttachment,
+	newAttachments schemas.FileAttachments,
 	backupRoot string, ctx context.Context,
 	concurrencyLimit int,
 	barWrapper *progress.BarWrapper,
@@ -80,8 +80,8 @@ func DownloadFileAttachments(
 	return saveErrors
 }
 
-func GroupAttachmentsByType(attachments []*schemas.FileAttachment) map[string][]*schemas.FileAttachment {
-	attachmentTypeMap := make(map[string][]*schemas.FileAttachment)
+func GroupAttachmentsByType(attachments schemas.FileAttachments) schemas.FileAttachmentMap {
+	attachmentTypeMap := make(map[string]schemas.FileAttachments)
 
 	for _, attachment := range attachments {
 		mimeRoot := strings.Split(attachment.EventMime, "/")[0]
@@ -104,7 +104,7 @@ func GroupAttachmentsByType(attachments []*schemas.FileAttachment) map[string][]
 	return attachmentTypeMap
 }
 
-func PruneAlreadyDownloaded(attachments []*schemas.FileAttachment, backupTarget string) (newAttachments []*schemas.FileAttachment, err error) {
+func PruneAlreadyDownloaded(attachments schemas.FileAttachments, backupTarget string) (newAttachments schemas.FileAttachments, err error) {
 	attachmentNames := make(map[string]*schemas.FileAttachment)
 	for _, att := range attachments {
 		attachmentNames[att.SaveName()] = att
@@ -136,7 +136,7 @@ func PruneAlreadyDownloaded(attachments []*schemas.FileAttachment, backupTarget 
 	return newAttachments, err
 }
 
-func eventsToFileAttachments(events []*api.Event) (attachments []*schemas.FileAttachment) {
+func eventsToFileAttachments(events []*api.Event) (attachments schemas.FileAttachments) {
 	for _, event := range events {
 		for _, eventAttachment := range event.Attachments {
 			// skip pdf files

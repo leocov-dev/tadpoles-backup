@@ -30,11 +30,12 @@ var (
 			})
 			err := user_input.DoLoginIfNeeded()
 			if err != nil {
-				utils.CmdFailed(cmd, err)
+				utils.CmdFailed(err)
 			}
 		},
 	}
 
+	detailedBackupJson bool
 	ctx, cancelBackup  = context.WithCancel(context.Background())
 	concurrencyLimit   int
 	defaultConcurrency = runtime.NumCPU() + (runtime.NumCPU() / 2)
@@ -47,6 +48,14 @@ func init() {
 		"c",
 		fmt.Sprintf("The number of simultaneous downloads allowed, 1 - %d.", config.MaxConcurrency),
 	)
+	statCmd.Flags().BoolVarP(
+		&detailedBackupJson,
+		"with-files",
+		"w",
+		false,
+		"JSON output includes detailed list of files (this is a large amount of data).",
+	)
+
 	rootCmd.AddCommand(backupCmd)
 }
 
@@ -67,33 +76,30 @@ func backupRun(cmd *cobra.Command, args []string) {
 	err := os.MkdirAll(backupTarget, os.ModePerm)
 	if err != nil {
 		s.Stop()
-		utils.CmdFailed(cmd, err)
+		utils.CmdFailed(err)
 	}
 
 	info, err := tadpoles.GetAccountInfo()
 	if err != nil {
 		s.Stop()
-		utils.CmdFailed(cmd, err)
+		utils.CmdFailed(err)
 	}
 	s.Stop()
 
 	s = spinners.StartNewSpinner("Checking Events...")
 	fileAttachments, err := tadpoles.GetEventFileAttachmentData(info.FirstEvent, info.LastEvent)
 	if err != nil {
-		utils.CmdFailed(cmd, err)
+		utils.CmdFailed(err)
 	}
 	s.Stop()
 
 	newAttachments, err := tadpoles.PruneAlreadyDownloaded(fileAttachments, backupTarget)
 	if err != nil {
-		utils.CmdFailed(cmd, err)
+		utils.CmdFailed(err)
 	}
 
-	utils.WriteMain("New Attachments", fmt.Sprint(len(newAttachments)))
-	typeMap := tadpoles.GroupAttachmentsByType(newAttachments)
-	for k, v := range typeMap {
-		utils.WriteSub(k, fmt.Sprint(len(v)))
-	}
+	attachmentMap := tadpoles.GroupAttachmentsByType(newAttachments)
+	attachmentMap.PrettyPrint("New Attachments")
 
 	count := len(newAttachments)
 	if count > 0 {
@@ -106,4 +112,9 @@ func backupRun(cmd *cobra.Command, args []string) {
 		utils.PrintErrorList(saveErrors)
 	}
 
+	backupOutput := schemas.NewBackupOutput(newAttachments, attachmentMap)
+	err = backupOutput.JsonPrint(detailedBackupJson)
+	if err != nil {
+		utils.CmdFailed(err)
+	}
 }

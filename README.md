@@ -61,9 +61,9 @@ docker run -it -v$HOME/tadpoles_bk:/usr/src/app/data --rm tadpoles backup data
 
 ## Development
 
-See the contributing guide [here](https://tadpoles-backup/blob/main/CONTRIBUTING.md).
+See the contributing guide [here](CONTRIBUTING.md).
 
-Install the Go version defined in [go.mod](https://tadpoles-backup/blob/main/go.mod) or use [goenv](https://github.com/syndbg/goenv) to manage Go (as set by `.go-version`).
+Install the Go version defined in [go.mod](go.mod) or use [goenv](https://github.com/syndbg/goenv) to manage Go (as set by [.go-version](.go-version)).
 
 ```
 # build for your platform only and run.
