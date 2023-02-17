@@ -10,7 +10,7 @@ RUN go mod download && go mod verify
 COPY . .
 RUN  make dev
 
-FROM builder
+FROM alpine:latest AS prod
 
 WORKDIR /app
 COPY --from=builder /code/bin/tadpoles-backup .
