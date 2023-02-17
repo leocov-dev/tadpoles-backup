@@ -51,3 +51,6 @@ jobs:
 
       - name: Multi-target Build
         run: make release
+
+      - name: Run Version Command
+        run: dist/tadpoles-backup-linux-amd64
