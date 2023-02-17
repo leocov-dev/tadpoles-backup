@@ -2,13 +2,16 @@ package tadpoles
 
 import (
 	"context"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 	"strings"
+	"tadpoles-backup/config"
 	"tadpoles-backup/internal/api"
 	"tadpoles-backup/internal/cache"
 	"tadpoles-backup/internal/schemas"
+	"tadpoles-backup/internal/utils"
 	"tadpoles-backup/internal/utils/progress"
 	"time"
 )
@@ -149,4 +152,14 @@ func eventsToFileAttachments(events []*api.Event) (attachments schemas.FileAttac
 		}
 	}
 	return attachments
+}
+
+func PrintErrorList(errorMsgs []string) {
+	if errorMsgs != nil && !config.JsonOutput {
+		utils.WriteError("Errors", "")
+		for i, e := range errorMsgs {
+			utils.WriteErrorSub.Write(fmt.Sprint(i+1), e)
+		}
+		fmt.Println("")
+	}
 }
