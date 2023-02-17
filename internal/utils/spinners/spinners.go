@@ -77,7 +77,7 @@ func StartNewSpinner(title string) *WrappedSpinner {
 
 	err := s.Start("cyan", "bold") // NOTE implicit Start()
 	if err != nil {
-		log.Error("Spinner startup failed: %s", err)
+		log.Errorf("Spinner startup failed: %s", err)
 	}
 	return s
 }
