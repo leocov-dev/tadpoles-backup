@@ -1,12 +1,20 @@
-FROM golang:1.19
+FROM golang:1.19 AS builder
 
-WORKDIR /usr/src/app
+WORKDIR /code
 
+# this is broken out from call to `make` to improve docker caching
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
+# run main build
 COPY . .
+RUN  make dev
 
-RUN make
+FROM builder
 
-CMD ["bin/tadpoles-backup", "--help"]
+WORKDIR /app
+COPY --from=builder /code/bin/tadpoles-backup .
+
+ENTRYPOINT ["./tadpoles-backup"]
+
+CMD ["version"]
