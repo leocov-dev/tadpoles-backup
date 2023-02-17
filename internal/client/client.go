@@ -61,7 +61,7 @@ func SerializeResponseCookies(response *http.Response) {
 	cookiesData := response.Cookies()
 	jsonString, _ := json.MarshalIndent(cookiesData, "", "  ")
 
-	err := ioutil.WriteFile(config.TadpolesCookieFile, jsonString, 0600)
+	err := os.WriteFile(config.TadpolesCookieFile, jsonString, 0600)
 
 	if err != nil {
 		log.Debug("Failed to serialize cookies to file...", err)

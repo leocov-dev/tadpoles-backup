@@ -16,30 +16,66 @@ var SpinnerManager = &spinnerManager{
 }
 
 type spinnerManager struct {
-	Spinners []*spinner.Spinner
+	Spinners []*WrappedSpinner
 	lock     *sync.RWMutex
 }
+type WrappedSpinner struct {
+	activeSpinner *spinner.Spinner
+	Text          string
+}
 
-func (sm *spinnerManager) AppendSpinner(s *spinner.Spinner) {
+func (w *WrappedSpinner) Stop() {
+	if w.activeSpinner != nil {
+		w.activeSpinner.Stop()
+	}
+}
+
+func (w *WrappedSpinner) SetPrefix(prefix string) {
+	if w.activeSpinner != nil {
+		w.activeSpinner.Prefix = prefix
+	}
+}
+
+func (w *WrappedSpinner) Color(colors ...string) error {
+	if w.activeSpinner != nil {
+		return w.activeSpinner.Color(colors...) // Implicit Start()
+	} else {
+		fmt.Println(w.Text)
+	}
+	return nil
+}
+
+func NewWrapper(title string) *WrappedSpinner {
+	w := &WrappedSpinner{
+		Text: title,
+	}
+	if !config.NonInteractiveMode {
+		options := []spinner.Option{
+			spinner.WithHiddenCursor(true),
+			spinner.WithFinalMSG(title + " Done\n"),
+		}
+		w.activeSpinner = spinner.New(config.SpinnerCharSet, config.SpinnerSpeed*time.Millisecond, options...)
+	}
+
+	return w
+}
+
+func (sm *spinnerManager) AppendSpinner(s *WrappedSpinner) {
 	sm.lock.Lock()
 	sm.Spinners = append(sm.Spinners, s)
 	sm.lock.Unlock()
 }
 
-func StartNewSpinner(title string) *spinner.Spinner {
-	options := []spinner.Option{
-		spinner.WithHiddenCursor(true),
-		spinner.WithFinalMSG(title + " Done\n"),
-	}
-	s := spinner.New(config.SpinnerCharSet, config.SpinnerSpeed*time.Millisecond, options...)
+func StartNewSpinner(title string) *WrappedSpinner {
+	s := NewWrapper(title)
 	SpinnerManager.AppendSpinner(s)
 
 	if log.GetLevel() == log.DebugLevel {
 		return s
 	}
 
-	s.Prefix = fmt.Sprintf("%s ", title)
-	err := s.Color("cyan", "bold") // NOTE implicit s.Start()
+	s.SetPrefix(fmt.Sprintf("%s ", title))
+	err := s.Color("cyan", "bold") // NOTE implicit Start()
 	if err != nil {
 		utils.PrintError("Spinner startup failed: %s", err)
 	}

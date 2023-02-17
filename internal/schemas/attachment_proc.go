@@ -3,7 +3,7 @@ package schemas
 import (
 	"context"
 	"fmt"
-	"github.com/gosuri/uiprogress"
+	"tadpoles-backup/internal/utils/progress"
 )
 
 type AttachmentProc struct {
@@ -11,16 +11,22 @@ type AttachmentProc struct {
 	ctx            context.Context
 	errorChannel   chan string
 	fileAttachment *FileAttachment
-	progressBar    *uiprogress.Bar
+	barWrapper     *progress.BarWrapper
 }
 
-func NewAttachmentProc(attachment *FileAttachment, backupRoot string, errorChannel chan string, ctx context.Context, progressBar *uiprogress.Bar) *AttachmentProc {
+func NewAttachmentProc(
+	attachment *FileAttachment,
+	backupRoot string,
+	errorChannel chan string,
+	ctx context.Context,
+	barWrapper *progress.BarWrapper,
+) *AttachmentProc {
 	proc := &AttachmentProc{
 		backupRoot:     backupRoot,
 		ctx:            ctx,
 		errorChannel:   errorChannel,
 		fileAttachment: attachment,
-		progressBar:    progressBar,
+		barWrapper:     barWrapper,
 	}
 
 	return proc
@@ -30,8 +36,8 @@ func (proc *AttachmentProc) Execute() {
 	saveName := proc.fileAttachment.SaveName()
 
 	defer func() {
-		if proc.progressBar != nil {
-			proc.progressBar.Incr()
+		if proc.barWrapper != nil {
+			proc.barWrapper.Increment()
 		}
 	}()
 

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -88,7 +88,7 @@ func getEventPage(params *url.Values, events *[]*Event) error {
 	}
 
 	defer utils.CloseWithLog(resp.Body)
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 
 	var page pageResponse
 	err = json.Unmarshal(body, &page)

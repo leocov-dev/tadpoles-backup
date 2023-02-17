@@ -2,7 +2,6 @@ package tadpoles
 
 import (
 	"context"
-	"github.com/gosuri/uiprogress"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
@@ -10,6 +9,7 @@ import (
 	"tadpoles-backup/internal/api"
 	"tadpoles-backup/internal/cache"
 	"tadpoles-backup/internal/schemas"
+	"tadpoles-backup/internal/utils/progress"
 	"time"
 )
 
@@ -53,13 +53,19 @@ func GetEventFileAttachmentData(firstEventTime time.Time, lastEventTime time.Tim
 	return fileAttachments, nil
 }
 
-func DownloadFileAttachments(newAttachments []*schemas.FileAttachment, backupRoot string, ctx context.Context, concurrencyLimit int, progressBar *uiprogress.Bar) ([]string, error) {
+func DownloadFileAttachments(
+	newAttachments []*schemas.FileAttachment,
+	backupRoot string, ctx context.Context,
+	concurrencyLimit int,
+	barWrapper *progress.BarWrapper,
+) []string {
+
 	errorChan := make(chan string)
 
 	downloadPool := schemas.NewDownloadPool(concurrencyLimit)
 
 	for _, attachment := range newAttachments {
-		proc := schemas.NewAttachmentProc(attachment, backupRoot, errorChan, ctx, progressBar)
+		proc := schemas.NewAttachmentProc(attachment, backupRoot, errorChan, ctx, barWrapper)
 		downloadPool.Add(proc)
 	}
 	downloadPool.Process()
@@ -71,7 +77,7 @@ func DownloadFileAttachments(newAttachments []*schemas.FileAttachment, backupRoo
 		saveErrors = append(saveErrors, s)
 	}
 
-	return saveErrors, nil
+	return saveErrors
 }
 
 func GroupAttachmentsByType(attachments []*schemas.FileAttachment) map[string][]*schemas.FileAttachment {

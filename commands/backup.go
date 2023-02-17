@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"github.com/gosuri/uiprogress"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -14,6 +13,7 @@ import (
 	"tadpoles-backup/internal/tadpoles"
 	"tadpoles-backup/internal/user_input"
 	"tadpoles-backup/internal/utils"
+	"tadpoles-backup/internal/utils/progress"
 	"tadpoles-backup/internal/utils/spinners"
 )
 
@@ -97,20 +97,11 @@ func backupRun(cmd *cobra.Command, args []string) {
 
 	count := len(newAttachments)
 	if count > 0 {
-		uiprogress.Start()
-		pb := uiprogress.AddBar(count).
-			AppendCompleted().
-			PrependElapsed().
-			PrependFunc(func(b *uiprogress.Bar) string {
-				return fmt.Sprintf("Downloading (%d/%d)", b.Current(), count)
-			})
+		bw := progress.StartNewProgressBar(count, "Downloading")
 
-		saveErrors, err := tadpoles.DownloadFileAttachments(newAttachments, backupTarget, ctx, concurrencyLimit, pb)
-		if err != nil {
-			utils.CmdFailed(cmd, err)
-		}
+		saveErrors := tadpoles.DownloadFileAttachments(newAttachments, backupTarget, ctx, concurrencyLimit, bw)
 
-		uiprogress.Stop()
+		bw.Stop()
 
 		utils.PrintErrorList(saveErrors)
 	}
