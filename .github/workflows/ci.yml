@@ -13,7 +13,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version-file: './go.mod'
+          go-version-file: "${{ github.workspace }}/go.mod"
           cache: true
 
       - name: Check Go Format
@@ -28,7 +28,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version-file: './go.mod'
+          go-version-file: "${{ github.workspace }}/go.mod"
           cache: true
 
       - name: Run Tests
@@ -43,7 +43,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version-file: './go.mod'
+          go-version-file: "${{ github.workspace }}/go.mod"
           cache: true
 
       - name: Install GOX
@@ -53,4 +53,4 @@ jobs:
         run: make release
 
       - name: Run Version Command
-        run: dist/tadpoles-backup-linux-amd64
+        run: "${{ github.workspace }}/dist/tadpoles-backup-linux-amd64"
