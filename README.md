@@ -56,7 +56,7 @@ With docker:
 ```
 docker build -t tadpoles .
 mkdir ~/tadpoles_bk
-docker run -it -v$HOME/tadpoles_bk:/usr/src/app/data --rm tadpoles bin/tadpoles-backup backup data
+docker run -it -v$HOME/tadpoles_bk:/usr/src/app/data --rm tadpoles backup data
 ```
 
 ## Development
