@@ -12,3 +12,6 @@ coverage.txt
 node.log
 /utils/node_modules
 !/utis/dist/*
+
+# other
+.DS_Store

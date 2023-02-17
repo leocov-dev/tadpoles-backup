@@ -31,6 +31,8 @@ var (
 )
 
 func init() {
+	rootCmd.PersistentFlags().BoolVarP(&config.NonInteractiveMode, "non-interactive", "n", false, "Don't use interactive prompts or show dynamic elements.")
+
 	rootCmd.PersistentFlags().BoolVarP(&debugMode, "debug", "d", false, "Print additional debug and informational logs.")
 	_ = rootCmd.PersistentFlags().MarkHidden("debug")
 }

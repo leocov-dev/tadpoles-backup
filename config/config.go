@@ -19,6 +19,7 @@ var (
 	DataDir                   = filepath.Join(userHomeDir, DotName)
 	TadpolesCookieFile        = filepath.Join(DataDir, fmt.Sprintf("%s-cookie", DotName))
 	TadpolesCacheFile         = filepath.Join(DataDir, fmt.Sprintf("%s-cache", DotName))
+	NonInteractiveMode        = false
 
 	// Helpers
 	makeDirs = []string{TempDir, DataDir}

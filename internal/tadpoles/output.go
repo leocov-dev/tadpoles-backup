@@ -1,0 +1,5 @@
+package tadpoles
+
+func PrintAccountInfo() {
+
+}
