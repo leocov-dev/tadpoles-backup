@@ -3,7 +3,7 @@ GOFMT_FILES?=$$(find . -type f -name '*.go')
 default: dev
 
 test:
-	@sh -c "$(CURDIR)/scripts/test.sh"
+	@bash -c "scripts/test.sh"
 
 node-install:
 	@echo "\n==> NPM Install"
@@ -16,20 +16,20 @@ node-build:
 
 # bin generates release zip packages in ./dist
 release: tidy
-	@sh -c "$(CURDIR)/scripts/release.sh"
+	@bash -c "scripts/release.sh"
 
 clean:
-	@rm -rf "$(CURDIR)/bin"
-	@rm -rf "$(CURDIR)/dist"
+	@rm -rf "bin"
+	@rm -rf "dist"
 
 dev: tidy fmt
-	@go build -race -o "$(CURDIR)/bin/tadpoles-backup" .
+	@go build -race -o "bin/tadpoles-backup" .
 
 fmt:
 	@gofmt -w $(GOFMT_FILES)
 
 fmtcheck:
-	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
+	@bash -c "scripts/gofmtcheck.sh"
 
 tidy:
 	@go mod tidy
