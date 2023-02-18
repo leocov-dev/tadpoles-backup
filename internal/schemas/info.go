@@ -2,7 +2,6 @@ package schemas
 
 import (
 	"fmt"
-	"tadpoles-backup/config"
 	"tadpoles-backup/internal/api"
 	"tadpoles-backup/internal/utils"
 	"time"
@@ -23,10 +22,6 @@ func (i Info) prettyFormatTimeFrame() string {
 }
 
 func (i Info) PrettyPrint() {
-	if config.IsPrintingJson() {
-		return
-	}
-
 	utils.WriteMain("Time-frame", i.prettyFormatTimeFrame())
 
 	utils.WriteMain("Children", "")
