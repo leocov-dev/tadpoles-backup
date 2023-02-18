@@ -9,7 +9,10 @@ import (
 )
 
 var (
-	Version string
+	// VersionTag
+	// this must be exported to set it from build command
+	// but should not be accessed directly
+	VersionTag string
 
 	exePath, _                = os.Executable()
 	exeDir                    = filepath.Dir(exePath)
@@ -31,7 +34,7 @@ var (
 )
 
 func init() {
-	makeDirs := []string{TempDir, GetDataDir()}
+	makeDirs := []string{TempDir}
 
 	for _, dir := range makeDirs {
 		err := os.MkdirAll(dir, os.ModePerm)
@@ -41,14 +44,10 @@ func init() {
 	}
 }
 
-func HasEnvCreds() bool {
-	return EnvUsername != "" && EnvPassword != ""
-}
-
 func IsContainerized() bool {
 	// check if in docker container
-	info, err := os.Stat("/.dockerenv")
-	if !os.IsNotExist(err) || !info.IsDir() {
+	_, err := os.Stat("/.dockerenv")
+	if !os.IsNotExist(err) {
 		return true
 	}
 
@@ -61,23 +60,30 @@ func IsContainerized() bool {
 	return false
 }
 
-func GetVersion() string {
-	if Version != "" {
-		return Version
-	}
-
-	return "0.0.0-dev"
-}
-
 func GetDataDir() string {
 	if dataDir == "" {
 		if IsContainerized() {
 			dataDir = exeDir
 		} else {
 			dataDir = filepath.Join(userHomeDir, DotName)
+
+			_ = os.MkdirAll(dataDir, os.ModePerm)
 		}
 	}
+
 	return dataDir
+}
+
+func HasEnvCreds() bool {
+	return EnvUsername != "" && EnvPassword != ""
+}
+
+func GetVersion() string {
+	if VersionTag != "" {
+		return VersionTag
+	}
+
+	return "0.0.0-dev"
 }
 
 func GetTadpolesCookieFile() string {

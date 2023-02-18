@@ -27,7 +27,7 @@ type dependants struct {
 }
 
 func GetParameters() (params *ParametersResponse, err error) {
-	resp, err := client.ApiClient.Get(client.ParametersEndpoint)
+	resp, err := client.GetApiClient().Get(client.ParametersEndpoint)
 	if err != nil {
 		return nil, err
 	}

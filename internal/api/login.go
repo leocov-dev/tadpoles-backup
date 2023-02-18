@@ -10,7 +10,7 @@ import (
 
 func PostLogin(email string, password string) error {
 	log.Debug("Login...")
-	resp, err := client.ApiClient.PostForm(
+	resp, err := client.GetApiClient().PostForm(
 		client.LoginEndpoint,
 		url.Values{
 			"email":    {email},
@@ -35,7 +35,7 @@ func PostAdmit() (expires *time.Time, err error) {
 	t := time.Now()
 	zone, _ := t.Zone()
 	log.Debug("zone: ", zone)
-	resp, err := client.ApiClient.PostForm(
+	resp, err := client.GetApiClient().PostForm(
 		client.AdmitEndpoint,
 		url.Values{
 			"tz": {zone},

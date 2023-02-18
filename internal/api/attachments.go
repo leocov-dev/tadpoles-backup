@@ -15,7 +15,7 @@ func GetAttachment(eventKey string, attachmentKey string) (resp *http.Response, 
 	urlBase, _ := url.Parse(client.AttachmentsEndpoint)
 	urlBase.RawQuery = params.Encode()
 
-	resp, err = client.ApiClient.Get(urlBase.String())
+	resp, err = client.GetApiClient().Get(urlBase.String())
 	if err != nil {
 		return nil, err
 	}

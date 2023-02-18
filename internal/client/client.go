@@ -16,7 +16,7 @@ import (
 
 var (
 	jar, _    = cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.CookieJarList})
-	ApiClient = newApiClient()
+	apiClient *http.Client
 
 	tadpolesHost   = "https://www.tadpoles.com"
 	TadpolesUrl, _ = url.Parse(tadpolesHost)
@@ -33,6 +33,14 @@ var (
 func newApiClient() *http.Client {
 	deserializeCookies()
 	return &http.Client{Jar: jar}
+}
+
+func GetApiClient() *http.Client {
+	if apiClient == nil {
+		apiClient = newApiClient()
+	}
+
+	return apiClient
 }
 
 // load cookies from serialized json on disk if able.
