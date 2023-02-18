@@ -53,4 +53,4 @@ jobs:
         run: make release
 
       - name: Run Version Command
-        run: "${{ github.workspace }}/dist/tadpoles-backup-linux-amd64"
+        run: make && "${{ github.workspace }}/bin/tadpoles-backup debug"

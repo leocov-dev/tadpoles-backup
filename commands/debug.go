@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
+	"reflect"
 	"tadpoles-backup/config"
 	"tadpoles-backup/internal/utils"
 )
@@ -47,5 +48,12 @@ func debugRun(cmd *cobra.Command, args []string) {
 		}
 
 		fmt.Println(string(jsonData))
+	} else {
+		v := reflect.ValueOf(debugData)
+		typeOfS := v.Type()
+
+		for i := 0; i < v.NumField(); i++ {
+			utils.WriteInfo(typeOfS.Field(i).Name, fmt.Sprintf("%v", v.Field(i).Interface()))
+		}
 	}
 }
