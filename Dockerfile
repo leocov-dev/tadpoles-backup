@@ -8,7 +8,7 @@ RUN go mod download && go mod verify
 
 # run main build
 COPY . .
-RUN  make dev
+RUN  GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/tadpoles-backup
 
 FROM alpine:latest AS prod
 
@@ -17,4 +17,4 @@ COPY --from=builder /code/bin/tadpoles-backup .
 
 ENTRYPOINT ["./tadpoles-backup"]
 
-CMD ["version"]
+CMD ["--non-interactive debug"]
