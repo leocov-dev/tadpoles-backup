@@ -23,14 +23,14 @@ var (
 	MaxConcurrency      int64 = 128
 	userHomeDir, _            = os.UserHomeDir()
 	TempDir                   = filepath.Join(os.TempDir(), DotName)
-	NonInteractiveMode        = false
-	JsonOutput                = false
 	EnvUsername               = os.Getenv("TADPOLES_USER")
 	EnvPassword               = os.Getenv("TADPOLES_PASS")
 
-	dataDir    string
-	cookieFile string
-	cacheFile  string
+	NonInteractiveMode bool
+	JsonOutput         bool
+	dataDir            string
+	cookieFile         string
+	cacheFile          string
 )
 
 func init() {
@@ -42,6 +42,22 @@ func init() {
 			fmt.Printf("Failed to make dir '%s' %s\n", dir, err.Error())
 		}
 	}
+}
+
+func IsInteractive() bool {
+	return !NonInteractiveMode
+}
+
+func IsNotInteractive() bool {
+	return NonInteractiveMode
+}
+
+func IsPrintingJson() bool {
+	return JsonOutput
+}
+
+func IsHumanReadable() bool {
+	return !JsonOutput
 }
 
 func IsContainerized() bool {

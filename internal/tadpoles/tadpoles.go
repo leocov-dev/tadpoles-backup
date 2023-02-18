@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"tadpoles-backup/config"
 	"tadpoles-backup/internal/api"
 	"tadpoles-backup/internal/cache"
 	"tadpoles-backup/internal/schemas"
@@ -155,7 +154,7 @@ func eventsToFileAttachments(events []*api.Event) (attachments schemas.FileAttac
 }
 
 func PrintErrorList(errorMsgs []string) {
-	if errorMsgs != nil && !config.JsonOutput {
+	if errorMsgs != nil {
 		utils.WriteError("Errors", "")
 		for i, e := range errorMsgs {
 			utils.WriteErrorSub.Write(fmt.Sprint(i+1), e)

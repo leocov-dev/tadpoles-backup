@@ -40,7 +40,7 @@ func debugRun(cmd *cobra.Command, args []string) {
 		CacheDbFile:     config.GetCacheDbFile(),
 	}
 
-	if config.JsonOutput {
+	if config.IsPrintingJson() {
 		jsonData, err := json.Marshal(debugData)
 		if err != nil {
 			utils.CmdFailed(err)

@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"tadpoles-backup/internal/client"
 	"tadpoles-backup/internal/utils"
@@ -36,7 +36,7 @@ func GetParameters() (params *ParametersResponse, err error) {
 	}
 
 	defer utils.CloseWithLog(resp.Body)
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 
 	err = json.Unmarshal(body, &params)
 

@@ -19,7 +19,7 @@ var resetPasswordCmd = &cobra.Command{
 	Short: "Reset your tadpoles.com password",
 	Run:   resetPasswordRun,
 	PreRun: func(cmd *cobra.Command, args []string) {
-		if config.NonInteractiveMode {
+		if config.IsNotInteractive() {
 			utils.CmdFailed(errors.New("Can't run this command in non-interactive mode."))
 		}
 	},

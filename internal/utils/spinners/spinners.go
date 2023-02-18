@@ -38,7 +38,7 @@ func (w *WrappedSpinner) SetPrefix(prefix string) {
 func (w *WrappedSpinner) Start(colors ...string) error {
 	if w.activeSpinner != nil {
 		return w.activeSpinner.Color(colors...) // Implicit Start()
-	} else if !config.JsonOutput {
+	} else if config.IsHumanReadable() {
 		fmt.Println(w.Text)
 	}
 	return nil
@@ -48,7 +48,7 @@ func NewWrapper(title string) *WrappedSpinner {
 	w := &WrappedSpinner{
 		Text: title,
 	}
-	if !config.NonInteractiveMode {
+	if config.IsInteractive() {
 		options := []spinner.Option{
 			spinner.WithHiddenCursor(true),
 			spinner.WithFinalMSG(title + " Done\n"),

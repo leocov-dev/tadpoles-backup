@@ -15,7 +15,6 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"tadpoles-backup/config"
@@ -69,7 +68,8 @@ func (a *FileAttachment) saveTarget(backupRoot string) (filePath string, err err
 	return filepath.Join(dir, fileName), nil
 }
 
-// download file to a temporary directory
+// Download
+// fetch file from url to a temporary directory
 func (a *FileAttachment) Download() (err error) {
 	log.Debug("Downloading: ", a.AttachmentKey)
 	log.Debugf("%s %s %s\n", a.ChildName, a.Comment, a.EventTime)
@@ -80,7 +80,7 @@ func (a *FileAttachment) Download() (err error) {
 	}
 	defer utils.CloseWithLog(resp.Body)
 
-	tempFile, err := ioutil.TempFile(config.TempDir, config.TempFilePattern)
+	tempFile, err := os.CreateTemp(config.TempDir, config.TempFilePattern)
 	if err != nil {
 		return err
 	}
@@ -101,6 +101,7 @@ func (a *FileAttachment) Download() (err error) {
 	return nil
 }
 
+// Save
 // create the necessary directories and move the temporary file to the target with a new name
 func (a *FileAttachment) Save(backupRoot string) (err error) {
 	if a.tempFile == "" {
@@ -220,6 +221,7 @@ func (a *FileAttachment) writeExifTag(sl *gjis.SegmentList) (err error) {
 	return nil
 }
 
+// setExifData
 // https://github.com/dsoprea/go-jpeg-image-structure/blob/master/jpeg_test.go
 func setExifData(sl *gjis.SegmentList, dateTime time.Time, userComment string) (err error) {
 	log.Debug("setExifData()...\n")
@@ -270,10 +272,6 @@ type FileAttachments []*FileAttachment
 type FileAttachmentMap map[string]FileAttachments
 
 func (fam FileAttachmentMap) PrettyPrint(heading string) {
-	if config.JsonOutput {
-		return
-	}
-
 	utils.WriteMain(heading, "")
 	for k, v := range fam {
 		utils.WriteSub(k, fmt.Sprint(len(v)))

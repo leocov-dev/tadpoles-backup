@@ -99,7 +99,9 @@ func backupRun(cmd *cobra.Command, args []string) {
 	}
 
 	attachmentMap := tadpoles.GroupAttachmentsByType(newAttachments)
-	attachmentMap.PrettyPrint("New Attachments")
+	if config.IsHumanReadable() {
+		attachmentMap.PrettyPrint("New Attachments")
+	}
 
 	var saveErrors []string
 	count := len(newAttachments)
@@ -110,12 +112,14 @@ func backupRun(cmd *cobra.Command, args []string) {
 
 		bw.Stop()
 
-		tadpoles.PrintErrorList(saveErrors)
+		if config.IsHumanReadable() {
+			tadpoles.PrintErrorList(saveErrors)
+		}
 	}
 
 	backupOutput := schemas.NewBackupOutput(newAttachments, attachmentMap, saveErrors)
-	err = backupOutput.JsonPrint(detailedBackupJson)
-	if err != nil {
-		utils.CmdFailed(err)
+
+	if config.IsPrintingJson() {
+		backupOutput.JsonPrint(detailedBackupJson)
 	}
 }
