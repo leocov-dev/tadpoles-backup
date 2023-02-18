@@ -21,7 +21,7 @@ jobs:
         run: go install github.com/mitchellh/gox@latest
 
       - name: Multi-target Build
-        run: RELEASE_TAG=${GITHUB_REF#refs/tags/} make release
+        run: VERSION_TAG=${GITHUB_REF#refs/tags/} make release
 
       - name: List Files
         run: ls ${{ github.workspace }}/dist

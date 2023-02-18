@@ -1,0 +1,19 @@
+version: "3.0"
+
+services:
+  # tadpoles-backup is not persistent; it will run and then exit
+  tadpoles-backup-download:
+    image: --- #leocov/tadpoles-backup:1.1.0
+
+    # image entrypoint has default --non-interactive flag set
+    command: ["backup", "/images"]
+
+    environment:
+      TADPOLES_USER: "<tadpoles.com user email>"
+      TADPOLES_PASS: "<tadpoles.com user password>"
+
+    volumes:
+      # target path to download images
+      - "<a-local-path>:/images"
+      # map this path to save cached api responses
+      - "<another-local-path:/app/.tadpoles-backup"

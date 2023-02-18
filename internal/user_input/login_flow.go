@@ -66,6 +66,9 @@ func DoLoginIfNeeded() error {
 		log.Debug("Admit Error: ", admitError)
 		if config.IsHumanReadable() {
 			utils.WriteError("Login failed", "Please try again...")
+			if config.IsNotInteractive() {
+				return admitError
+			}
 		} else {
 			return admitError
 		}
