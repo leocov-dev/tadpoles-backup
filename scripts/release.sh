@@ -12,10 +12,10 @@ cd "$DIR" || exit
 
 # Starting...
 echo
-if [[ -z $RELEASE_TAG ]]; then
+if [[ -z $VERSION_TAG ]]; then
     echo "==> Build for UNTAGGED release"
 else
-    echo "==> Build for release ${RELEASE_TAG}"
+    echo "==> Build for release ${VERSION_TAG}"
 fi
 
 # Determine the arch/os combos we're building for
@@ -41,7 +41,9 @@ fi
 # Instruct gox to build statically linked binaries
 export CGO_ENABLED=0
 
-LD_FLAGS="-s -w -X 'tadpoles-backup/config.VersionTag=${RELEASE_TAG}'"
+# -w disables debug
+# -s strips symbol data
+LD_FLAGS="-s -w -X 'tadpoles-backup/config.VersionTag=${VERSION_TAG}'"
 
 # Ensure all remote modules are downloaded and cached before build so that
 # the concurrent builds launched by gox won't race to redundantly download them.

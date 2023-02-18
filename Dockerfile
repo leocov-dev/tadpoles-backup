@@ -1,4 +1,7 @@
 FROM golang:1.19 AS builder
+ARG ARCH=amd64
+ARG OS=linux
+ARG VERSION_TAG
 
 WORKDIR /code
 
@@ -6,15 +9,15 @@ WORKDIR /code
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
-# run main build
+# run build for container
 COPY . .
-RUN  GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/tadpoles-backup
+RUN  make container GOOS=$OS GOARCH=$ARCH VERSION_TAG=$VERSION_TAG
 
 FROM alpine:latest AS prod
 
 WORKDIR /app
 COPY --from=builder /code/bin/tadpoles-backup .
 
-ENTRYPOINT ["./tadpoles-backup"]
+ENTRYPOINT ["./tadpoles-backup", "--non-interactive"]
 
-CMD ["--non-interactive debug"]
+CMD ["debug"]

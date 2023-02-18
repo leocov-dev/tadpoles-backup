@@ -79,12 +79,11 @@ func IsContainerized() bool {
 func GetDataDir() string {
 	if dataDir == "" {
 		if IsContainerized() {
-			dataDir = exeDir
+			dataDir = filepath.Join(exeDir, DotName)
 		} else {
 			dataDir = filepath.Join(userHomeDir, DotName)
-
-			_ = os.MkdirAll(dataDir, os.ModePerm)
 		}
+		_ = os.MkdirAll(dataDir, os.ModePerm)
 	}
 
 	return dataDir
