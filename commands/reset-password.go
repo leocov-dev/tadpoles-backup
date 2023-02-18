@@ -3,9 +3,9 @@ package commands
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"github.com/fatih/color"
-	"github.com/go-errors/errors"
 	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
 	"os"
@@ -20,7 +20,7 @@ var resetPasswordCmd = &cobra.Command{
 	Run:   resetPasswordRun,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if config.IsNotInteractive() {
-			utils.CmdFailed(errors.New("Can't run this command in non-interactive mode."))
+			utils.CmdFailed(errors.New("can't run this command in non-interactive mode"))
 		}
 	},
 }
