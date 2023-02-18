@@ -5,7 +5,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/weppos/publicsuffix-go/publicsuffix"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -54,7 +54,7 @@ func deserializeCookies() {
 		jsonFile, _ := os.Open(cookieFile)
 		defer utils.CloseWithLog(jsonFile)
 
-		byteValue, _ := ioutil.ReadAll(jsonFile)
+		byteValue, _ := io.ReadAll(jsonFile)
 		err := json.Unmarshal(byteValue, &storedCookies)
 
 		if err != nil {

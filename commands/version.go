@@ -20,7 +20,7 @@ func init() {
 func versionRun(cmd *cobra.Command, args []string) {
 	version := config.GetVersion()
 
-	if config.JsonOutput {
+	if config.IsPrintingJson() {
 		versionData := struct {
 			Version string `json:"version"`
 		}{

@@ -2,6 +2,7 @@ package commands
 
 import (
 	"github.com/spf13/cobra"
+	"tadpoles-backup/config"
 	"tadpoles-backup/internal/schemas"
 	"tadpoles-backup/internal/tadpoles"
 	"tadpoles-backup/internal/user_input"
@@ -50,11 +51,10 @@ func statRun(cmd *cobra.Command, _ []string) {
 	s.Stop()
 
 	attachmentMap := tadpoles.GroupAttachmentsByType(attachments)
-	attachmentMap.PrettyPrint("All Attachments")
-
-	statOutput := schemas.NewStatOutput(info, attachments, attachmentMap)
-	err = statOutput.JsonPrint(detailedStatJson)
-	if err != nil {
-		utils.CmdFailed(err)
+	if config.IsHumanReadable() {
+		attachmentMap.PrettyPrint("All Attachments")
+	} else {
+		statOutput := schemas.NewStatOutput(info, attachments, attachmentMap)
+		statOutput.JsonPrint(detailedStatJson)
 	}
 }

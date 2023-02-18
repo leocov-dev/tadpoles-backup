@@ -23,7 +23,7 @@ func (i Info) prettyFormatTimeFrame() string {
 }
 
 func (i Info) PrettyPrint() {
-	if config.JsonOutput {
+	if config.IsPrintingJson() {
 		return
 	}
 

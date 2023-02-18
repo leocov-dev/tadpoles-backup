@@ -8,7 +8,7 @@ import (
 )
 
 func CmdFailed(err error) {
-	if config.JsonOutput {
+	if config.IsPrintingJson() {
 		errorData := struct {
 			Error string `json:"error"`
 		}{

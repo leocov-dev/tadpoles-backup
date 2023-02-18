@@ -3,6 +3,7 @@ package schemas
 import (
 	"encoding/json"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 )
 
 type BackupOutput struct {
@@ -23,7 +24,7 @@ func NewBackupOutput(files FileAttachments, fileMap FileAttachmentMap, errors []
 	}
 }
 
-func (bo BackupOutput) JsonPrint(detailed bool) error {
+func (bo BackupOutput) JsonPrint(detailed bool) {
 	if !detailed {
 		bo.FileAttachments = nil
 	}
@@ -31,10 +32,8 @@ func (bo BackupOutput) JsonPrint(detailed bool) error {
 	jsonString, err := json.Marshal(bo)
 
 	if err != nil {
-		return err
+		log.Error(err)
 	}
 
 	fmt.Println(string(jsonString))
-
-	return nil
 }
