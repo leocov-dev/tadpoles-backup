@@ -36,9 +36,9 @@ func (w *WrappedSpinner) SetPrefix(prefix string) {
 }
 
 func (w *WrappedSpinner) Start(colors ...string) error {
-	if w.activeSpinner != nil {
+	if w.activeSpinner != nil { // nil would be non-interactive
 		return w.activeSpinner.Color(colors...) // Implicit Start()
-	} else if config.IsHumanReadable() {
+	} else if config.IsHumanReadable() { // not json but still non-interactive
 		fmt.Println(w.Text)
 	}
 	return nil
