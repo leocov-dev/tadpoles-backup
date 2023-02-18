@@ -40,7 +40,9 @@ func statRun(cmd *cobra.Command, _ []string) {
 	}
 	s.Stop()
 
-	info.PrettyPrint()
+	if config.IsHumanReadable() {
+		info.PrettyPrint()
+	}
 
 	s = spinners.StartNewSpinner("Checking Events...")
 
