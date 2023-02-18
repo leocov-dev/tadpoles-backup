@@ -53,4 +53,4 @@ jobs:
         run: make release
 
       - name: Run Version Command
-        run: make && "${{ github.workspace }}/bin/tadpoles-backup debug"
+        run: make && bin/tadpoles-backup debug
