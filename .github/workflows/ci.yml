@@ -52,5 +52,5 @@ jobs:
       - name: Multi-target Build
         run: make release
 
-      - name: Run Version Command
-        run: make && bin/tadpoles-backup debug
+      - name: Run Debug Command
+        run: make && bin/tadpoles-backup --non-interactive debug
