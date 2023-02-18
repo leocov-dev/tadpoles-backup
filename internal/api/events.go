@@ -81,7 +81,7 @@ func getEventPage(params *url.Values, events *Events) error {
 	urlBase.RawQuery = params.Encode()
 
 	log.Debug("Query: ", urlBase.String())
-	resp, err := client.ApiClient.Get(urlBase.String())
+	resp, err := client.GetApiClient().Get(urlBase.String())
 	if err != nil {
 		return err
 	}
