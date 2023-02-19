@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tadpoles-backup-images-volume
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  mountOptions:
+    - hard
+    - noatime
+    - nfsvers=4.1
+  nfs:
+    path: /my/exported/nfs/path
+    server: <my nfs server>
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: tadpoles-backup-images-claim
+  namespace: tadpoles-backup
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

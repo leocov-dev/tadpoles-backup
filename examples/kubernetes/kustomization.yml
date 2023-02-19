@@ -1,0 +1,16 @@
+namespace: tadpoles-backup
+generatorOptions:
+  disableNameSuffixHash: true
+resources:
+  - deployment.yml
+  - volume.yml
+secretGenerator:
+  - name: tadpoles-auth
+    envs:
+      - tadpoles-auth.env
+  # generate docker registry secret here or create it with
+  # `kubectl create secret docker-registry regcred` command
+  - name: regcred
+    type: kubernetes.io/dockerconfigjson
+    literals:
+      - .dockerconfigjson=<CONFIG JSON>
