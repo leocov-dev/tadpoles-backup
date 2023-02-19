@@ -4,12 +4,11 @@ on:
   push:
     branches:
       - main
-    tags:
-      - v*
 
 jobs:
   release-draft:
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
       - name: Checkout
@@ -18,8 +17,9 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version-file: "${{ github.workspace }}/go.mod"
+          go-version-file: "./go.mod"
           cache: true
+          cache-dependency-path: "./go.sum"
 
       - name: Install GOX
         run: go install github.com/mitchellh/gox@latest
@@ -28,15 +28,19 @@ jobs:
         run: VERSION_TAG=${GITHUB_REF#refs/tags/} make release
 
       - name: List Files
-        id: build_files
-        run: ls ${{ github.workspace }}/dist > $GITHUB_OUTPUT
+        run: ls ${{ github.workspace }}/dist
 
-#      - name: Draft Release
-#        permissions:
-#          contents: write
-#        uses: release-drafter/release-drafter@v5
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Draft Release
+        permissions:
+          contents: write
+        uses: release-drafter/release-drafter@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload --clobber ${GITHUB_REF#refs/tags/} ./dist/*
 
 #name: release
 #
