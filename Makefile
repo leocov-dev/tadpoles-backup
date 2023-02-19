@@ -1,4 +1,3 @@
-VERSION_TAG=
 GOFMT_FILES?=$$(find . -type f -name '*.go')
 
 default: dev

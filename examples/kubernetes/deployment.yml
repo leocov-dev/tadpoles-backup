@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tadpoles-backup
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: tadpoles-backup
+spec:
+  schedule: "0 1 * * *"  # every day at 1 AM
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          volumes:
+            - name: image-dir
+              persistentVolumeClaim:
+                claimName: tadpoles-backup-images-claim
+          imagePullSecrets:
+            - name: regcred
+          containers:
+            - name: tadpoles-backup
+              image: leocov/tadpoles-backup:latest
+              imagePullPolicy: IfNotPresent
+              command: [ "backup", "/images" ]
+              volumeMounts:
+                - mountPath: "/images"
+                  name: image-dir
+              envFrom:
+                - secretRef:
+                    name: tadpoles-auth
+          restartPolicy: Never
