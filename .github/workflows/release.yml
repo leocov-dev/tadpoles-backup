@@ -1,12 +1,16 @@
-name: release
+name: draft release
 
 on:
-  release:
-    types: [created]
+  push:
+    branches:
+      - main
+    tags:
+      - ^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
 
 jobs:
-  release:
+  release-draft:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -24,11 +28,47 @@ jobs:
         run: VERSION_TAG=${GITHUB_REF#refs/tags/} make release
 
       - name: List Files
-        run: ls ${{ github.workspace }}/dist
+        id: build_files
+        run: ls ${{ github.workspace }}/dist > $GITHUB_OUTPUT
 
-      - name: Push Files
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ${{ github.workspace }}/dist/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Draft Release
+#        permissions:
+#          contents: write
+#        uses: release-drafter/release-drafter@v5
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#name: release
+#
+#on:
+#  release:
+#    types: [ created ]
+#
+#jobs:
+#  release:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#
+#      - name: Setup Go
+#        uses: actions/setup-go@v3
+#        with:
+#          go-version-file: "${{ github.workspace }}/go.mod"
+#          cache: true
+#
+#      - name: Install GOX
+#        run: go install github.com/mitchellh/gox@latest
+#
+#      - name: Multi-target Build
+#        run: VERSION_TAG=${GITHUB_REF#refs/tags/} make release
+#
+#      - name: List Files
+#        run: ls ${{ github.workspace }}/dist
+#
+#      - name: Push Files
+#        uses: softprops/action-gh-release@v1
+#        with:
+#          files: ${{ github.workspace }}/dist/*
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
