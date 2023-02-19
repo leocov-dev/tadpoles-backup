@@ -10,7 +10,7 @@ jobs:
     name: Push Docker Image to Docker Hub
     runs-on: ubuntu-latest
     steps:
-      - name: Set up QEMU
+      - name: Set up  QEMU
         uses: docker/setup-qemu-action@v2
         with:
           platforms: arm64
