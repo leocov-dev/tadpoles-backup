@@ -1,7 +1,6 @@
 name: publish docker image
 
 on:
-  pull_request:
   release:
     types: [ published ]
 
@@ -13,7 +12,7 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
-      - name: Set up  QEMU
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
         with:
           platforms: arm64
