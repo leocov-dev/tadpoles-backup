@@ -31,8 +31,6 @@ jobs:
         run: ls ${{ github.workspace }}/dist
 
       - name: Draft Release
-        permissions:
-          contents: write
         uses: release-drafter/release-drafter@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
