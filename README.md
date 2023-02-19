@@ -3,7 +3,7 @@
 # Tadpoles Image Backup
 
 ## About
-This tool will allow you to save all your child's images at full resolution from _tadpoles.com_.
+This tool will allow you to save all your child's images at full resolution from _tadpoles.com_. Comments and timestamp info will be applied as EXIF image metadata.
 
 Current save back-ends:
 * Local file system
@@ -51,13 +51,34 @@ $ tadpoles-backup stat
 $ tadpoles-backup backup "/a/directory/on/your/machine/"
 ```
 
-With docker:
+> Note for macOS
+> Gatekeeper will prevent you from running unidentified apps.
+> You can allow the app from system preferences or by right-click opening
 
+### Docker
+
+Pre-built images are available from Docker Hub at [leocov/tadpoles-backup](https://hub.docker.com/r/leocov/tadpoles-backup).
+
+```shell
+$ docker pull leocov/tadpoles-backup:latest
+
+# list account info
+$ docker run --rm -eTADPOLES_USER=<email> -eTADPOLES_PASS=<password> leocov/tadpoles-backup stat
+
+# download new images
+$ docker run --rm -eTADPOLES_USER=<email> -eTADPOLES_PASS=<password> -v$HOME/Pictures/tadpoles:/images leocov/tadpoles-backup backup /images
+
+# enable api response caching by mapping app data directory
+$ docker run --rm -eTADPOLES_USER=<email> -eTADPOLES_PASS=<password> -v$HOME/.tadpoles-backup:/app/.tadpoles-backup leocov/tadpoles-backup stat
 ```
-docker build -t tadpoles .
-mkdir ~/tadpoles_bk
-docker run -it -v$HOME/tadpoles_bk:/usr/src/app/data --rm tadpoles backup data
+
+You may also build the docker image locally.
+```shell
+# will be automatically tagged as `tadpoles-backup`
+$ make docker-image
 ```
+
+Docker Compose and Kubernetes [examples](examples) are available.
 
 ## Development
 
