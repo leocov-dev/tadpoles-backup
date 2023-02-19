@@ -11,7 +11,7 @@ Current save back-ends:
 * Local file system
 
 ## Install
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/leocov-dev/tadpoles-backup)](https://tadpoles-backup/releases/latest)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/leocov-dev/tadpoles-backup)](https://github.com/leocov-dev/tadpoles-backup/releases/latest)
 
 Get [latest](https://tadpoles-backup/releases/latest) prebuilt executable from the [releases](https://tadpoles-backup/releases) page.
 
@@ -58,9 +58,9 @@ $ tadpoles-backup backup "/a/directory/on/your/machine/"
 > You can allow the app from system preferences or by right-click opening
 
 ### Docker
-![Docker Image Version (latest by date)](https://img.shields.io/docker/v/leocov/tadpoles-backup?label=latest&sort=date)
+Pre-built images are available from Docker Hub
 
-Pre-built images are available from Docker Hub at [leocov/tadpoles-backup](https://hub.docker.com/r/leocov/tadpoles-backup).
+[![Docker Image Version (latest by date)](https://img.shields.io/docker/v/leocov/tadpoles-backup?label=latest&sort=date)](https://hub.docker.com/r/leocov/tadpoles-backup)
 
 ```shell
 $ docker pull leocov/tadpoles-backup:latest
