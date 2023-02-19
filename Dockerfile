@@ -1,6 +1,4 @@
-FROM golang:1.19 AS builder
-ARG ARCH=amd64
-ARG OS=linux
+FROM golang:1.19-alpine3.17 AS builder
 ARG VERSION_TAG
 
 WORKDIR /code
@@ -11,9 +9,9 @@ RUN go mod download && go mod verify
 
 # run build for container
 COPY . .
-RUN  make container GOOS=$OS GOARCH=$ARCH VERSION_TAG=$VERSION_TAG
+RUN  CGO_ENABLED=0 go build -o bin/tadpoles-backup --ldflags="-X 'tadpoles-backup/config.VersionTag=$VERSION_TAG'"
 
-FROM alpine:latest AS prod
+FROM alpine:3.17 AS prod
 
 WORKDIR /app
 COPY --from=builder /code/bin/tadpoles-backup .
