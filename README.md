@@ -1,4 +1,6 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT) ![GitHub go.mod Go version (branch)](https://img.shields.io/github/go-mod/go-version/leocov-dev/tadpoles-backup/main) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/leocov-dev/tadpoles-backup/ci)
+[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT)
+![Go version for branch](https://img.shields.io/github/go-mod/go-version/leocov-dev/tadpoles-backup/main)
+![CI Status](https://img.shields.io/github/actions/workflow/status/leocov-dev/tadpoles-backup/ci.yml)
 
 # Tadpoles Image Backup
 
@@ -56,6 +58,7 @@ $ tadpoles-backup backup "/a/directory/on/your/machine/"
 > You can allow the app from system preferences or by right-click opening
 
 ### Docker
+![Docker Image Version (latest by date)](https://img.shields.io/docker/v/leocov/tadpoles-backup?label=latest&sort=date)
 
 Pre-built images are available from Docker Hub at [leocov/tadpoles-backup](https://hub.docker.com/r/leocov/tadpoles-backup).
 
