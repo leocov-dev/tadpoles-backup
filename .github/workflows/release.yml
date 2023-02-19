@@ -10,6 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Define Version
+        id: vars
+        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -24,20 +28,20 @@ jobs:
         run: go install github.com/mitchellh/gox@latest
 
       - name: Multi-target Build
-        run: VERSION_TAG=${GITHUB_REF#refs/tags/} make release
+        run: VERSION_TAG=${{ steps.vars.outputs.tag }} make release
 
       - name: List Files
-        run: ls ${{ github.workspace }}/dist
+        run: ls ./dist
 
       - name: Draft Release
         uses: release-drafter/release-drafter@v5
         with:
-          tag: ${GITHUB_REF#refs/tags/}
-          version: ${GITHUB_REF#refs/tags/}
+          tag: ${{ steps.vars.outputs.tag }}
+          version: ${{ steps.vars.outputs.tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload --clobber ${GITHUB_REF#refs/tags/} ./dist/*
+        run: gh release upload --clobber ${{ steps.vars.outputs.tag }} ./dist/*
