@@ -16,7 +16,7 @@ spec:
     - nfsvers=4.1
   nfs:
     path: /my/exported/nfs/path
-    server: <my nfs server>
+    server: 1.2.3.4
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1

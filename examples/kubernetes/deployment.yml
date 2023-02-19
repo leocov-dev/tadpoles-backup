@@ -9,6 +9,7 @@ metadata:
   name: tadpoles-backup
 spec:
   schedule: "0 1 * * *"  # every day at 1 AM
+  concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
@@ -19,13 +20,12 @@ spec:
             - name: image-dir
               persistentVolumeClaim:
                 claimName: tadpoles-backup-images-claim
-          imagePullSecrets:
-            - name: regcred
           containers:
             - name: tadpoles-backup
               image: leocov/tadpoles-backup:latest
               imagePullPolicy: IfNotPresent
-              command: [ "backup", "/images" ]
+#              command: ["./tadpoles-backup --non-interactive"]  # this is already entrypoint default
+              args: [ "backup", "/images" ]
               volumeMounts:
                 - mountPath: "/images"
                   name: image-dir
