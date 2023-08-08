@@ -15,7 +15,7 @@ import (
 )
 
 func DoLoginIfNeeded() error {
-	if api.S.Login.NeedsLogin() {
+	if api.Spec.Login.NeedsLogin() {
 		// no valid cookie, do login
 		var email string
 		var password string
@@ -31,7 +31,7 @@ func DoLoginIfNeeded() error {
 			)
 		}
 
-		expires, loginError := api.S.Login.DoLogin(email, password)
+		expires, loginError := api.Spec.Login.DoLogin(email, password)
 
 		if loginError != nil {
 			if config.IsHumanReadable() {

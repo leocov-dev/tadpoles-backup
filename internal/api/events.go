@@ -42,7 +42,7 @@ type pageResponse struct {
 	Events Events `json:"events"`
 }
 
-func (s *Spec) getEventPage(request *http.Client, params *url.Values, events *Events) error {
+func (s *spec) getEventPage(request *http.Client, params *url.Values, events *Events) error {
 	urlBase := s.Endpoints.Events
 	urlBase.RawQuery = params.Encode()
 

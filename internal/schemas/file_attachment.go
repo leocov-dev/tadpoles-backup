@@ -74,7 +74,7 @@ func (a *FileAttachment) Download() (err error) {
 	log.Debug("Downloading: ", a.AttachmentKey)
 	log.Debugf("%s %s %s\n", a.ChildName, a.Comment, a.EventTime)
 
-	resp, err := api.S.GetAttachment(a.EventKey, a.AttachmentKey)
+	resp, err := api.Spec.GetAttachment(a.EventKey, a.AttachmentKey)
 	if err != nil {
 		return err
 	}

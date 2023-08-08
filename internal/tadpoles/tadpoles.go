@@ -16,7 +16,7 @@ import (
 )
 
 func GetAccountInfo() (info *schemas.Info, err error) {
-	parameters, err := api.S.GetParameters()
+	parameters, err := api.Spec.GetParameters()
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func GetEventFileAttachmentData(firstEventTime time.Time, lastEventTime time.Tim
 		}
 	}
 
-	newEvents, err := api.S.GetEvents(firstEventTime, lastEventTime)
+	newEvents, err := api.Spec.GetEvents(firstEventTime, lastEventTime)
 	if err != nil {
 		return nil, err
 	}

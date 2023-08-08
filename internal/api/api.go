@@ -14,13 +14,13 @@ import (
 	"time"
 )
 
-type Spec struct {
+type spec struct {
 	Endpoints Endpoints
 	request   *http.Client
 	Login     Login
 }
 
-func (s *Spec) GetAttachment(eventKey string, attachmentKey string) (resp *http.Response, err error) {
+func (s *spec) GetAttachment(eventKey string, attachmentKey string) (resp *http.Response, err error) {
 	params := url.Values{
 		"obj": {eventKey},
 		"key": {attachmentKey},
@@ -40,7 +40,7 @@ func (s *Spec) GetAttachment(eventKey string, attachmentKey string) (resp *http.
 	return resp, err
 }
 
-func (s *Spec) GetEvents(firstEventTime time.Time, lastEventTime time.Time) (events Events, err error) {
+func (s *spec) GetEvents(firstEventTime time.Time, lastEventTime time.Time) (events Events, err error) {
 	params := url.Values{
 		"direction":           {"range"},
 		"earliest_event_time": {strconv.FormatInt(firstEventTime.Unix(), 10)},
@@ -67,7 +67,7 @@ func (s *Spec) GetEvents(firstEventTime time.Time, lastEventTime time.Time) (eve
 	return events, nil
 }
 
-func (s *Spec) GetParameters() (params *ParametersResponse, err error) {
+func (s *spec) GetParameters() (params *ParametersResponse, err error) {
 	resp, err := s.request.Get(s.Endpoints.Parameters.String())
 	if err != nil {
 		return nil, err
@@ -91,8 +91,8 @@ func (t *tadpolesTransport) RoundTrip(req *http.Request) (*http.Response, error)
 	return http.DefaultTransport.RoundTrip(req)
 }
 
-func newSpec() *Spec {
-	spec := &Spec{
+func newSpec() *spec {
+	spec := &spec{
 		request: &http.Client{
 			Jar:       deserializeCookies(tadpolesUrl),
 			Transport: &tadpolesTransport{},
@@ -113,9 +113,9 @@ func newSpec() *Spec {
 }
 
 var (
-	S *Spec
+	Spec *spec
 )
 
 func SetupAPISpec() {
-	S = newSpec()
+	Spec = newSpec()
 }
