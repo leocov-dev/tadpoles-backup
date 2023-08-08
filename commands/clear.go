@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	resetOptions    = []string{"cookie", "cache"}
+	resetOptions    = []string{"all", "cookie", "cache"}
 	resetOptsString = strings.Join(resetOptions, " | ")
 
 	clearCmd = &cobra.Command{
@@ -26,21 +26,23 @@ func init() {
 
 func clearArgs() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
-		if len(args) >= 1 {
-			choice := args[0]
-
-			found := false
-			for _, item := range resetOptions {
-				if item == choice {
-					found = true
-				}
-			}
-
-			if !found {
-				return fmt.Errorf("specify one of [%s] or leave blank to reset all", resetOptsString)
-			}
-
+		if len(args) < 1 {
+			return fmt.Errorf("specify one of [%s]", resetOptsString)
 		}
+
+		choice := args[0]
+
+		found := false
+		for _, item := range resetOptions {
+			if item == choice {
+				found = true
+			}
+		}
+
+		if !found {
+			return fmt.Errorf("specify one of [%s]", resetOptsString)
+		}
+
 		return nil
 	}
 }
@@ -58,7 +60,7 @@ func clearRun(cmd *cobra.Command, args []string) {
 		err = config.ClearCookiesFile()
 	case "cache":
 		err = config.ClearCacheFile()
-	default:
+	case "all":
 		err = config.ClearAll()
 	}
 

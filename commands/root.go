@@ -5,7 +5,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
+	"strings"
 	"tadpoles-backup/config"
+	"tadpoles-backup/internal/api"
 	"tadpoles-backup/internal/cache"
 	"tadpoles-backup/internal/utils"
 )
@@ -17,11 +19,23 @@ var (
 			config.Name,
 			config.GetVersion()),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			if config.EnvProvider != "" {
+				providerErr := cmd.Flags().Set("provider", config.EnvProvider)
+				if providerErr != nil {
+					utils.CmdFailed(fmt.Errorf(
+						"environment variable PROVIDER should be one of [%s]",
+						strings.Join(config.Provider.Allowed, ", "),
+					))
+				}
+			}
+
 			setLoggingLevel()
 			err := cache.InitializeCache()
 			if err != nil {
 				utils.CmdFailed(err)
 			}
+
+			api.SetupAPISpec()
 		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
 			_ = os.RemoveAll(config.TempDir)
@@ -31,6 +45,8 @@ var (
 )
 
 func init() {
+	rootCmd.PersistentFlags().VarP(config.Provider, "provider", "p", fmt.Sprintf("Service provider [%s]", strings.Join(config.Provider.Allowed, ", ")))
+
 	rootCmd.PersistentFlags().BoolVarP(&config.NonInteractiveMode, "non-interactive", "n", false, "Don't use interactive prompts or show dynamic elements.")
 
 	rootCmd.PersistentFlags().BoolVarP(&config.JsonOutput, "json", "j", false, "Output as JSON.")
