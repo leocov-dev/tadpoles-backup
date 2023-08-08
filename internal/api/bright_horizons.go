@@ -60,7 +60,7 @@ func (l *BrightHorizonsLogin) DoLogin(email string, password string) (*time.Time
 	token := string(body)
 
 	// TODO: remove this log
-	logrus.Debug("Token:", token)
+	logrus.Debug("JWT Token:", token)
 
 	return l.validate(token)
 }
