@@ -26,6 +26,9 @@ var (
 	EnvUsername               = os.Getenv("TADPOLES_USER")
 	EnvPassword               = os.Getenv("TADPOLES_PASS")
 
+	EnvProvider = os.Getenv("PROVIDER")
+	Provider    = NewProviderConfig([]string{"tadpoles", "brightHorizons"}, "tadpoles")
+
 	NonInteractiveMode bool
 	JsonOutput         bool
 	dataDir            string
@@ -116,11 +119,25 @@ func GetCacheDbFile() string {
 }
 
 func ClearCookiesFile() error {
+	file := GetTadpolesCookieFile()
+
+	_, err := os.OpenFile(file, os.O_RDONLY, 0444)
+	if os.IsNotExist(err) {
+		return nil
+	}
+
 	return os.Remove(GetTadpolesCookieFile())
 }
 
 func ClearCacheFile() error {
-	return os.Remove(GetCacheDbFile())
+	file := GetCacheDbFile()
+
+	_, err := os.OpenFile(file, os.O_RDONLY, 0444)
+	if os.IsNotExist(err) {
+		return nil
+	}
+
+	return os.Remove(file)
 }
 
 func ClearAll() error {

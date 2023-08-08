@@ -2,12 +2,9 @@ package user_input
 
 import (
 	"bufio"
-	"crypto/x509"
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh/terminal"
-	"net/url"
 	"os"
 	"strings"
 	"tadpoles-backup/config"
@@ -18,26 +15,8 @@ import (
 )
 
 func DoLoginIfNeeded() error {
-	_, err := api.PostAdmit()
-
-	if err == nil {
-		// serialized credential cookie was valid!
-		return nil
-	}
-
-	if urlError, ok := err.(*url.Error); ok {
-		switch e := urlError.Unwrap().(type) {
-		case x509.CertificateInvalidError:
-			return errors.New(fmt.Sprintf("cannot connect to tadpoles.com: %s", e.Error()))
-		default:
-			return urlError
-		}
-	}
-
-	log.Debug("Admit Error: ", err)
-
-	// no valid cookie, do login
-	for {
+	if api.S.Login.NeedsLogin() {
+		// no valid cookie, do login
 		var email string
 		var password string
 
@@ -47,30 +26,23 @@ func DoLoginIfNeeded() error {
 		} else if config.IsInteractive() {
 			email, password = credentials()
 		} else {
-			utils.CmdFailed(errors.New("credentials must be supplied from the environment if running in non-interactive mode"))
+			utils.CmdFailed(
+				errors.New("credentials must be supplied from the environment if running in non-interactive mode"),
+			)
 		}
 
-		loginError := api.PostLogin(email, password)
+		expires, loginError := api.S.Login.DoLogin(email, password)
+
 		if loginError != nil {
-			log.Debug("Login Error: ", err)
+			if config.IsHumanReadable() {
+				utils.WriteError("Login failed", "Please try again...")
+			}
+			return loginError
 		}
 
-		expires, admitError := api.PostAdmit()
-		if admitError == nil {
-			if config.IsHumanReadable() {
-				utils.WriteInfo("Login expires", expires.In(time.Local).Format("Mon Jan 2 03:04:05 PM"))
-				fmt.Println("")
-			}
-			break
-		}
-		log.Debug("Admit Error: ", admitError)
 		if config.IsHumanReadable() {
-			utils.WriteError("Login failed", "Please try again...")
-			if config.IsNotInteractive() {
-				return admitError
-			}
-		} else {
-			return admitError
+			utils.WriteInfo("Login expires", expires.In(time.Local).Format("Mon Jan 2 03:04:05 PM"))
+			fmt.Println("")
 		}
 	}
 
