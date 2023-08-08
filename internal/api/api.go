@@ -101,7 +101,7 @@ func newSpec() *Spec {
 	}
 
 	switch config.Provider.String() {
-	case "brightHorizons":
+	case config.BRIGHT_HORIZONS:
 		log.Debug("using Bright Horizons login")
 		spec.Login = newBrightHorizonsLogin(spec.request)
 	default:
