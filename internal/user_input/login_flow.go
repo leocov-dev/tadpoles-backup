@@ -51,7 +51,19 @@ func DoLoginIfNeeded() error {
 
 // get username and password from user user_input
 func credentials() (string, string) {
-	utils.WriteInfo("Input", "tadpoles.com login required...")
+	var providerDisplayText string
+
+	switch config.Provider.String() {
+	case config.BRIGHT_HORIZONS:
+		providerDisplayText = "brighthorizons.com"
+	default:
+		providerDisplayText = "tadpoles.com"
+	}
+
+	utils.WriteInfo(
+		"Input",
+		fmt.Sprintf("%s login required...", providerDisplayText),
+	)
 	reader := bufio.NewReader(os.Stdin)
 
 	utils.WriteInfo("Email", "", headings.NoNewLine)

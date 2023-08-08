@@ -8,6 +8,11 @@ import (
 	"strings"
 )
 
+const (
+	TADPOLES        string = "tadpoles"
+	BRIGHT_HORIZONS        = "brightHorizons"
+)
+
 var (
 	// VersionTag
 	// this must be exported to set it from build command
@@ -27,7 +32,7 @@ var (
 	EnvPassword               = os.Getenv("TADPOLES_PASS")
 
 	EnvProvider = os.Getenv("PROVIDER")
-	Provider    = NewProviderConfig([]string{"tadpoles", "brightHorizons"}, "tadpoles")
+	Provider    = NewProviderConfig([]string{TADPOLES, BRIGHT_HORIZONS}, TADPOLES)
 
 	NonInteractiveMode bool
 	JsonOutput         bool
