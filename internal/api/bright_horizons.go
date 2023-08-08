@@ -48,6 +48,9 @@ func (l *BrightHorizonsLogin) DoLogin(email string, password string) (*time.Time
 	}
 	defer utils.CloseWithLog(resp.Body)
 	body, _ := io.ReadAll(resp.Body)
+	token := string(body)
+
+	logrus.Debug("JWT Token: ", token)
 
 	return l.validate(string(body))
 }
