@@ -10,38 +10,29 @@ import (
 )
 
 type BrightHorizonsLogin struct {
-	request     *http.Client
+	client      *http.Client
 	loginUrl    *url.URL
 	validateUrl *url.URL
-	admitUrl    *url.URL
 }
 
 func newBrightHorizonsLogin(request *http.Client) *BrightHorizonsLogin {
 	loginUrl, _ := url.Parse("https://familyinfocenter.brighthorizons.com/mybrightday/login")
 
 	return &BrightHorizonsLogin{
-		request:     request,
+		client:      request,
 		loginUrl:    loginUrl,
 		validateUrl: tadpolesUrl.JoinPath("auth", "jwt", "validate"),
-		admitUrl:    apiV1Root.JoinPath("athome", "admit"),
 	}
 }
 
 func (l *BrightHorizonsLogin) NeedsLogin() bool {
-	zone, _ := time.Now().Zone()
+	_, err := l.admit()
 
-	resp, err := l.request.PostForm(
-		l.admitUrl.String(),
-		url.Values{
-			"tz": {zone},
-		},
-	)
-
-	return err != nil || resp.StatusCode != http.StatusOK
+	return err != nil
 }
 
 func (l *BrightHorizonsLogin) DoLogin(email string, password string) (*time.Time, error) {
-	resp, err := l.request.PostForm(
+	resp, err := l.client.PostForm(
 		l.loginUrl.String(),
 		url.Values{
 			"username": {email},
@@ -57,18 +48,14 @@ func (l *BrightHorizonsLogin) DoLogin(email string, password string) (*time.Time
 	}
 	defer utils.CloseWithLog(resp.Body)
 	body, _ := io.ReadAll(resp.Body)
-	token := string(body)
 
-	// TODO: remove this log
-	logrus.Debug("JWT Token:", token)
-
-	return l.validate(token)
+	return l.validate(string(body))
 }
 
 func (l *BrightHorizonsLogin) validate(token string) (expires *time.Time, err error) {
 	logrus.Debug("Validate...")
 
-	resp, err := l.request.PostForm(
+	resp, err := l.client.PostForm(
 		l.validateUrl.String(),
 		url.Values{
 			"token": {token},
@@ -81,10 +68,11 @@ func (l *BrightHorizonsLogin) validate(token string) (expires *time.Time, err er
 		return nil, newRequestError(resp, "bright horizons token validation failed")
 	}
 
-	serializeResponseCookies(resp)
-
-	inLocalTime := resp.Cookies()[0].Expires
-
 	logrus.Debug("Validate successful")
-	return &inLocalTime, nil
+
+	return l.admit()
+}
+
+func (l *BrightHorizonsLogin) admit() (expires *time.Time, err error) {
+	return admitAndStoreCookie(l.client)
 }
