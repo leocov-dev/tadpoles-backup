@@ -24,7 +24,10 @@ func GetAccountInfo() (info *schemas.Info, err error) {
 	return schemas.NewInfoFromParams(parameters), nil
 }
 
-func GetEventFileAttachmentData(firstEventTime time.Time, lastEventTime time.Time) (fileAttachments schemas.FileAttachments, err error) {
+func GetEventFileAttachmentData(
+	firstEventTime time.Time,
+	lastEventTime time.Time,
+) (fileAttachments schemas.FileAttachments, err error) {
 	events, err := cache.ReadEventCache()
 	if err != nil {
 		return nil, err
@@ -57,7 +60,8 @@ func GetEventFileAttachmentData(firstEventTime time.Time, lastEventTime time.Tim
 
 func DownloadFileAttachments(
 	newAttachments schemas.FileAttachments,
-	backupRoot string, ctx context.Context,
+	backupRoot string,
+	ctx context.Context,
 	concurrencyLimit int,
 	barWrapper *progress.BarWrapper,
 ) []string {
@@ -106,7 +110,10 @@ func GroupAttachmentsByType(attachments schemas.FileAttachments) schemas.FileAtt
 	return attachmentTypeMap
 }
 
-func PruneAlreadyDownloaded(attachments schemas.FileAttachments, backupTarget string) (newAttachments schemas.FileAttachments, err error) {
+func PruneAlreadyDownloaded(
+	attachments schemas.FileAttachments,
+	backupTarget string,
+) (newAttachments schemas.FileAttachments, err error) {
 	attachmentNames := make(map[string]*schemas.FileAttachment)
 	for _, att := range attachments {
 		attachmentNames[att.SaveName()] = att
