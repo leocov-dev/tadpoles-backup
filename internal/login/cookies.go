@@ -1,4 +1,4 @@
-package api
+package login
 
 import (
 	"encoding/json"
@@ -14,8 +14,8 @@ import (
 	"tadpoles-backup/internal/utils"
 )
 
-// load cookies from serialized json on disk if able.
-func deserializeCookies(hostUrl *url.URL) *cookiejar.Jar {
+// DeserializeCookies load cookies from serialized json on disk if able.
+func DeserializeCookies(hostUrl *url.URL) *cookiejar.Jar {
 	jar, _ := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.CookieJarList})
 
 	cookieFile := config.GetTadpolesCookieFile()

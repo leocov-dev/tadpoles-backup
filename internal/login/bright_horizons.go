@@ -1,4 +1,4 @@
-package api
+package login
 
 import (
 	"github.com/sirupsen/logrus"
@@ -15,7 +15,7 @@ type BrightHorizonsLogin struct {
 	validateUrl *url.URL
 }
 
-func newBrightHorizonsLogin(request *http.Client) *BrightHorizonsLogin {
+func NewBrightHorizonsLogin(request *http.Client) *BrightHorizonsLogin {
 	loginUrl, _ := url.Parse("https://familyinfocenter.brighthorizons.com/mybrightday/login")
 	validateUrl, _ := url.Parse("https://mybrightday.brighthorizons.com/auth/jwt/validate")
 
@@ -45,7 +45,7 @@ func (l *BrightHorizonsLogin) DoLogin(email string, password string) (*time.Time
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, newRequestError(resp, "bright horizons login failed")
+		return nil, utils.NewRequestError(resp, "bright horizons login failed")
 	}
 	defer utils.CloseWithLog(resp.Body)
 	body, _ := io.ReadAll(resp.Body)
@@ -69,7 +69,7 @@ func (l *BrightHorizonsLogin) validate(token string) (expires *time.Time, err er
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, newRequestError(resp, "bright horizons token validation failed")
+		return nil, utils.NewRequestError(resp, "bright horizons token validation failed")
 	}
 
 	logrus.Debug("Validate successful")

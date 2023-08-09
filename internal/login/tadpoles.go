@@ -1,9 +1,10 @@
-package api
+package login
 
 import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
+	"tadpoles-backup/internal/utils"
 	"time"
 )
 
@@ -12,7 +13,7 @@ type TadpolesLogin struct {
 	loginUrl *url.URL
 }
 
-func newTadpolesLogin(request *http.Client) *TadpolesLogin {
+func NewTadpolesLogin(request *http.Client) *TadpolesLogin {
 	loginUrl, _ := url.Parse("https://www.tadpoles.com/auth/login")
 	return &TadpolesLogin{
 		client:   request,
@@ -40,7 +41,7 @@ func (l *TadpolesLogin) DoLogin(email string, password string) (*time.Time, erro
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, newRequestError(resp, "tadpoles login failed")
+		return nil, utils.NewRequestError(resp, "tadpoles login failed")
 	}
 
 	logrus.Debug("Login successful")
