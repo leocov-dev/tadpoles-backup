@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strconv"
 	"tadpoles-backup/config"
+	"tadpoles-backup/internal/login"
 	"tadpoles-backup/internal/utils"
 	"time"
 )
@@ -17,7 +18,7 @@ import (
 type spec struct {
 	Endpoints Endpoints
 	request   *http.Client
-	Login     Login
+	Login     login.Login
 }
 
 func (s *spec) GetAttachment(eventKey string, attachmentKey string) (resp *http.Response, err error) {
@@ -34,7 +35,7 @@ func (s *spec) GetAttachment(eventKey string, attachmentKey string) (resp *http.
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, newRequestError(resp, "could not get attachment")
+		return nil, utils.NewRequestError(resp, "could not get attachment")
 	}
 
 	return resp, err
@@ -73,7 +74,7 @@ func (s *spec) GetParameters() (params *ParametersResponse, err error) {
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, newRequestError(resp, "could not get parameters")
+		return nil, utils.NewRequestError(resp, "could not get parameters")
 	}
 
 	defer utils.CloseWithLog(resp.Body)
@@ -97,25 +98,25 @@ func newSpec() *spec {
 		log.Debug("using Bright Horizons login")
 		endpoints := newEndpoints("https://mybrightday.brighthorizons.com")
 		request := &http.Client{
-			Jar:       deserializeCookies(endpoints.Root),
+			Jar:       login.DeserializeCookies(endpoints.Root),
 			Transport: &randomUserAgentTransport{},
 		}
 		return &spec{
 			request:   request,
 			Endpoints: endpoints,
-			Login:     newBrightHorizonsLogin(request),
+			Login:     login.NewBrightHorizonsLogin(request),
 		}
 	default:
 		log.Debug("using Tadpoles login")
 		endpoints := newEndpoints("https://www.tadpoles.com")
 		request := &http.Client{
-			Jar:       deserializeCookies(endpoints.Root),
+			Jar:       login.DeserializeCookies(endpoints.Root),
 			Transport: &randomUserAgentTransport{},
 		}
 		return &spec{
 			request:   request,
 			Endpoints: endpoints,
-			Login:     newTadpolesLogin(request),
+			Login:     login.NewTadpolesLogin(request),
 		}
 	}
 }

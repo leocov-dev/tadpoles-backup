@@ -1,9 +1,10 @@
-package api
+package login
 
 import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
+	"tadpoles-backup/internal/utils"
 	"time"
 )
 
@@ -26,7 +27,7 @@ func admitAndStoreCookie(request *http.Client) (*time.Time, error) {
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, newRequestError(resp, "tadpoles admit failed")
+		return nil, utils.NewRequestError(resp, "tadpoles admit failed")
 	}
 
 	serializeResponseCookies(resp)

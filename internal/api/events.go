@@ -52,7 +52,7 @@ func (s *spec) getEventPage(request *http.Client, params *url.Values, events *Ev
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return newRequestError(resp, "could not get events page")
+		return utils.NewRequestError(resp, "could not get events page")
 	}
 
 	defer utils.CloseWithLog(resp.Body)

@@ -1,10 +1,9 @@
-package api
+package utils
 
 import (
 	"fmt"
 	"io"
 	"net/http"
-	"tadpoles-backup/internal/utils"
 )
 
 type RequestError struct {
@@ -13,7 +12,7 @@ type RequestError struct {
 }
 
 func (e *RequestError) Error() string {
-	defer utils.CloseWithLog(e.Response.Body)
+	defer CloseWithLog(e.Response.Body)
 	body, _ := io.ReadAll(e.Response.Body)
 
 	msg := fmt.Sprintf(
@@ -26,7 +25,7 @@ func (e *RequestError) Error() string {
 	return msg
 }
 
-func newRequestError(resp *http.Response, message string) *RequestError {
+func NewRequestError(resp *http.Response, message string) *RequestError {
 	return &RequestError{
 		Response: resp,
 		Message:  message,
