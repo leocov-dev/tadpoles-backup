@@ -17,11 +17,12 @@ type BrightHorizonsLogin struct {
 
 func newBrightHorizonsLogin(request *http.Client) *BrightHorizonsLogin {
 	loginUrl, _ := url.Parse("https://familyinfocenter.brighthorizons.com/mybrightday/login")
+	validateUrl, _ := url.Parse("https://mybrightday.brighthorizons.com/auth/jwt/validate")
 
 	return &BrightHorizonsLogin{
 		client:      request,
 		loginUrl:    loginUrl,
-		validateUrl: tadpolesUrl.JoinPath("auth", "jwt", "validate"),
+		validateUrl: validateUrl,
 	}
 }
 

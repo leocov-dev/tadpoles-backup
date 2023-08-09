@@ -13,9 +13,10 @@ type TadpolesLogin struct {
 }
 
 func newTadpolesLogin(request *http.Client) *TadpolesLogin {
+	loginUrl, _ := url.Parse("https://www.tadpoles.com/auth/login")
 	return &TadpolesLogin{
 		client:   request,
-		loginUrl: tadpolesUrl.JoinPath("auth", "login"),
+		loginUrl: loginUrl,
 	}
 }
 
