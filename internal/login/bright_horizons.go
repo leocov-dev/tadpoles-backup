@@ -13,23 +13,26 @@ type BrightHorizonsLogin struct {
 	client      *http.Client
 	loginUrl    *url.URL
 	validateUrl *url.URL
+	checkUrl    *url.URL
 }
 
 func NewBrightHorizonsLogin(request *http.Client) *BrightHorizonsLogin {
 	loginUrl, _ := url.Parse("https://familyinfocenter.brighthorizons.com/mybrightday/login")
 	validateUrl, _ := url.Parse("https://mybrightday.brighthorizons.com/auth/jwt/validate")
+	checkUrl, _ := url.Parse("https://mybrightday.brighthorizons.com/remote/v1/events")
 
 	return &BrightHorizonsLogin{
 		client:      request,
 		loginUrl:    loginUrl,
 		validateUrl: validateUrl,
+		checkUrl:    checkUrl,
 	}
 }
 
 func (l *BrightHorizonsLogin) NeedsLogin() bool {
-	_, err := l.admit()
+	resp, err := l.client.Get(l.checkUrl.String())
 
-	return err != nil
+	return err != nil || resp.StatusCode != http.StatusOK
 }
 
 func (l *BrightHorizonsLogin) DoLogin(email string, password string) (*time.Time, error) {
@@ -74,9 +77,5 @@ func (l *BrightHorizonsLogin) validate(token string) (expires *time.Time, err er
 
 	logrus.Debug("Validate successful")
 
-	return l.admit()
-}
-
-func (l *BrightHorizonsLogin) admit() (expires *time.Time, err error) {
-	return admitAndStoreCookie(l.client)
+	return serializeResponseCookies(resp)
 }

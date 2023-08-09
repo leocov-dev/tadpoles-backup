@@ -49,5 +49,25 @@ func (l *TadpolesLogin) DoLogin(email string, password string) (*time.Time, erro
 }
 
 func (l *TadpolesLogin) admit() (expires *time.Time, err error) {
-	return admitAndStoreCookie(l.client)
+	logrus.Debug("Admit...")
+
+	zone, _ := time.Now().Zone()
+
+	admitUrl, _ := url.Parse("https://www.tadpoles.com/remote/v1/athome/admit")
+	resp, err := l.client.PostForm(
+		admitUrl.String(),
+		url.Values{
+			"tz": {zone},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, utils.NewRequestError(resp, "tadpoles admit failed")
+	}
+
+	logrus.Debug("Admit successful")
+
+	return serializeResponseCookies(resp)
 }
