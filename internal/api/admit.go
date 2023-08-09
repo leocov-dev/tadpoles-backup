@@ -15,8 +15,9 @@ func admitAndStoreCookie(request *http.Client) (*time.Time, error) {
 
 	zone, _ := time.Now().Zone()
 
+	admitUrl, _ := url.Parse("https://www.tadpoles.com/remote/v1/athome/admit")
 	resp, err := request.PostForm(
-		apiV1Root.JoinPath("athome", "admit").String(),
+		admitUrl.String(),
 		url.Values{
 			"tz": {zone},
 		},

@@ -84,32 +84,40 @@ func (s *spec) GetParameters() (params *ParametersResponse, err error) {
 	return params, err
 }
 
-type tadpolesTransport struct{}
+type randomUserAgentTransport struct{}
 
-func (t *tadpolesTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *randomUserAgentTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.Header.Add("User-Agent", uarand.GetRandom())
 	return http.DefaultTransport.RoundTrip(req)
 }
 
 func newSpec() *spec {
-	spec := &spec{
-		request: &http.Client{
-			Jar:       deserializeCookies(tadpolesUrl),
-			Transport: &tadpolesTransport{},
-		},
-		Endpoints: newEndpoints(),
-	}
-
 	switch config.Provider.String() {
 	case config.BRIGHT_HORIZONS:
 		log.Debug("using Bright Horizons login")
-		spec.Login = newBrightHorizonsLogin(spec.request)
+		endpoints := newEndpoints("https://mybrightday.brighthorizons.com")
+		request := &http.Client{
+			Jar:       deserializeCookies(endpoints.Root),
+			Transport: &randomUserAgentTransport{},
+		}
+		return &spec{
+			request:   request,
+			Endpoints: endpoints,
+			Login:     newBrightHorizonsLogin(request),
+		}
 	default:
 		log.Debug("using Tadpoles login")
-		spec.Login = newTadpolesLogin(spec.request)
+		endpoints := newEndpoints("https://www.tadpoles.com")
+		request := &http.Client{
+			Jar:       deserializeCookies(endpoints.Root),
+			Transport: &randomUserAgentTransport{},
+		}
+		return &spec{
+			request:   request,
+			Endpoints: endpoints,
+			Login:     newTadpolesLogin(request),
+		}
 	}
-
-	return spec
 }
 
 var (
