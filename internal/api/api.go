@@ -1,11 +1,9 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/corpix/uarand"
 	log "github.com/sirupsen/logrus"
-	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -27,7 +25,7 @@ func (s *spec) GetAttachment(eventKey string, attachmentKey string) (resp *http.
 		"key": {attachmentKey},
 	}
 
-	urlBase := s.Endpoints.Attachments
+	urlBase := *s.Endpoints.Attachments
 	urlBase.RawQuery = params.Encode()
 
 	resp, err = s.request.Get(urlBase.String())
@@ -42,47 +40,40 @@ func (s *spec) GetAttachment(eventKey string, attachmentKey string) (resp *http.
 }
 
 func (s *spec) GetEvents(firstEventTime time.Time, lastEventTime time.Time) (events Events, err error) {
+	first := "0"
+	if !firstEventTime.IsZero() {
+		first = strconv.FormatInt(firstEventTime.Unix(), 10)
+	}
+
+	last := strconv.FormatInt(lastEventTime.Unix(), 10)
+
 	params := url.Values{
 		"direction":           {"range"},
-		"earliest_event_time": {strconv.FormatInt(firstEventTime.Unix(), 10)},
-		"latest_event_time":   {strconv.FormatInt(lastEventTime.Unix(), 10)},
+		"earliest_event_time": {first},
+		"latest_event_time":   {last},
 		"num_events":          {fmt.Sprint(config.EventsQueryPageSize)},
 		"cursor":              nil, // it is acceptable to start cursor as empty
 	}
 
-	for true {
-		log.Debug("Cursor: ", params.Get("cursor"))
-		err = s.getEventPage(s.request, &params, &events)
+	// need a non-empty value to enter the while loop
+	cursor := "initialize"
+
+	for cursor != "" {
+		log.Debug("Cursor: ", cursor)
+		err = s.appendEventsPage(s.request, &params, &events)
 		if err != nil {
 			log.Debug("Get Page Error: ", err)
 			return events, err
 		}
-
-		// cursor will be empty when no more pages
-		if params.Get("cursor") == "" {
-			log.Debug("Get Events Done...")
-			break
-		}
+		cursor = params.Get("cursor")
 	}
+	log.Debug("Get Events Done...")
+
+	events.Sort(func(e1, e2 *Event) bool {
+		return e1.EventTime.Time().Before(e2.EventTime.Time())
+	})
 
 	return events, nil
-}
-
-func (s *spec) GetParameters() (params *ParametersResponse, err error) {
-	resp, err := s.request.Get(s.Endpoints.Parameters.String())
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, utils.NewRequestError(resp, "could not get parameters")
-	}
-
-	defer utils.CloseWithLog(resp.Body)
-	body, _ := io.ReadAll(resp.Body)
-
-	err = json.Unmarshal(body, &params)
-
-	return params, err
 }
 
 type randomUserAgentTransport struct{}

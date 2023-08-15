@@ -69,30 +69,30 @@ func backupArgs() cobra.PositionalArgs {
 }
 
 func backupRun(cmd *cobra.Command, args []string) {
-	s := spinners.StartNewSpinner("Getting Account Info...")
-
+	// ------------------------------------------------------------------------
 	backupTarget := filepath.Clean(args[0])
 	log.Debug("Backing up to: ", backupTarget)
 	err := os.MkdirAll(backupTarget, os.ModePerm)
 	if err != nil {
+		utils.CmdFailed(err)
+	}
+
+	// ------------------------------------------------------------------------
+	s := spinners.StartNewSpinner("Checking Events...")
+	events, err := tadpoles.GetAllEvents()
+	if err != nil {
 		s.Stop()
 		utils.CmdFailed(err)
 	}
 
-	info, err := tadpoles.GetAccountInfo()
+	fileAttachments, err := tadpoles.GetEventFileAttachmentData(events)
 	if err != nil {
 		s.Stop()
 		utils.CmdFailed(err)
 	}
 	s.Stop()
 
-	s = spinners.StartNewSpinner("Checking Events...")
-	fileAttachments, err := tadpoles.GetEventFileAttachmentData(info.FirstEvent, info.LastEvent)
-	if err != nil {
-		utils.CmdFailed(err)
-	}
-	s.Stop()
-
+	// ------------------------------------------------------------------------
 	newAttachments, err := tadpoles.PruneAlreadyDownloaded(fileAttachments, backupTarget)
 	if err != nil {
 		utils.CmdFailed(err)
@@ -103,6 +103,7 @@ func backupRun(cmd *cobra.Command, args []string) {
 		attachmentMap.PrettyPrint("New Attachments")
 	}
 
+	// ------------------------------------------------------------------------
 	var saveErrors []string
 	count := len(newAttachments)
 	if count > 0 {

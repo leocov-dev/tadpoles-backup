@@ -3,7 +3,6 @@ package cache
 import (
 	"encoding/json"
 	bolt "go.etcd.io/bbolt"
-	"sort"
 	"tadpoles-backup/config"
 	"tadpoles-backup/internal/api"
 	"tadpoles-backup/internal/utils"
@@ -35,16 +34,10 @@ func InitializeCache() error {
 	})
 }
 
-type ByEventTime []*api.Event
-
-func (a ByEventTime) Len() int           { return len(a) }
-func (a ByEventTime) Less(i, j int) bool { return a[i].EventTime.Time().Before(a[j].EventTime.Time()) }
-func (a ByEventTime) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-
 // ReadEventCache
 // read the local bolt-db cache file and
 // return a list of api events sorted by event time
-func ReadEventCache() (events []*api.Event, err error) {
+func ReadEventCache() (events api.Events, err error) {
 	db, err := OpenCacheDB(&bolt.Options{ReadOnly: true})
 	if err != nil {
 		return nil, err
@@ -72,14 +65,16 @@ func ReadEventCache() (events []*api.Event, err error) {
 		return nil, err
 	}
 
-	sort.Sort(ByEventTime(events))
+	events.Sort(func(e1, e2 *api.Event) bool {
+		return e1.EventTime.Time().Before(e2.EventTime.Time())
+	})
 
 	return events, nil
 }
 
-// WriteEventCache
+// UpdateEventCache
 // write a list of api events to the local bolt-db cache file
-func WriteEventCache(events []*api.Event) error {
+func UpdateEventCache(events []*api.Event) error {
 	db, err := OpenCacheDB(nil)
 	if err != nil {
 		return err

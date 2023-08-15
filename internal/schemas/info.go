@@ -2,6 +2,7 @@ package schemas
 
 import (
 	"fmt"
+	"sort"
 	"tadpoles-backup/internal/api"
 	"tadpoles-backup/internal/utils"
 	"time"
@@ -31,17 +32,26 @@ func (i Info) PrettyPrint() {
 	}
 }
 
-func NewInfoFromParams(pr *api.ParametersResponse) *Info {
+func NewInfoFromEvents(events api.Events) *Info {
 	info := &Info{
-		FirstEvent: pr.FirstEventTime.Time(),
-		LastEvent:  pr.LastEventTime.Time(),
+		FirstEvent: events[0].EventTime.Time(),
+		LastEvent:  events[len(events)-1].EventTime.Time(),
 	}
 
-	for _, item := range pr.Memberships {
-		for _, dep := range item.Dependants {
-			info.Dependants = append(info.Dependants, dep.DisplayName)
+	childSet := make(map[string]bool)
+
+	for _, event := range events {
+		if event.ChildName == "" {
+			continue
 		}
+		childSet[event.ChildName] = true
 	}
+
+	for name, _ := range childSet {
+		info.Dependants = append(info.Dependants, name)
+	}
+
+	sort.Strings(info.Dependants)
 
 	return info
 }
