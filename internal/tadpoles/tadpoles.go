@@ -15,44 +15,42 @@ import (
 	"time"
 )
 
-func GetAccountInfo() (info *schemas.Info, err error) {
-	parameters, err := api.Spec.GetParameters()
+func GetAllEvents() (events api.Events, err error) {
+	// start at "zero" time
+	lastCachedTime := time.Time{}
+
+	cachedEvents, err := cache.ReadEventCache()
 	if err != nil {
 		return nil, err
 	}
 
-	return schemas.NewInfoFromParams(parameters), nil
-}
-
-func GetEventFileAttachmentData(
-	firstEventTime time.Time,
-	lastEventTime time.Time,
-) (fileAttachments schemas.FileAttachments, err error) {
-	events, err := cache.ReadEventCache()
-	if err != nil {
-		return nil, err
-	}
-
-	if len(events) > 0 {
-		lastCachedTime := events[len(events)-1].EventTime.Time()
+	if len(cachedEvents) > 0 {
+		lastCachedTime = cachedEvents[len(cachedEvents)-1].EventTime.Time()
 		log.Debugf("lastCachedTime: %s\n", lastCachedTime)
 
-		if lastCachedTime.After(firstEventTime) {
-			firstEventTime = lastCachedTime.Add(1 * time.Second)
+		// add one second to prevent fetch of existing event
+		lastCachedTime = lastCachedTime.Add(1 * time.Second)
+		events = append(events, cachedEvents...)
+	}
+
+	newEvents, err := api.Spec.GetEvents(lastCachedTime, time.Now())
+	if err != nil {
+		return nil, err
+	}
+
+	if len(newEvents) > 0 {
+		err = cache.UpdateEventCache(newEvents)
+		if err != nil {
+			return nil, err
 		}
+
+		events = append(events, newEvents...)
 	}
 
-	newEvents, err := api.Spec.GetEvents(firstEventTime, lastEventTime)
-	if err != nil {
-		return nil, err
-	}
+	return events, nil
+}
 
-	err = cache.WriteEventCache(newEvents)
-	if err != nil {
-		return nil, err
-	}
-
-	events = append(events, newEvents...)
+func GetEventFileAttachmentData(events api.Events) (fileAttachments schemas.FileAttachments, err error) {
 	fileAttachments = eventsToFileAttachments(events)
 
 	return fileAttachments, nil

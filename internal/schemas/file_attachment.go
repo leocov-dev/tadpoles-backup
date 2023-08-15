@@ -272,6 +272,10 @@ type FileAttachments []*FileAttachment
 type FileAttachmentMap map[string]FileAttachments
 
 func (fam FileAttachmentMap) PrettyPrint(heading string) {
+	if !config.DebugMode {
+		delete(fam, "Unknown")
+	}
+
 	utils.WriteMain(heading, "")
 	for k, v := range fam {
 		utils.WriteSub(k, fmt.Sprint(len(v)))

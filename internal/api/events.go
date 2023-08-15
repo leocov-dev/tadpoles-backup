@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"sort"
 	"tadpoles-backup/internal/utils"
 )
 
@@ -37,13 +38,41 @@ func (e *Event) String() string {
 	return string(val)
 }
 
+type By func(e1, e2 *Event) bool
+
+func (e Events) Sort(by By) {
+	es := &eventSorter{
+		events: e,
+		by:     by,
+	}
+
+	sort.Sort(es)
+}
+
+type eventSorter struct {
+	events Events
+	by     By
+}
+
+func (s *eventSorter) Len() int {
+	return len(s.events)
+}
+
+func (s *eventSorter) Swap(i, j int) {
+	s.events[i], s.events[j] = s.events[j], s.events[i]
+}
+
+func (s *eventSorter) Less(i, j int) bool {
+	return s.by(s.events[i], s.events[j])
+}
+
 type pageResponse struct {
 	Cursor string `json:"cursor"`
 	Events Events `json:"events"`
 }
 
-func (s *spec) getEventPage(request *http.Client, params *url.Values, events *Events) error {
-	urlBase := s.Endpoints.Events
+func (s *spec) appendEventsPage(request *http.Client, params *url.Values, events *Events) error {
+	urlBase := *s.Endpoints.Events
 	urlBase.RawQuery = params.Encode()
 
 	log.Debug("Query: ", urlBase.String())

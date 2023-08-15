@@ -6,7 +6,6 @@ type Endpoints struct {
 	Root        *url.URL
 	Events      *url.URL
 	Attachments *url.URL
-	Parameters  *url.URL
 }
 
 func newEndpoints(domain string) Endpoints {
@@ -16,6 +15,5 @@ func newEndpoints(domain string) Endpoints {
 		Root:        rootUrl,
 		Events:      apiV1Root.JoinPath("events"),
 		Attachments: apiV1Root.JoinPath("obj_attachment"),
-		Parameters:  apiV1Root.JoinPath("parameters"),
 	}
 }

@@ -41,7 +41,6 @@ var (
 			_ = os.RemoveAll(config.TempDir)
 		},
 	}
-	debugMode bool
 )
 
 func init() {
@@ -51,7 +50,7 @@ func init() {
 
 	rootCmd.PersistentFlags().BoolVarP(&config.JsonOutput, "json", "j", false, "Output as JSON.")
 
-	rootCmd.PersistentFlags().BoolVarP(&debugMode, "debug", "d", false, "Print additional debug and informational logs.")
+	rootCmd.PersistentFlags().BoolVarP(&config.DebugMode, "debug", "d", false, "Print additional debug and informational logs.")
 	_ = rootCmd.PersistentFlags().MarkHidden("debug")
 }
 
@@ -60,7 +59,7 @@ func Execute() {
 }
 
 func setLoggingLevel() {
-	if debugMode {
+	if config.DebugMode {
 		log.SetLevel(log.DebugLevel)
 		fmt.Println("*** In Debug Mode ***")
 		fmt.Println()

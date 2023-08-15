@@ -29,13 +29,13 @@ func (dpl *DownloadPool) init() {
 	for worker := 0; worker < dpl.maxWorkers; worker++ {
 		dpl.wg.Add(1)
 
-		go func(worker int) {
+		go func() {
 			defer dpl.wg.Done()
 
 			for proc := range dpl.queue {
 				proc.Execute()
 			}
-		}(worker)
+		}()
 	}
 }
 

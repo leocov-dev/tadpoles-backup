@@ -32,31 +32,37 @@ func init() {
 }
 
 func statRun(cmd *cobra.Command, _ []string) {
-	s := spinners.StartNewSpinner("Getting Account Info...")
 
-	info, err := tadpoles.GetAccountInfo()
+	// ------------------------------------------------------------------------
+	s := spinners.StartNewSpinner("Checking Events...")
+	events, err := tadpoles.GetAllEvents()
 	if err != nil {
+		s.Stop()
 		utils.CmdFailed(err)
 	}
 	s.Stop()
 
+	// ------------------------------------------------------------------------
+	info := schemas.NewInfoFromEvents(events)
 	if config.IsHumanReadable() {
 		info.PrettyPrint()
 	}
 
-	s = spinners.StartNewSpinner("Checking Events...")
-
-	attachments, err := tadpoles.GetEventFileAttachmentData(info.FirstEvent, info.LastEvent)
+	// ------------------------------------------------------------------------
+	s = spinners.StartNewSpinner("Parsing Attachments...")
+	attachments, err := tadpoles.GetEventFileAttachmentData(events)
 	if err != nil {
+		s.Stop()
 		utils.CmdFailed(err)
 	}
 	s.Stop()
 
+	// ------------------------------------------------------------------------
 	attachmentMap := tadpoles.GroupAttachmentsByType(attachments)
 	if config.IsHumanReadable() {
 		attachmentMap.PrettyPrint("All Attachments")
 	} else {
 		statOutput := schemas.NewStatOutput(info, attachments, attachmentMap)
-		statOutput.JsonPrint(detailedStatJson)
+		statOutput.Print(detailedStatJson)
 	}
 }

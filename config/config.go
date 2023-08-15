@@ -19,6 +19,7 @@ var (
 	// but should not be accessed directly
 	VersionTag string
 
+	DebugMode                 = false
 	exePath, _                = os.Executable()
 	exeDir                    = filepath.Dir(exePath)
 	Name                      = filepath.Base(exePath)
