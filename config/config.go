@@ -24,7 +24,7 @@ var (
 	exeDir                    = filepath.Dir(exePath)
 	Name                      = filepath.Base(exePath)
 	DotName                   = fmt.Sprintf(".%s", Name)
-	EventsQueryPageSize       = 300
+	EventsQueryPageSize       = 50
 	TempFilePattern           = fmt.Sprintf("%s-*", Name)
 	MaxConcurrency      int64 = 128
 	userHomeDir, _            = os.UserHomeDir()

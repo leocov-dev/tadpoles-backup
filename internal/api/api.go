@@ -55,16 +55,19 @@ func (s *spec) GetEvents(firstEventTime time.Time, lastEventTime time.Time) (eve
 		"cursor":              nil, // it is acceptable to start cursor as empty
 	}
 
+	pageNum := 0
+
 	// need a non-empty value to enter the while loop
 	cursor := "initialize"
 
 	for cursor != "" {
-		log.Debug("Cursor: ", cursor)
+		log.Debug(fmt.Sprintf("Page: %d Cursor: %s", pageNum, cursor))
 		err = s.appendEventsPage(s.request, &params, &events)
 		if err != nil {
 			log.Debug("Get Page Error: ", err)
 			return events, err
 		}
+		pageNum += 1
 		cursor = params.Get("cursor")
 	}
 	log.Debug("Get Events Done...")
@@ -91,6 +94,7 @@ func newSpec() *spec {
 		request := &http.Client{
 			Jar:       login.DeserializeCookies(endpoints.Root),
 			Transport: &randomUserAgentTransport{},
+			Timeout:   60 * time.Second,
 		}
 		return &spec{
 			request:   request,
@@ -103,6 +107,7 @@ func newSpec() *spec {
 		request := &http.Client{
 			Jar:       login.DeserializeCookies(endpoints.Root),
 			Transport: &randomUserAgentTransport{},
+			Timeout:   60 * time.Second,
 		}
 		return &spec{
 			request:   request,
