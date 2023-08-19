@@ -24,7 +24,7 @@ func (bw *BarWrapper) Increment() {
 
 func StartNewProgressBar(steps int, heading string) *BarWrapper {
 	wrapper := &BarWrapper{}
-	if config.IsInteractive() {
+	if config.IsInteractive() && !config.DebugMode {
 		uiprogress.Start()
 		wrapper.bar = uiprogress.AddBar(steps).
 			AppendCompleted().

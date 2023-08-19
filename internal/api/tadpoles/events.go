@@ -1,7 +1,8 @@
-package api
+package tadpoles
 
 import (
 	"encoding/json"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
@@ -17,17 +18,17 @@ type Attachment struct {
 
 type Event struct {
 	Comment         string         `json:"comment"`
-	Attachments     []*Attachment  `json:"new_attachments"`
+	Attachments     []Attachment   `json:"new_attachments"`
 	ChildName       string         `json:"parent_member_display"`
-	EventTime       utils.JsonTime `json:"event_time"`
-	CreateTime      utils.JsonTime `json:"create_time"`
+	EventTime       utils.EpocTime `json:"event_time"`
+	CreateTime      utils.EpocTime `json:"create_time"`
 	TimeZone        string         `json:"tz"`
 	EventKey        string         `json:"key"`
 	EventType       string         `json:"type"`
 	LocationDisplay string         `json:"location_display"`
 }
 
-type Events []*Event
+type Events []Event
 
 func (e *Event) String() string {
 	val, err := json.MarshalIndent(e, "", "    ")
@@ -36,6 +37,17 @@ func (e *Event) String() string {
 		return ""
 	}
 	return string(val)
+}
+
+func (e *Event) FormatTimeStamp() string {
+	return fmt.Sprintf("%d%02d%02d%02d%02d%02d",
+		e.EventTime.Time().Year(),
+		e.EventTime.Time().Month(),
+		e.EventTime.Time().Day(),
+		e.EventTime.Time().Hour(),
+		e.EventTime.Time().Minute(),
+		e.EventTime.Time().Second(),
+	)
 }
 
 type By func(e1, e2 *Event) bool
@@ -63,7 +75,7 @@ func (s *eventSorter) Swap(i, j int) {
 }
 
 func (s *eventSorter) Less(i, j int) bool {
-	return s.by(s.events[i], s.events[j])
+	return s.by(&s.events[i], &s.events[j])
 }
 
 type pageResponse struct {
@@ -71,17 +83,15 @@ type pageResponse struct {
 	Events Events `json:"events"`
 }
 
-func (s *spec) appendEventsPage(request *http.Client, params *url.Values, events *Events) error {
-	urlBase := *s.Endpoints.Events
-	urlBase.RawQuery = params.Encode()
+func fetchEventsPage(client *http.Client, eventsUrl *url.URL) (newEvents Events, cursor string, err error) {
 
-	log.Debug("Query: ", urlBase.String())
-	resp, err := request.Get(urlBase.String())
+	log.Debug("Query: ", eventsUrl.String())
+	resp, err := client.Get(eventsUrl.String())
 	if err != nil {
-		return err
+		return nil, "", err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return utils.NewRequestError(resp, "could not get events page")
+		return nil, "", utils.NewRequestError(resp, "could not get events page")
 	}
 
 	defer utils.CloseWithLog(resp.Body)
@@ -90,9 +100,5 @@ func (s *spec) appendEventsPage(request *http.Client, params *url.Values, events
 	var page pageResponse
 	err = json.Unmarshal(body, &page)
 
-	params.Set("cursor", page.Cursor)
-
-	*events = append(*events, page.Events...)
-
-	return nil
+	return page.Events, page.Cursor, nil
 }

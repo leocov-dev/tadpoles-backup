@@ -6,20 +6,20 @@ import (
 	"time"
 )
 
-// JsonTime defines a timestamp encoded as epoch seconds in JSON
-type JsonTime time.Time
+// EpocTime defines a timestamp encoded as epoch seconds in JSON
+type EpocTime time.Time
 
-func (jt JsonTime) String() string {
+func (jt EpocTime) String() string {
 	return jt.Time().String()
 }
 
 // MarshalJSON is used to convert the timestamp to JSON
-func (jt JsonTime) MarshalJSON() ([]byte, error) {
+func (jt EpocTime) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(time.Time(jt).Unix(), 10)), nil
 }
 
 // UnmarshalJSON is used to convert the timestamp from JSON
-func (jt *JsonTime) UnmarshalJSON(s []byte) (err error) {
+func (jt *EpocTime) UnmarshalJSON(s []byte) (err error) {
 	r := string(s)
 
 	f, err := strconv.ParseFloat(r, 64)
@@ -36,11 +36,11 @@ func (jt *JsonTime) UnmarshalJSON(s []byte) (err error) {
 // Unix returns t as a Unix time, the number of seconds elapsed
 // since January 1, 1970 UTC. The result does not depend on the
 // location associated with t.
-func (jt JsonTime) Unix() int64 {
+func (jt EpocTime) Unix() int64 {
 	return time.Time(jt).Unix()
 }
 
-// JsonTime returns the JSON time as a time.JsonTime instance in UTC
-func (jt JsonTime) Time() time.Time {
+// EpocTime returns the JSON time as a time.EpocTime instance in UTC
+func (jt EpocTime) Time() time.Time {
 	return (time.Time)(jt).UTC()
 }

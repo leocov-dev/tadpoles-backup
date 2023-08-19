@@ -31,3 +31,13 @@ func NewRequestError(resp *http.Response, message string) *RequestError {
 		Message:  message,
 	}
 }
+
+func PrintErrorList(errorMsgs []string) {
+	if errorMsgs != nil {
+		WriteError("Errors", "")
+		for i, e := range errorMsgs {
+			WriteErrorSub.Write(fmt.Sprint(i+1), e)
+		}
+		fmt.Println("")
+	}
+}

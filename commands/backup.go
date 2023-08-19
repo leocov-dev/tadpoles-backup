@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -9,12 +10,12 @@ import (
 	"path/filepath"
 	"runtime"
 	"tadpoles-backup/config"
+	"tadpoles-backup/internal/provider_client"
 	"tadpoles-backup/internal/schemas"
-	"tadpoles-backup/internal/tadpoles"
-	"tadpoles-backup/internal/user_input"
 	"tadpoles-backup/internal/utils"
 	"tadpoles-backup/internal/utils/progress"
 	"tadpoles-backup/internal/utils/spinners"
+	"time"
 )
 
 var (
@@ -28,10 +29,6 @@ var (
 			utils.CloseHandlerWithCallback(func() {
 				cancelBackup()
 			})
-			err := user_input.DoLoginIfNeeded()
-			if err != nil {
-				utils.CmdFailed(err)
-			}
 		},
 	}
 
@@ -69,23 +66,29 @@ func backupArgs() cobra.PositionalArgs {
 }
 
 func backupRun(cmd *cobra.Command, args []string) {
-	// ------------------------------------------------------------------------
-	backupTarget := filepath.Clean(args[0])
-	log.Debug("Backing up to: ", backupTarget)
-	err := os.MkdirAll(backupTarget, os.ModePerm)
+	provider := provider_client.GetProviderClient()
+
+	err := provider.LoginIfNeeded()
 	if err != nil {
 		utils.CmdFailed(err)
 	}
 
 	// ------------------------------------------------------------------------
-	s := spinners.StartNewSpinner("Checking Events...")
-	events, err := tadpoles.GetAllEvents()
+	backupTarget := filepath.Clean(args[0])
+	log.Debug("Backing up to: ", backupTarget)
+	err = os.MkdirAll(backupTarget, os.ModePerm)
+	if err != nil {
+		utils.CmdFailed(err)
+	}
+
+	// ------------------------------------------------------------------------
+	s := spinners.StartNewSpinner("Fetching Media Data...")
+	info, err := provider.GetAccountInfo()
 	if err != nil {
 		s.Stop()
 		utils.CmdFailed(err)
 	}
-
-	fileAttachments, err := tadpoles.GetEventFileAttachmentData(events)
+	mediaFiles, err := provider.GetAllMediaFiles(info.FirstEvent, time.Now())
 	if err != nil {
 		s.Stop()
 		utils.CmdFailed(err)
@@ -93,34 +96,70 @@ func backupRun(cmd *cobra.Command, args []string) {
 	s.Stop()
 
 	// ------------------------------------------------------------------------
-	newAttachments, err := tadpoles.PruneAlreadyDownloaded(fileAttachments, backupTarget)
+	newMediaFiles, err := mediaFiles.FilterOnlyNew(backupTarget)
 	if err != nil {
 		utils.CmdFailed(err)
 	}
 
-	attachmentMap := tadpoles.GroupAttachmentsByType(newAttachments)
 	if config.IsHumanReadable() {
-		attachmentMap.PrettyPrint("New Attachments")
+		newMediaFiles.CountByType().PrettyPrint("New Media Files")
 	}
 
 	// ------------------------------------------------------------------------
 	var saveErrors []string
-	count := len(newAttachments)
+	count := len(newMediaFiles)
 	if count > 0 {
 		bw := progress.StartNewProgressBar(count, "Downloading")
 
-		saveErrors = tadpoles.DownloadFileAttachments(newAttachments, backupTarget, ctx, concurrencyLimit, bw)
+		saveErrors = newMediaFiles.DownloadAll(
+			provider.GetHttpClient(),
+			backupTarget,
+			concurrencyLimit,
+			ctx,
+			bw,
+		)
 
 		bw.Stop()
-
-		if config.IsHumanReadable() {
-			tadpoles.PrintErrorList(saveErrors)
-		}
 	}
 
-	backupOutput := schemas.NewBackupOutput(newAttachments, attachmentMap, saveErrors)
-
-	if config.IsPrintingJson() {
-		backupOutput.JsonPrint(detailedBackupJson)
+	if config.IsHumanReadable() {
+		utils.PrintErrorList(saveErrors)
+	} else {
+		NewBackupOutput(newMediaFiles, saveErrors).Print(detailedBackupJson)
 	}
+}
+
+// BackupOutput
+// Formatting schema for printing backup info
+type BackupOutput struct {
+	MediaFiles schemas.MediaFiles `json:"files,omitempty"`
+	Images     int                `json:"imageCount"`
+	Videos     int                `json:"videoCount"`
+	Unknown    int                `json:"unknownCount"`
+	Errors     []string           `json:"errors"`
+}
+
+func NewBackupOutput(files schemas.MediaFiles, errors []string) BackupOutput {
+	countMap := files.CountByType()
+
+	return BackupOutput{
+		MediaFiles: files,
+		Images:     countMap["Images"],
+		Videos:     countMap["Videos"],
+		Unknown:    countMap["Unknown"],
+		Errors:     errors,
+	}
+}
+
+func (bo BackupOutput) Print(detailed bool) {
+	if !detailed {
+		bo.MediaFiles = nil
+	}
+
+	jsonString, err := json.Marshal(bo)
+	if err != nil {
+		log.Error(err)
+	}
+
+	fmt.Println(string(jsonString))
 }

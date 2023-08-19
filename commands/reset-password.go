@@ -1,3 +1,9 @@
+// This reset command is here to facilitate resetting your password in the
+// situation when a tadpoles.com account has been configured to use Google-Auth
+// instead of direct login. In this situation it's not possible to reset your
+// password via the website or disable the Google-Auth connection. This
+// command will call the correct APIs to reset the direct login password.
+
 package commands
 
 import (

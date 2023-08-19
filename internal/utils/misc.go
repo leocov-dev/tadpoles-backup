@@ -28,6 +28,14 @@ func FileExists(filename string) bool {
 	return !info.IsDir()
 }
 
+func DeleteFile(filename string) error {
+	if FileExists(filename) {
+		return os.Remove(filename)
+	}
+
+	return nil
+}
+
 func CopyFile(sourcePath, destPath string) error {
 	inputFile, err := os.Open(sourcePath)
 	if err != nil {
@@ -50,9 +58,18 @@ func CopyFile(sourcePath, destPath string) error {
 	return nil
 }
 
-func IsImageType(t types.Type) bool {
+func IsImageType(t types.MIME) bool {
 	for k := range matchers.Image {
-		if k == t {
+		if k.MIME == t {
+			return true
+		}
+	}
+	return false
+}
+
+func IsVideoType(t types.MIME) bool {
+	for k := range matchers.Video {
+		if k.MIME == t {
 			return true
 		}
 	}

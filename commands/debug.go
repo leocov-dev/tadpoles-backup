@@ -37,8 +37,6 @@ func debugRun(cmd *cobra.Command, args []string) {
 		HasEnvCreds:     config.HasEnvCreds(),
 		IsContainerized: config.IsContainerized(),
 		DataDir:         config.GetDataDir(),
-		CookieFile:      config.GetTadpolesCookieFile(),
-		CacheDbFile:     config.GetCacheDbFile(),
 	}
 
 	if config.IsPrintingJson() {

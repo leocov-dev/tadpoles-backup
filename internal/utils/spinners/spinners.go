@@ -15,7 +15,7 @@ var SpinnerManager = &spinnerManager{
 }
 
 type spinnerManager struct {
-	Spinners []*WrappedSpinner
+	Spinners []WrappedSpinner
 	lock     *sync.RWMutex
 }
 type WrappedSpinner struct {
@@ -51,7 +51,6 @@ func NewWrapper(title string) *WrappedSpinner {
 	if config.IsInteractive() {
 		options := []spinner.Option{
 			spinner.WithHiddenCursor(true),
-			spinner.WithFinalMSG(title + " Done\n"),
 		}
 		w.activeSpinner = spinner.New(config.SpinnerCharSet, config.SpinnerSpeed*time.Millisecond, options...)
 	}
@@ -63,7 +62,7 @@ func NewWrapper(title string) *WrappedSpinner {
 
 func (sm *spinnerManager) AppendSpinner(s *WrappedSpinner) {
 	sm.lock.Lock()
-	sm.Spinners = append(sm.Spinners, s)
+	sm.Spinners = append(sm.Spinners, *s)
 	sm.lock.Unlock()
 }
 

@@ -1,11 +1,9 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 const (
@@ -19,27 +17,25 @@ var (
 	// but should not be accessed directly
 	VersionTag string
 
-	DebugMode                 = false
-	exePath, _                = os.Executable()
-	exeDir                    = filepath.Dir(exePath)
-	Name                      = filepath.Base(exePath)
-	DotName                   = fmt.Sprintf(".%s", Name)
-	EventsQueryPageSize       = 50
-	TempFilePattern           = fmt.Sprintf("%s-*", Name)
-	MaxConcurrency      int64 = 128
-	userHomeDir, _            = os.UserHomeDir()
-	TempDir                   = filepath.Join(os.TempDir(), DotName)
-	EnvUsername               = os.Getenv("TADPOLES_USER")
-	EnvPassword               = os.Getenv("TADPOLES_PASS")
+	DebugMode            = false
+	exePath, _           = os.Executable()
+	exeDir               = filepath.Dir(exePath)
+	Name                 = filepath.Base(exePath)
+	DotName              = fmt.Sprintf(".%s", Name)
+	MaxConcurrency int64 = 128
+	userHomeDir, _       = os.UserHomeDir()
+	TempDir              = filepath.Join(os.TempDir(), DotName)
+	EnvUsername          = os.Getenv("TADPOLES_USER")
+	EnvPassword          = os.Getenv("TADPOLES_PASS")
 
-	EnvProvider = os.Getenv("PROVIDER")
-	Provider    = NewProviderConfig([]string{TADPOLES, BRIGHT_HORIZONS}, TADPOLES)
+	allProviders    = []string{TADPOLES, BRIGHT_HORIZONS}
+	defaultProvider = TADPOLES
+	EnvProvider     = os.Getenv("PROVIDER")
+	Provider        = NewProviderConfig(allProviders, defaultProvider)
 
 	NonInteractiveMode bool
 	JsonOutput         bool
 	dataDir            string
-	cookieFile         string
-	cacheFile          string
 )
 
 func init() {
@@ -108,62 +104,4 @@ func GetVersion() string {
 	}
 
 	return "0.0.0-dev"
-}
-
-func GetTadpolesCookieFile() string {
-	if cookieFile == "" {
-		cookieFile = filepath.Join(GetDataDir(), fmt.Sprintf("%s-cookie", DotName))
-	}
-	return cookieFile
-}
-
-func GetCacheDbFile() string {
-	if cacheFile == "" {
-		cacheFile = filepath.Join(GetDataDir(), fmt.Sprintf("%s-cache", DotName))
-	}
-	return cacheFile
-}
-
-func ClearCookiesFile() error {
-	file := GetTadpolesCookieFile()
-
-	_, err := os.OpenFile(file, os.O_RDONLY, 0444)
-	if os.IsNotExist(err) {
-		return nil
-	}
-
-	return os.Remove(GetTadpolesCookieFile())
-}
-
-func ClearCacheFile() error {
-	file := GetCacheDbFile()
-
-	_, err := os.OpenFile(file, os.O_RDONLY, 0444)
-	if os.IsNotExist(err) {
-		return nil
-	}
-
-	return os.Remove(file)
-}
-
-func ClearAll() error {
-	cookieErr := ClearCookiesFile()
-	cacheErr := ClearCacheFile()
-
-	allErrors := []error{cookieErr, cacheErr}
-
-	var errStr []string
-
-	for _, e := range allErrors {
-		if e == nil {
-			continue
-		}
-		errStr = append(errStr, e.Error())
-	}
-
-	if errStr != nil {
-		return errors.New(strings.Join(errStr, "; "))
-	}
-
-	return nil
 }
