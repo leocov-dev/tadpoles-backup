@@ -1,4 +1,4 @@
-package login
+package api
 
 import (
 	"encoding/json"
@@ -10,16 +10,14 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"os"
-	"tadpoles-backup/config"
 	"tadpoles-backup/internal/utils"
 	"time"
 )
 
 // DeserializeCookies load cookies from serialized json on disk if able.
-func DeserializeCookies(hostUrl *url.URL) *cookiejar.Jar {
+func DeserializeCookies(cookieFile string, hostUrl *url.URL) *cookiejar.Jar {
 	jar, _ := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.CookieJarList})
 
-	cookieFile := config.GetTadpolesCookieFile()
 	if utils.FileExists(cookieFile) {
 		// Open our jsonFile
 		jsonFile, err := os.Open(cookieFile)
@@ -51,7 +49,7 @@ func DeserializeCookies(hostUrl *url.URL) *cookiejar.Jar {
 	return jar
 }
 
-func serializeResponseCookies(response *http.Response) (expires *time.Time, err error) {
+func SerializeResponseCookies(cookieFile string, response *http.Response) (expires *time.Time, err error) {
 	cookiesData := response.Cookies()
 	jsonString, err := json.MarshalIndent(cookiesData, "", "  ")
 	if err != nil {
@@ -59,7 +57,7 @@ func serializeResponseCookies(response *http.Response) (expires *time.Time, err 
 		return nil, err
 	}
 
-	err = os.WriteFile(config.GetTadpolesCookieFile(), jsonString, 0600)
+	err = os.WriteFile(cookieFile, jsonString, 0600)
 	if err != nil {
 		logrus.Debug("Failed to write cookies json to file...", err)
 		return nil, err

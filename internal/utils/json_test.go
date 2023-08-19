@@ -5,10 +5,10 @@ import (
 	"time"
 )
 
-func TestJsonTime_UnmarshalJSON(t *testing.T) {
+func TestEpocTime_UnmarshalJSON(t *testing.T) {
 	expected := time.Date(2020, time.March, 29, 14, 41, 54, 0, time.UTC)
 
-	jt := &JsonTime{}
+	jt := &EpocTime{}
 	err := jt.UnmarshalJSON([]byte("1585492914.00"))
 
 	if err != nil {

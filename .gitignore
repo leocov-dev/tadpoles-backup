@@ -15,4 +15,4 @@ node.log
 
 # other
 .DS_Store
-api_tests/
+*.private.env.json

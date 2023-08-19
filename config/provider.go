@@ -1,4 +1,4 @@
-// Package schemas https://github.com/spf13/pflag/issues/236#issuecomment-931600452
+// Package config - custom `choice` flag from: https://github.com/spf13/pflag/issues/236#issuecomment-931600452
 package config
 
 import (

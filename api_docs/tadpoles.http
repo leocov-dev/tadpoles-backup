@@ -1,0 +1,32 @@
+### fetch JWT token
+POST {{host}}/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+email={{email}}&password={{password}}&response=jwt
+
+> {% client.global.set("token", response.body); %}
+
+### validate JWT token
+POST {{host}}/auth/jwt/validate
+Content-Type: application/x-www-form-urlencoded
+
+token={{token}}
+
+
+### do admit
+POST {{host}}/remote/v1/athome/admit
+Content-Type: application/x-www-form-urlencoded
+
+tz=America/New_York
+
+
+### get parameters
+GET {{host}}/remote/v1/parameters
+
+### get events
+GET {{host}}/remote/v1/events?
+    direction=range
+    &earliest_event_time=0
+    &latest_event_time=1692110008
+    &num_events=50
+    &client=dashboard

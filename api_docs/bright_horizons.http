@@ -1,0 +1,86 @@
+### fetch JWT token
+POST https://familyinfocenter.brighthorizons.com/mybrightday/login
+Content-Type: application/x-www-form-urlencoded
+
+username={{email}}&password={{password}}&response=jwt
+
+> {% client.global.set("token", response.body); %}
+
+### validate JWT token
+# This validates the JWT and returns an API key to be used in
+# the `X-Api-Key` header with every other request.
+POST {{host}}/api/v2/auth/jwt/validate
+Content-Type: application/x-www-form-urlencoded
+
+token={{token}}
+
+> {% client.global.set("apiKey", response.body.api_key); %}
+
+### fetch parent profile
+# Parent profice data for the logged in user.
+# The `id` feild is important for retrieving dependent data.
+GET {{host}}/api/v2/user/profile
+Accept: application/json
+X-Api-Key: {{apiKey}}
+
+> {% client.global.set("userId", response.body.id); %}
+
+### notification list
+GET {{host}}/api/v2/guardian/{{userId}}/notifications
+Accept: application/json
+X-Api-Key: {{apiKey}}
+
+### fetch dependents data
+# This endpoint provides data on dependents and guardian contacts.
+# The details include stage (preschool, school), schedule, classroom, etc.
+# Critical details are the `id` for each dependent, used for events fetch
+# and the `earliest_memory` entry which serves as a starting point for event
+# date ranges
+GET {{host}}/api/v2/dependents/guardian/{{userId}}
+Accept: application/json
+X-Api-Key: {{apiKey}}
+
+> {%
+    const child = response.body[0];
+    client.global.set("dependentId", child.id);
+    client.global.set("earliestMemory", child.earliest_memory.split("T")[0])
+    let d = new Date(Date.parse(child.earliest_memory))
+    d = new Date(d.setDate(d.getDate() + 30))
+    client.global.set("plusOneMonth", `${d.getUTCFullYear()}-${d.getUTCMonth()}=${d.getUTCDay()}`)
+%}
+
+### events list
+# This endpoint provides event data for a specific timeframe.
+# You may specify dates outside the ranges valid for a user (far past, or future)
+# and the API will return everything it can - don't request data for a very large
+# range or the response will be many megabytes
+# Important keys are `snapshot_entries` and for each snapshot list item `attachment_id`
+# and `capture_time`
+GET https://mybrightday.brighthorizons.com/api/v2/dependent/{{dependentId}}/daily_reports?
+    start={{earliestMemory}}
+    &end={{plusOneMonth}}
+Accept: application/json
+X-Api-Key: {{apiKey}}
+
+> {%
+for (let report of response.body) {
+    let snapshots = report.snapshot_entries;
+    if (snapshots != undefined && snapshots.length > 0) {
+        client.global.set("attachmentId", snapshots[0].attachment_id);
+        break;
+    }
+}
+ %}
+
+### Media Download
+# this endpoint gets a signed-url for the media data
+# as well as mime-type data
+GET {{host}}/api/v2/media/{{attachmentId}}
+Accept: application/json
+X-Api-Key: {{apiKey}}
+
+> {%
+    client.global.set("signedUrl", response.body.signed_url);
+    client.global.set("mimeType", response.body.mime_type);
+    client.global.set("mimeTypeHint", response.body.mime_type_hint);
+%}

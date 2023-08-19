@@ -1,10 +1,11 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 	"github.com/spf13/cobra"
 	"strings"
-	"tadpoles-backup/config"
+	"tadpoles-backup/internal/provider_client"
 	"tadpoles-backup/internal/utils"
 )
 
@@ -55,13 +56,26 @@ func clearRun(cmd *cobra.Command, args []string) {
 		choice = args[0]
 	}
 
+	provider := provider_client.GetProviderClient()
+
 	switch choice {
 	case "cookie":
-		err = config.ClearCookiesFile()
+		err = provider.ClearLoginData()
 	case "cache":
-		err = config.ClearCacheFile()
+		err = provider.ClearCache()
 	case "all":
-		err = config.ClearAll()
+		allErrors := provider.ClearAll()
+		var errStrList []string
+
+		for _, e := range allErrors {
+			if e == nil {
+				continue
+			}
+			errStrList = append(errStrList, e.Error())
+		}
+		if errStrList != nil {
+			err = errors.New(strings.Join(errStrList, "; "))
+		}
 	}
 
 	if err != nil {

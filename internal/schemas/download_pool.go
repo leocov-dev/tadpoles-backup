@@ -6,14 +6,14 @@ import "sync"
 
 type DownloadPool struct {
 	maxWorkers int
-	queue      chan *AttachmentProc
+	queue      chan *DownloadTask
 	wg         sync.WaitGroup
 }
 
 func NewDownloadPool(concurrencyLimit int) *DownloadPool {
 	dpl := &DownloadPool{
 		maxWorkers: concurrencyLimit,
-		queue:      make(chan *AttachmentProc),
+		queue:      make(chan *DownloadTask),
 		wg:         sync.WaitGroup{},
 	}
 	dpl.init()
@@ -23,7 +23,7 @@ func NewDownloadPool(concurrencyLimit int) *DownloadPool {
 
 // Add
 // put a new attachment download request into the download queue
-func (dpl *DownloadPool) Add(proc *AttachmentProc) {
+func (dpl *DownloadPool) Add(proc *DownloadTask) {
 	dpl.queue <- proc
 }
 
@@ -46,13 +46,13 @@ func (dpl *DownloadPool) init() {
 			// This allows each worker to listen to the queue channel, pull
 			// a download request from it, and execute the request.
 			for proc := range dpl.queue {
-				proc.Execute()
+				proc.Run()
 			}
 		}()
 	}
 }
 
-func (dpl *DownloadPool) Process() {
+func (dpl *DownloadPool) ProcessTasks() {
 	// since our channel does not specify a length we need to close it
 	// this will make it so that the workers don't wait for more data
 	// once the current data in the queue is exhausted

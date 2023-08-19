@@ -7,8 +7,6 @@ import (
 	"os"
 	"strings"
 	"tadpoles-backup/config"
-	"tadpoles-backup/internal/api"
-	"tadpoles-backup/internal/cache"
 	"tadpoles-backup/internal/utils"
 )
 
@@ -30,12 +28,6 @@ var (
 			}
 
 			setLoggingLevel()
-			err := cache.InitializeCache()
-			if err != nil {
-				utils.CmdFailed(err)
-			}
-
-			api.SetupAPISpec()
 		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
 			_ = os.RemoveAll(config.TempDir)
