@@ -1,6 +1,7 @@
 package provider_client
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"tadpoles-backup/config"
@@ -70,19 +71,23 @@ func (c *TadpolesClient) GetAccountInfo() (info *schemas.AccountInfo, err error)
 	return info, nil
 }
 
-func (c *TadpolesClient) GetAllMediaFiles(start, end time.Time) (attachments schemas.MediaFiles, err error) {
+func (c *TadpolesClient) GetAllMediaFiles(_ context.Context, start, end time.Time, useCache bool) (mediaFiles schemas.MediaFiles, err error) {
 	var events tadpoles.Events
 
-	cachedEvents, err := c.cache.ReadEventCache()
-	if err != nil {
-		return nil, err
-	}
-
-	cachedEventsLen := len(cachedEvents)
-
-	if cachedEventsLen > 0 {
-		start = cachedEvents[cachedEventsLen-1].EventTime.Time().Add(1 * time.Second)
+	if useCache {
+		cachedEvents, err := c.cache.ReadEventCache()
+		if err != nil {
+			return nil, err
+		}
 		events = append(events, cachedEvents...)
+
+		cachedEventsLen := len(cachedEvents)
+		if cachedEventsLen > 0 {
+			lastCachedEvent := cachedEvents[cachedEventsLen-1]
+			lastEventTime := lastCachedEvent.EventTime.Time()
+			// TODO this falls apart if `end` is not after `lastEventTime`
+			start = lastEventTime.Add(1 * time.Second)
+		}
 	}
 
 	newEvents, err := c.spec.GetEvents(start, end)
@@ -98,10 +103,14 @@ func (c *TadpolesClient) GetAllMediaFiles(start, end time.Time) (attachments sch
 	}
 
 	for _, event := range events {
-		attachments = append(attachments, c.spec.GetEventAttachments(event)...)
+		eventFiles, err := c.spec.GetEventMediaFiles(*event)
+		if err != nil {
+			return nil, err
+		}
+		mediaFiles = append(mediaFiles, eventFiles...)
 	}
 
-	return attachments, nil
+	return mediaFiles, nil
 }
 
 func (c *TadpolesClient) ClearLoginData() error {
@@ -117,4 +126,8 @@ func (c *TadpolesClient) ClearAll() []error {
 	cacheErr := c.cache.ClearCache()
 
 	return []error{cookieErr, cacheErr}
+}
+
+func (c *TadpolesClient) ShouldUseCache(_ string) bool {
+	return true
 }

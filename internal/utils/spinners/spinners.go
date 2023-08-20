@@ -66,6 +66,14 @@ func (sm *spinnerManager) AppendSpinner(s *WrappedSpinner) {
 	sm.lock.Unlock()
 }
 
+func (sm *spinnerManager) StopAll() {
+	sm.lock.Lock()
+	for _, ws := range sm.Spinners {
+		ws.Stop()
+	}
+	sm.lock.Unlock()
+}
+
 func StartNewSpinner(title string) *WrappedSpinner {
 	s := NewWrapper(title)
 	SpinnerManager.AppendSpinner(s)

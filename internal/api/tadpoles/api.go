@@ -26,21 +26,21 @@ func NewApiSpec(cookieFile string) *ApiSpec {
 	}
 }
 
-func (s *ApiSpec) GetAccountParameters() (info *ParametersResponse, err error) {
-	return fetchParameters(s.Client, s.endpoints.parametersUrl)
+func (a *ApiSpec) GetAccountParameters() (info *ParametersResponse, err error) {
+	return fetchParameters(a.Client, a.endpoints.parametersUrl)
 }
 
-func (s *ApiSpec) GetEventAttachments(event Event) schemas.MediaFiles {
-	attachments := make([]schemas.MediaFile, len(event.Attachments))
+func (a *ApiSpec) GetEventMediaFiles(event Event) (schemas.MediaFiles, error) {
+	mediaFiles := make(schemas.MediaFiles, len(event.Attachments))
 
 	for i, attachment := range event.Attachments {
-		attachments[i] = NewMediaFileFromEventAttachment(event, attachment, s.endpoints)
+		mediaFiles[i] = NewMediaFileFromEventAttachment(event, *attachment, a.endpoints)
 	}
 
-	return attachments
+	return mediaFiles, nil
 }
 
-func (s *ApiSpec) GetEvents(firstEventTime time.Time, lastEventTime time.Time) (events Events, err error) {
+func (a *ApiSpec) GetEvents(firstEventTime time.Time, lastEventTime time.Time) (events Events, err error) {
 	pageNum := 0
 
 	// need a non-empty value to enter the while loop
@@ -49,9 +49,8 @@ func (s *ApiSpec) GetEvents(firstEventTime time.Time, lastEventTime time.Time) (
 	for cursor != "" {
 		log.Debug(fmt.Sprintf("Page: %d Cursor: %s", pageNum, cursor))
 		var newEvents Events
-		newEvents, cursor, err = fetchEventsPage(s.Client, s.endpoints.eventsUrl(firstEventTime, lastEventTime, cursor))
+		newEvents, cursor, err = fetchEventsPage(a.Client, a.endpoints.eventsUrl(firstEventTime, lastEventTime, cursor))
 		if err != nil {
-			log.Debug("Get Page Error: ", err)
 			return nil, err
 		}
 		events = append(events, newEvents...)
@@ -66,20 +65,20 @@ func (s *ApiSpec) GetEvents(firstEventTime time.Time, lastEventTime time.Time) (
 	return events, nil
 }
 
-func (s *ApiSpec) NeedsLogin(cookieFile string) bool {
-	_, err := loginAdmit(s.Client, s.endpoints.admitUrl, cookieFile)
+func (a *ApiSpec) NeedsLogin(cookieFile string) bool {
+	_, err := loginAdmit(a.Client, a.endpoints.admitUrl, cookieFile)
 
 	return err != nil
 }
 
-func (s *ApiSpec) DoLogin(email string, password string, cookieFile string) (*time.Time, error) {
+func (a *ApiSpec) DoLogin(email string, password string, cookieFile string) (*time.Time, error) {
 	log.Debug("Login...")
 
-	err := login(s.Client, s.endpoints.loginUrl, email, password)
+	err := login(a.Client, a.endpoints.loginUrl, email, password)
 	if err != nil {
 		return nil, err
 	}
 
 	log.Debug("Login successful")
-	return loginAdmit(s.Client, s.endpoints.admitUrl, cookieFile)
+	return loginAdmit(a.Client, a.endpoints.admitUrl, cookieFile)
 }

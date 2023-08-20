@@ -18,7 +18,7 @@ type Attachment struct {
 
 type Event struct {
 	Comment         string         `json:"comment"`
-	Attachments     []Attachment   `json:"new_attachments"`
+	Attachments     []*Attachment  `json:"new_attachments"`
 	ChildName       string         `json:"parent_member_display"`
 	EventTime       utils.EpocTime `json:"event_time"`
 	CreateTime      utils.EpocTime `json:"create_time"`
@@ -28,7 +28,7 @@ type Event struct {
 	LocationDisplay string         `json:"location_display"`
 }
 
-type Events []Event
+type Events []*Event
 
 func (e *Event) String() string {
 	val, err := json.MarshalIndent(e, "", "    ")
@@ -75,7 +75,7 @@ func (s *eventSorter) Swap(i, j int) {
 }
 
 func (s *eventSorter) Less(i, j int) bool {
-	return s.by(&s.events[i], &s.events[j])
+	return s.by(s.events[i], s.events[j])
 }
 
 type pageResponse struct {

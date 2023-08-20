@@ -10,7 +10,6 @@ import (
 	"os/signal"
 	"runtime"
 	"syscall"
-	"time"
 )
 
 func CloseWithLog(f io.Closer) {
@@ -84,15 +83,13 @@ func CloseHandlerWithCallback(cb func()) {
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
-		time.Sleep(1 * time.Second)
 		<-c
 		if runtime.GOOS != "windows" {
 			// makes the cursor visible
 			fmt.Print("\033[?25h")
 		}
-		fmt.Println("\rCtrl+C pressed in Terminal")
 		cb()
-		time.Sleep(1 * time.Second)
+		fmt.Println("\rCtrl+C pressed in Terminal")
 		os.Exit(0)
 	}()
 }

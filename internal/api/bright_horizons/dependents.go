@@ -2,6 +2,7 @@ package bright_horizons
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -9,17 +10,21 @@ import (
 	"time"
 )
 
-type DependentData struct {
-	DependentId string    `json:"id"`
+type Dependent struct {
+	Id          string    `json:"id"`
 	FirstName   string    `json:"first_name"`
 	LastName    string    `json:"last_name"`
 	FirstRecord time.Time `json:"earliest_memory"`
 	LastRecord  time.Time `json:"graduation_date"`
 }
 
-type DependentResponse []DependentData
+func (d *Dependent) DisplayName() string {
+	return fmt.Sprintf("%s %s", d.FirstName, d.LastName)
+}
 
-func fetchDependents(client *http.Client, dependentUrl *url.URL) (dependents DependentResponse, err error) {
+type Dependents []Dependent
+
+func fetchDependents(client *http.Client, dependentUrl *url.URL) (dependents Dependents, err error) {
 	resp, err := client.Get(dependentUrl.String())
 	if err != nil {
 		return nil, err
