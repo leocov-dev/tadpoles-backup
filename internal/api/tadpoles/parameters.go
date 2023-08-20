@@ -11,11 +11,11 @@ import (
 type ParametersResponse struct {
 	LastEventTime  utils.EpocTime `json:"last_event_time"`
 	FirstEventTime utils.EpocTime `json:"first_event_time"`
-	Memberships    []memberships  `json:"memberships"`
+	Memberships    []*memberships `json:"memberships"`
 }
 
 type memberships struct {
-	Dependents []dependents `json:"dependents"`
+	Dependents []*dependents `json:"dependents"`
 }
 
 type dependents struct {

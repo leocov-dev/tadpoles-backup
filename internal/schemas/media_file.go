@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"tadpoles-backup/config"
+	"tadpoles-backup/internal/async"
 	"tadpoles-backup/internal/utils"
 	"tadpoles-backup/internal/utils/progress"
 	"time"
@@ -18,8 +19,8 @@ import (
 type MediaFile struct {
 	comment     string
 	timestamp   time.Time
+	downloadUrl *url.URL
 	FileName    string
-	DownloadUrl *url.URL
 	MimeType    types.MIME
 }
 
@@ -34,37 +35,37 @@ func NewMediaFile(
 		comment:     comment,
 		timestamp:   timestamp,
 		FileName:    fileName,
-		DownloadUrl: downloadUrl,
+		downloadUrl: downloadUrl,
 		MimeType:    types.NewMIME(mimeType),
 	}
 }
 
-func (f MediaFile) FilePath(rootDir string) string {
+func (m MediaFile) FilePath(rootDir string) string {
 	// final file extension will be determined at download time when parsing
 	// actual data
 	return filepath.Join(
 		rootDir,
-		fmt.Sprint(f.timestamp.Year()),
+		fmt.Sprint(m.timestamp.Year()),
 		fmt.Sprintf("%d-%02d-%02d",
-			f.timestamp.Year(), f.timestamp.Month(), f.timestamp.Day()),
-		fmt.Sprintf("%s.partial", f.FileName),
+			m.timestamp.Year(), m.timestamp.Month(), m.timestamp.Day()),
+		fmt.Sprintf("%s.partial", m.FileName),
 	)
 }
 
-func (f MediaFile) GetTimestamp() time.Time {
-	return f.timestamp
+func (m MediaFile) GetTimestamp() time.Time {
+	return m.timestamp
 }
 
-func (f MediaFile) GetComment() string {
-	return f.comment
+func (m MediaFile) GetComment() string {
+	return m.comment
 }
 
-func (f MediaFile) Download(client *http.Client, dlRoot string) error {
+func (m MediaFile) Download(client *http.Client, dlRoot string) error {
 	return utils.DownloadFile(
 		client,
-		f.DownloadUrl,
-		f.FilePath(dlRoot),
-		f,
+		m.downloadUrl,
+		m.FilePath(dlRoot),
+		m,
 	)
 }
 
@@ -72,16 +73,16 @@ type MediaFiles []MediaFile
 
 type MediaFileCountMap map[string]int
 
-func (fs MediaFiles) CountByType() MediaFileCountMap {
+func (mfs MediaFiles) CountByType() MediaFileCountMap {
 	countMap := make(MediaFileCountMap)
 	countMap["Images"] = 0
 	countMap["Videos"] = 0
 	countMap["Unknown"] = 0
 
-	for _, f := range fs {
-		if utils.IsImageType(f.MimeType) {
+	for _, mediaFile := range mfs {
+		if utils.IsImageType(mediaFile.MimeType) {
 			countMap["Images"] += 1
-		} else if utils.IsVideoType(f.MimeType) {
+		} else if utils.IsVideoType(mediaFile.MimeType) {
 			countMap["Videos"] += 1
 		} else {
 			countMap["Unknown"] += 1
@@ -91,12 +92,12 @@ func (fs MediaFiles) CountByType() MediaFileCountMap {
 	return countMap
 }
 
-func (fs MediaFiles) FilterOnlyNew(
+func (mfs MediaFiles) FilterOnlyNew(
 	downloadRoot string,
 ) (onlyNew MediaFiles, err error) {
 	filePathMap := make(map[string]MediaFile)
 
-	for _, f := range fs {
+	for _, f := range mfs {
 		filePathMap[f.FileName] = f
 	}
 
@@ -126,37 +127,30 @@ func (fs MediaFiles) FilterOnlyNew(
 	return onlyNew, err
 }
 
-func (fs MediaFiles) DownloadAll(
+func (mfs MediaFiles) DownloadAll(
 	client *http.Client,
 	dlRoot string,
-	concurrency int,
 	ctx context.Context,
 	sharedProgressBar *progress.BarWrapper,
-) (dlErrors []string) {
-	errorChan := make(chan string)
+) error {
+	taskPool := async.NewTaskPool(ctx)
 
-	downloadPool := NewDownloadPool(concurrency)
-
-	for _, f := range fs {
-		downloadPool.Add(
+	for _, f := range mfs {
+		err := taskPool.AddTask(
 			NewDownloadTask(
 				client,
 				f,
 				dlRoot,
-				errorChan,
-				ctx,
 				sharedProgressBar,
 			),
 		)
+		if err != nil {
+			return err
+		}
 	}
-	downloadPool.ProcessTasks()
-	close(errorChan)
+	taskPool.Wait()
 
-	for s := range errorChan {
-		dlErrors = append(dlErrors, s)
-	}
-
-	return dlErrors
+	return taskPool.GetErrors()
 }
 
 func (cm MediaFileCountMap) PrettyPrint(heading string) {

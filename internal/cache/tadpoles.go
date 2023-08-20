@@ -71,7 +71,7 @@ func (c *TadpolesCache) ReadEventCache() (events tadpoles.Events, err error) {
 			if err != nil {
 				return err
 			}
-			events = append(events, event)
+			events = append(events, &event)
 		}
 
 		return nil
@@ -92,7 +92,7 @@ func (c *TadpolesCache) ReadEventCache() (events tadpoles.Events, err error) {
 func (c *TadpolesCache) UpdateEventCache(events tadpoles.Events) error {
 	initializeBucket(c.dbFile, c.bucketName)
 
-	db, err := bolt.Open(c.dbFile, 0666, nil)
+	db, err := bolt.Open(c.dbFile, 0600, nil)
 	if err != nil {
 		return err
 	}

@@ -3,12 +3,12 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gosuri/uiprogress"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"os"
 	"path/filepath"
-	"runtime"
 	"tadpoles-backup/config"
 	"tadpoles-backup/internal/provider_client"
 	"tadpoles-backup/internal/schemas"
@@ -25,26 +25,19 @@ var (
 		Run:   backupRun,
 		Args:  backupArgs(),
 		PreRun: func(cmd *cobra.Command, args []string) {
-			log.Debug("Backup PersistentPreRun")
 			utils.CloseHandlerWithCallback(func() {
+				spinners.SpinnerManager.StopAll()
+				uiprogress.Stop()
 				cancelBackup()
 			})
 		},
 	}
 
-	detailedBackupJson bool
-	ctx, cancelBackup  = context.WithCancel(context.Background())
-	concurrencyLimit   int
-	defaultConcurrency = runtime.NumCPU() + (runtime.NumCPU() / 2)
+	detailedBackupJson      bool
+	backupCtx, cancelBackup = context.WithCancel(context.Background())
 )
 
 func init() {
-	backupCmd.Flags().VarP(
-		schemas.NewConcurrencyValue(defaultConcurrency, &concurrencyLimit),
-		"concurrency",
-		"c",
-		fmt.Sprintf("The number of simultaneous downloads allowed, 1 - %d.", config.MaxConcurrency),
-	)
 	backupCmd.Flags().BoolVarP(
 		&detailedBackupJson,
 		"with-files",
@@ -65,7 +58,7 @@ func backupArgs() cobra.PositionalArgs {
 	}
 }
 
-func backupRun(cmd *cobra.Command, args []string) {
+func backupRun(_ *cobra.Command, args []string) {
 	provider := provider_client.GetProviderClient()
 
 	err := provider.LoginIfNeeded()
@@ -88,7 +81,12 @@ func backupRun(cmd *cobra.Command, args []string) {
 		s.Stop()
 		utils.CmdFailed(err)
 	}
-	mediaFiles, err := provider.GetAllMediaFiles(info.FirstEvent, time.Now())
+	mediaFiles, err := provider.GetAllMediaFiles(
+		backupCtx,
+		info.FirstEvent,
+		time.Now(),
+		provider.ShouldUseCache("backup"),
+	)
 	if err != nil {
 		s.Stop()
 		utils.CmdFailed(err)
@@ -106,16 +104,14 @@ func backupRun(cmd *cobra.Command, args []string) {
 	}
 
 	// ------------------------------------------------------------------------
-	var saveErrors []string
 	count := len(newMediaFiles)
 	if count > 0 {
 		bw := progress.StartNewProgressBar(count, "Downloading")
 
-		saveErrors = newMediaFiles.DownloadAll(
+		err = newMediaFiles.DownloadAll(
 			provider.GetHttpClient(),
 			backupTarget,
-			concurrencyLimit,
-			ctx,
+			backupCtx,
 			bw,
 		)
 
@@ -123,9 +119,9 @@ func backupRun(cmd *cobra.Command, args []string) {
 	}
 
 	if config.IsHumanReadable() {
-		utils.PrintErrorList(saveErrors)
+		utils.WriteError("Download Errors:", err.Error())
 	} else {
-		NewBackupOutput(newMediaFiles, saveErrors).Print(detailedBackupJson)
+		NewBackupOutput(newMediaFiles, err).Print(detailedBackupJson)
 	}
 }
 
@@ -136,10 +132,10 @@ type BackupOutput struct {
 	Images     int                `json:"imageCount"`
 	Videos     int                `json:"videoCount"`
 	Unknown    int                `json:"unknownCount"`
-	Errors     []string           `json:"errors"`
+	Error      error              `json:"error"`
 }
 
-func NewBackupOutput(files schemas.MediaFiles, errors []string) BackupOutput {
+func NewBackupOutput(files schemas.MediaFiles, err error) BackupOutput {
 	countMap := files.CountByType()
 
 	return BackupOutput{
@@ -147,7 +143,7 @@ func NewBackupOutput(files schemas.MediaFiles, errors []string) BackupOutput {
 		Images:     countMap["Images"],
 		Videos:     countMap["Videos"],
 		Unknown:    countMap["Unknown"],
-		Errors:     errors,
+		Error:      err,
 	}
 }
 

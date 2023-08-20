@@ -73,8 +73,9 @@ for (let report of response.body) {
  %}
 
 ### Media Download
-# this endpoint gets a signed-url for the media data
-# as well as mime-type data
+# this endpoint gets a presigned url for the media data
+# as well as mime-type data.
+# presigned url expires in 24 hrs
 GET {{host}}/api/v2/media/{{attachmentId}}
 Accept: application/json
 X-Api-Key: {{apiKey}}

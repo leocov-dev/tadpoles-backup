@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
@@ -19,10 +20,14 @@ var (
 		Short: "Print Account Info",
 		Run:   statRun,
 		PreRun: func(cmd *cobra.Command, args []string) {
-			utils.CloseHandler()
+			utils.CloseHandlerWithCallback(func() {
+				spinners.SpinnerManager.StopAll()
+				cancelStat()
+			})
 		},
 	}
-	detailedStatJson bool
+	detailedStatJson    bool
+	statCtx, cancelStat = context.WithCancel(context.Background())
 )
 
 func init() {
@@ -30,7 +35,7 @@ func init() {
 	rootCmd.AddCommand(statCmd)
 }
 
-func statRun(cmd *cobra.Command, _ []string) {
+func statRun(_ *cobra.Command, _ []string) {
 	provider := provider_client.GetProviderClient()
 
 	err := provider.LoginIfNeeded()
@@ -53,7 +58,12 @@ func statRun(cmd *cobra.Command, _ []string) {
 
 	// ------------------------------------------------------------------------
 	s = spinners.StartNewSpinner("Fetching Media Info...")
-	mediaFiles, err := provider.GetAllMediaFiles(info.FirstEvent, time.Now())
+	mediaFiles, err := provider.GetAllMediaFiles(
+		statCtx,
+		info.FirstEvent,
+		time.Now(),
+		provider.ShouldUseCache("stat"),
+	)
 	if err != nil {
 		s.Stop()
 		utils.CmdFailed(err)
