@@ -95,9 +95,11 @@ func (c *TadpolesClient) GetAllMediaFiles(_ context.Context, start, end time.Tim
 		return nil, err
 	}
 	if len(newEvents) > 0 {
-		err = c.cache.UpdateEventCache(newEvents)
-		if err != nil {
-			return nil, err
+		if useCache {
+			err = c.cache.UpdateEventCache(newEvents)
+			if err != nil {
+				return nil, err
+			}
 		}
 		events = append(events, newEvents...)
 	}

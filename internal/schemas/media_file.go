@@ -133,7 +133,7 @@ func (mfs MediaFiles) DownloadAll(
 	ctx context.Context,
 	sharedProgressBar *progress.BarWrapper,
 ) error {
-	taskPool := async.NewTaskPool(ctx)
+	taskPool := async.NewTaskPool(ctx, nil)
 
 	for _, f := range mfs {
 		err := taskPool.AddTask(
@@ -150,7 +150,7 @@ func (mfs MediaFiles) DownloadAll(
 	}
 	taskPool.Wait()
 
-	return taskPool.GetErrors()
+	return taskPool.Errors()
 }
 
 func (cm MediaFileCountMap) PrettyPrint(heading string) {

@@ -119,7 +119,11 @@ func backupRun(_ *cobra.Command, args []string) {
 	}
 
 	if config.IsHumanReadable() {
-		utils.WriteError("Download Errors:", err.Error())
+		if err != nil {
+			utils.WriteError("Download Errors:", err.Error())
+		} else {
+			fmt.Println("Download complete!")
+		}
 	} else {
 		NewBackupOutput(newMediaFiles, err).Print(detailedBackupJson)
 	}

@@ -5,6 +5,7 @@ package async
 import (
 	"context"
 	"errors"
+	log "github.com/sirupsen/logrus"
 	"runtime"
 	"strings"
 	"sync"
@@ -22,6 +23,7 @@ type TaskPool struct {
 	waitGroup     sync.WaitGroup
 	isClosed      bool
 	err           *PoolError
+	cleanupCb     func()
 }
 
 type PoolError struct {
@@ -39,7 +41,10 @@ func (e *PoolError) Error() string {
 	return sb.String()
 }
 
-func NewTaskPool(cancelContext context.Context) *TaskPool {
+func NewTaskPool(
+	cancelContext context.Context,
+	cleanupCb func(),
+) *TaskPool {
 	pool := &TaskPool{
 		maxWorkers:    runtime.NumCPU() * 2,
 		queueChan:     make(chan Task),
@@ -48,6 +53,7 @@ func NewTaskPool(cancelContext context.Context) *TaskPool {
 		waitGroup:     sync.WaitGroup{},
 		isClosed:      false,
 		err:           &PoolError{},
+		cleanupCb:     cleanupCb,
 	}
 	pool.init()
 
@@ -67,6 +73,18 @@ func (pool *TaskPool) AddTask(task Task) error {
 // init
 // build out the download workers and set them listening to the queue
 func (pool *TaskPool) init() {
+	go func() {
+		for taskError := range pool.errorChan {
+			select {
+			case <-pool.cancelContext.Done():
+				return
+			default:
+				log.Debug("handling task error")
+				pool.err.taskErrors = append(pool.err.taskErrors, taskError)
+			}
+		}
+	}()
+
 	// make a number of worker goroutines
 	for worker := 0; worker < pool.maxWorkers; worker++ {
 		// each worker is a wait group
@@ -97,27 +115,22 @@ func (pool *TaskPool) init() {
 	}
 }
 
-func (pool *TaskPool) Close() {
+func (pool *TaskPool) Wait() {
 	// since our channel does not specify a length we need to close it
 	// this will make it so that the workers don't wait for more data
 	// once the current data in the queue is exhausted
 	pool.isClosed = true
 	close(pool.queueChan)
-	close(pool.errorChan)
-}
-
-func (pool *TaskPool) Wait() {
-	pool.Close()
-
 	// wait for all the wait groups to be done (all worker goroutines have exited)
 	pool.waitGroup.Wait()
+	close(pool.errorChan)
+
+	if pool.cleanupCb != nil {
+		pool.cleanupCb()
+	}
 }
 
-func (pool *TaskPool) GetErrors() error {
-	for taskError := range pool.errorChan {
-		pool.err.taskErrors = append(pool.err.taskErrors, taskError)
-	}
-
+func (pool *TaskPool) Errors() error {
 	if len(pool.err.taskErrors) > 0 {
 		return pool.err
 	}

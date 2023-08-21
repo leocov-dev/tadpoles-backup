@@ -2,6 +2,7 @@ package bright_horizons
 
 import (
 	"encoding/json"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"net/url"
@@ -17,6 +18,21 @@ type Report struct {
 	Snapshots []*Snapshot `json:"snapshot_entries"`
 }
 type Reports []*Report
+
+func (r Reports) Dedupe() Reports {
+	filtered := Reports{}
+	foundMap := make(map[string]bool)
+
+	for _, report := range r {
+		if _, found := foundMap[report.Id]; found {
+			log.Debug("duplicate report ", report.Id)
+		}
+		foundMap[report.Id] = true
+		filtered = append(filtered, report)
+	}
+
+	return filtered
+}
 
 type By func(e1, e2 *Report) bool
 
@@ -44,6 +60,10 @@ func (s *reportSorter) Swap(i, j int) {
 
 func (s *reportSorter) Less(i, j int) bool {
 	return s.by(s.reports[i], s.reports[j])
+}
+
+func ByReportDate(r1, r2 *Report) bool {
+	return r1.Created.Before(r2.Created)
 }
 
 func fetchDependentReports(client *http.Client, reportUrl *url.URL, dependent Dependent) (reports Reports, err error) {
