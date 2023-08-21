@@ -20,7 +20,7 @@ func NewApiSpec() *ApiSpec {
 		Endpoints: newEndpoints(),
 		Client: &http.Client{
 			Transport: &api.RandomUserAgentTransport{},
-			Timeout:   60 * time.Second,
+			Timeout:   120 * time.Second,
 		},
 	}
 }

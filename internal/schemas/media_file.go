@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 	"tadpoles-backup/config"
-	"tadpoles-backup/internal/async"
 	"tadpoles-backup/internal/utils"
 	"tadpoles-backup/internal/utils/progress"
+	"tadpoles-backup/pkg/async"
 	"time"
 )
 
@@ -136,16 +136,21 @@ func (mfs MediaFiles) DownloadAll(
 	taskPool := async.NewTaskPool(ctx, nil)
 
 	for _, f := range mfs {
-		err := taskPool.AddTask(
-			NewDownloadTask(
-				client,
-				f,
-				dlRoot,
-				sharedProgressBar,
-			),
-		)
-		if err != nil {
-			return err
+		select {
+		case <-ctx.Done():
+			return async.NewCanceledError()
+		default:
+			err := taskPool.AddTask(
+				NewDownloadTask(
+					client,
+					f,
+					dlRoot,
+					sharedProgressBar,
+				),
+			)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	taskPool.Wait()

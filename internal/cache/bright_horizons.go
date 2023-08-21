@@ -113,7 +113,7 @@ func (c *BrightHorizonsCache) UpdateReportCache(
 	}
 	defer utils.CloseWithLog(db)
 
-	log.Debugf("writing event cache %s <- %d", dependentId, len(reports))
+	log.Debugf("writing report cache %s <- %d", dependentId, len(reports))
 
 	for _, report := range reports {
 		updateErr := db.Update(func(tx *bolt.Tx) error {
