@@ -21,8 +21,8 @@ var (
 		Run:   statRun,
 		PreRun: func(cmd *cobra.Command, args []string) {
 			utils.CloseHandlerWithCallback(func() {
-				spinners.SpinnerManager.StopAll()
 				cancelStat()
+				spinners.SpinnerManager.StopAll()
 			})
 		},
 	}

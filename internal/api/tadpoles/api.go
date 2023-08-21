@@ -1,11 +1,13 @@
 package tadpoles
 
 import (
+	"context"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"tadpoles-backup/internal/api"
 	"tadpoles-backup/internal/schemas"
+	"tadpoles-backup/pkg/async"
 	"time"
 )
 
@@ -40,21 +42,26 @@ func (a *ApiSpec) GetEventMediaFiles(event Event) (schemas.MediaFiles, error) {
 	return mediaFiles, nil
 }
 
-func (a *ApiSpec) GetEvents(firstEventTime time.Time, lastEventTime time.Time) (events Events, err error) {
+func (a *ApiSpec) GetEvents(ctx context.Context, firstEventTime time.Time, lastEventTime time.Time) (events Events, err error) {
 	pageNum := 0
 
 	// need a non-empty value to enter the while loop
 	cursor := "initialize"
 
 	for cursor != "" {
-		log.Debug(fmt.Sprintf("Page: %d Cursor: %s", pageNum, cursor))
-		var newEvents Events
-		newEvents, cursor, err = fetchEventsPage(a.Client, a.endpoints.eventsUrl(firstEventTime, lastEventTime, cursor))
-		if err != nil {
-			return nil, err
+		select {
+		case <-ctx.Done():
+			return nil, async.NewCanceledError()
+		default:
+			log.Debug(fmt.Sprintf("Page: %d Cursor: %s", pageNum, cursor))
+			var newEvents Events
+			newEvents, cursor, err = fetchEventsPage(a.Client, a.endpoints.eventsUrl(firstEventTime, lastEventTime, cursor))
+			if err != nil {
+				return nil, err
+			}
+			events = append(events, newEvents...)
+			pageNum += 1
 		}
-		events = append(events, newEvents...)
-		pageNum += 1
 	}
 	log.Debug("Get Events Done...")
 

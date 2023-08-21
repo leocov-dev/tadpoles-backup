@@ -26,9 +26,9 @@ var (
 		Args:  backupArgs(),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			utils.CloseHandlerWithCallback(func() {
+				cancelBackup()
 				spinners.SpinnerManager.StopAll()
 				uiprogress.Stop()
-				cancelBackup()
 			})
 		},
 	}
@@ -114,18 +114,21 @@ func backupRun(_ *cobra.Command, args []string) {
 			backupCtx,
 			bw,
 		)
+		if err != nil {
+			bw.Stop()
+			utils.CmdFailed(err)
+		}
 
 		bw.Stop()
 	}
 
 	if config.IsHumanReadable() {
-		if err != nil {
-			utils.WriteError("Download Errors:", err.Error())
-		} else {
-			fmt.Println("Download complete!")
-		}
+		fmt.Println("Download complete!")
 	} else {
-		NewBackupOutput(newMediaFiles, err).Print(detailedBackupJson)
+		err = NewBackupOutput(newMediaFiles).Print(detailedBackupJson)
+		if err != nil {
+			utils.CmdFailed(err)
+		}
 	}
 }
 
@@ -136,10 +139,9 @@ type BackupOutput struct {
 	Images     int                `json:"imageCount"`
 	Videos     int                `json:"videoCount"`
 	Unknown    int                `json:"unknownCount"`
-	Error      error              `json:"error"`
 }
 
-func NewBackupOutput(files schemas.MediaFiles, err error) BackupOutput {
+func NewBackupOutput(files schemas.MediaFiles) BackupOutput {
 	countMap := files.CountByType()
 
 	return BackupOutput{
@@ -147,19 +149,19 @@ func NewBackupOutput(files schemas.MediaFiles, err error) BackupOutput {
 		Images:     countMap["Images"],
 		Videos:     countMap["Videos"],
 		Unknown:    countMap["Unknown"],
-		Error:      err,
 	}
 }
 
-func (bo BackupOutput) Print(detailed bool) {
+func (bo BackupOutput) Print(detailed bool) error {
 	if !detailed {
 		bo.MediaFiles = nil
 	}
 
 	jsonString, err := json.Marshal(bo)
 	if err != nil {
-		log.Error(err)
+		return err
 	}
 
 	fmt.Println(string(jsonString))
+	return nil
 }

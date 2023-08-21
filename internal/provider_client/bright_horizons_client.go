@@ -2,15 +2,14 @@ package provider_client
 
 import (
 	"context"
-	"errors"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
 	"tadpoles-backup/internal/api/bright_horizons"
-	"tadpoles-backup/internal/async"
 	"tadpoles-backup/internal/cache"
 	"tadpoles-backup/internal/schemas"
 	"tadpoles-backup/internal/user_input"
+	"tadpoles-backup/pkg/async"
 	"time"
 )
 
@@ -161,15 +160,20 @@ func (c *BrightHorizonsClient) GetAllMediaFiles(ctx context.Context, start, end 
 
 	for _, d := range dependents {
 		for i, chunk := range depUrlMap[d.Id] {
-			log.Debugf("Schedule Chunk: %d - %s", i, chunk.Query())
-			err = taskPool.AddTask(&reportTask{
-				apiSpec:     c.spec,
-				resultsChan: resultsChan,
-				dependent:   d,
-				reportUrl:   chunk,
-			})
-			if err != nil {
-				return nil, err
+			select {
+			case <-ctx.Done():
+				return nil, async.NewCanceledError()
+			default:
+				log.Debugf("Schedule Chunk: %d - %s", i, chunk.Query())
+				err = taskPool.AddTask(&reportTask{
+					apiSpec:     c.spec,
+					resultsChan: resultsChan,
+					dependent:   d,
+					reportUrl:   chunk,
+				})
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 	}
@@ -185,7 +189,7 @@ func (c *BrightHorizonsClient) GetAllMediaFiles(ctx context.Context, start, end 
 	for chunk := range resultsChan {
 		select {
 		case <-ctx.Done():
-			return nil, errors.New("canceled")
+			return nil, async.NewCanceledError()
 		default:
 			if useCache {
 				err = c.cache.UpdateReportCache(chunk.dependentId, chunk.reports)

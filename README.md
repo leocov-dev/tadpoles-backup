@@ -2,14 +2,16 @@
 ![Go version for branch](https://img.shields.io/github/go-mod/go-version/leocov-dev/tadpoles-backup/main)
 ![CI Status](https://img.shields.io/github/actions/workflow/status/leocov-dev/tadpoles-backup/ci.yml)
 
-# Tadpoles Image Backup
+# Media Backup for Childcare Services
 
 ## About
-This tool will allow you to save all your child's images at full resolution from _tadpoles.com_. Comments and timestamp info will be applied as EXIF image metadata.
+This tool will allow you to save all your child's images and videos at full resolution from various service providers. Comments and timestamp info will be applied as EXIF image metadata where possible.
 
-Current save back-ends:
-* Local file system
+Providers:
+* Tadpoles
+* Bright Horizons
 
+---
 ## Install
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/leocov-dev/tadpoles-backup)](https://github.com/leocov-dev/tadpoles-backup/releases/latest)
 
@@ -34,30 +36,48 @@ $ sudo chmod +x /usr/local/bin/tadpoles-backup
 $ Invoke-WebRequest -OutFile $env:USERPROFILE\tadpoles-backup.exe https://tadpoles-backup/releases/latest/download/tadpoles-backup-windows-amd64.exe
 ```
 
+---
 ## Usage
-
-> :exclamation:**IMPORTANT**:exclamation:
->
-> You **MUST** have a _tadpoles.com_ account with a tadpoles specific password.
-You **CAN NOT** log in to this tool with Google Auth.
-If you normally log into _tadpoles.com_ with Google/Gmail account verification read these [instructions](.github/GoogleAccountSignIn.md).
 
 ```
 # Print help with command details:
 $ tadpoles-backup --help
 
-# Get account statistics (requires login)
-$ tadpoles-backup stat
+# Get account statistics
+$ tadpoles-backup --provider <service-provider> stat
 
-# Download images (requires login)
-$ tadpoles-backup backup "/a/directory/on/your/machine/"
+# Download images
+$ tadpoles-backup --provider <service-provider> backup <a-local-directory>
+
+# Clear Saved Login
+$ tadpoles-backup --provider <service-provider> clear login
 ```
 
 > Note for macOS
 > Gatekeeper will prevent you from running unidentified apps.
 > You can allow the app from system preferences or by right-click opening
 
-### Docker
+### Provider Notes
+
+#### Tadpoles
+
+You **MUST** have a _www.tadpoles.com_ account with a tadpoles specific password.
+You **CAN NOT** log in to this tool with Google Auth.
+If you normally log into _tadpoles.com_ with Google/Gmail account verification read these [instructions](.github/GoogleAccountSignIn.md).
+
+The tool stores your _www.tadpoles.com_ authentication cookie for future use so that you don't need to enter your password every time.
+This cookie lasts for about 2 weeks. Your email and password are never stored.
+
+#### Bright Horizons
+
+Due to how the system provides download data the `backup` command can't use cached data for speed-up.
+Every run of the `backup` command will fetch all reports and may take some time.
+
+The tool stores your _mybrightday.brighthorizons.com_ api-key for future use so that you don't need to enter your password every time.
+This api-key may only expire if you change your password. Your email and password are never stored.
+
+---
+## Container Image
 Pre-built images are available from Docker Hub
 
 [![Docker Image Version (latest by date)](https://img.shields.io/docker/v/leocov/tadpoles-backup?label=latest&sort=date)](https://hub.docker.com/r/leocov/tadpoles-backup)
@@ -81,8 +101,10 @@ You may also build the docker image locally.
 $ make docker-image
 ```
 
+### Docker Compose / Kubernetes
 Docker Compose and Kubernetes [examples](examples) are available.
 
+---
 ## Development
 
 See the contributing guide [here](CONTRIBUTING.md).
@@ -94,14 +116,11 @@ Install the Go version defined in [go.mod](go.mod) or use [goenv](https://github
 $ make && bin/tadpoles-backup --help
 ```
 
-## Notes
-
-`tadples-backup` caches your login session cookie locally so you are not prompted to enter your password every time you use the tool.
-It **DOES NOT** store or retain your actual email or password.
-Instead it writes a file to your home directory with a temporary authentication cookie which lasts for 2 weeks.
-This file is located in `$HOME/.tadpoles-backup/` and can be deleted whenever you choose.
-
-
+---
 ## Inspired By
 * [twneale/tadpoles](https://github.com/twneale/tadpoles)
 * [ChuckMac/tadpoles-scraper](https://github.com/ChuckMac/tadpoles-scraper)
+
+## Thanks to
+* @arthurnn - for assistance with Docker image
+* @AndyRPH - for assistance with Bright Horizons support

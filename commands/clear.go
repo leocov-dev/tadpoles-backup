@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	resetOptions    = []string{"all", "cookie", "cache"}
+	resetOptions    = []string{"all", "login", "cache"}
 	resetOptsString = strings.Join(resetOptions, " | ")
 
 	clearCmd = &cobra.Command{
@@ -59,7 +59,7 @@ func clearRun(cmd *cobra.Command, args []string) {
 	provider := provider_client.GetProviderClient()
 
 	switch choice {
-	case "cookie":
+	case "login":
 		err = provider.ClearLoginData()
 	case "cache":
 		err = provider.ClearCache()

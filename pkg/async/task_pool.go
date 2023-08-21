@@ -18,9 +18,9 @@ type Task interface {
 type TaskPool struct {
 	maxWorkers    int
 	queueChan     chan Task
-	errorChan     chan error
 	cancelContext context.Context
 	waitGroup     sync.WaitGroup
+	mutex         sync.Mutex
 	isClosed      bool
 	err           *PoolError
 	cleanupCb     func()
@@ -48,9 +48,7 @@ func NewTaskPool(
 	pool := &TaskPool{
 		maxWorkers:    runtime.NumCPU() * 2,
 		queueChan:     make(chan Task),
-		errorChan:     make(chan error),
 		cancelContext: cancelContext,
-		waitGroup:     sync.WaitGroup{},
 		isClosed:      false,
 		err:           &PoolError{},
 		cleanupCb:     cleanupCb,
@@ -73,17 +71,6 @@ func (pool *TaskPool) AddTask(task Task) error {
 // init
 // build out the download workers and set them listening to the queue
 func (pool *TaskPool) init() {
-	go func() {
-		for taskError := range pool.errorChan {
-			select {
-			case <-pool.cancelContext.Done():
-				return
-			default:
-				log.Debug("handling task error")
-				pool.err.taskErrors = append(pool.err.taskErrors, taskError)
-			}
-		}
-	}()
 
 	// make a number of worker goroutines
 	for worker := 0; worker < pool.maxWorkers; worker++ {
@@ -91,10 +78,13 @@ func (pool *TaskPool) init() {
 		pool.waitGroup.Add(1)
 
 		// start a new goroutine as an event loop for this worker
-		go func() {
+		go func(wid int) {
 			// if the worker has no more to do (function has exited)
 			// then mark its wait group as done
-			defer pool.waitGroup.Done()
+			defer func() {
+				log.Debug("==> worker exiting ", wid)
+				pool.waitGroup.Done()
+			}()
 
 			// "ranging" a channel is a blocking call that ticks when new
 			// data is pushed on the channel.
@@ -107,11 +97,14 @@ func (pool *TaskPool) init() {
 				default:
 					err := nextTask.Run()
 					if err != nil {
-						pool.errorChan <- err
+						log.Debug("caught task error")
+						pool.mutex.Lock()
+						pool.err.taskErrors = append(pool.err.taskErrors, err)
+						pool.mutex.Unlock()
 					}
 				}
 			}
-		}()
+		}(worker)
 	}
 }
 
@@ -121,12 +114,15 @@ func (pool *TaskPool) Wait() {
 	// once the current data in the queue is exhausted
 	pool.isClosed = true
 	close(pool.queueChan)
+
+	log.Debug("closed queue")
 	// wait for all the wait groups to be done (all worker goroutines have exited)
 	pool.waitGroup.Wait()
-	close(pool.errorChan)
 
+	log.Debug("done waiting")
 	if pool.cleanupCb != nil {
 		pool.cleanupCb()
+		log.Debug("done cleanup")
 	}
 }
 

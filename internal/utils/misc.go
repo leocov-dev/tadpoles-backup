@@ -84,12 +84,12 @@ func CloseHandlerWithCallback(cb func()) {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
+		cb()
 		if runtime.GOOS != "windows" {
 			// makes the cursor visible
 			fmt.Print("\033[?25h")
 		}
-		cb()
 		fmt.Println("\rCtrl+C pressed in Terminal")
-		os.Exit(0)
+		os.Exit(1)
 	}()
 }

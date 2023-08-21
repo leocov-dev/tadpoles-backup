@@ -71,7 +71,7 @@ func (c *TadpolesClient) GetAccountInfo() (info *schemas.AccountInfo, err error)
 	return info, nil
 }
 
-func (c *TadpolesClient) GetAllMediaFiles(_ context.Context, start, end time.Time, useCache bool) (mediaFiles schemas.MediaFiles, err error) {
+func (c *TadpolesClient) GetAllMediaFiles(ctx context.Context, start, end time.Time, useCache bool) (mediaFiles schemas.MediaFiles, err error) {
 	var events tadpoles.Events
 
 	if useCache {
@@ -90,7 +90,7 @@ func (c *TadpolesClient) GetAllMediaFiles(_ context.Context, start, end time.Tim
 		}
 	}
 
-	newEvents, err := c.spec.GetEvents(start, end)
+	newEvents, err := c.spec.GetEvents(ctx, start, end)
 	if err != nil {
 		return nil, err
 	}
