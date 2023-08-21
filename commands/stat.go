@@ -72,7 +72,7 @@ func statRun(_ *cobra.Command, _ []string) {
 
 	// ------------------------------------------------------------------------
 	if config.IsHumanReadable() {
-		mediaFiles.CountByType().PrettyPrint("All Media Files")
+		mediaFiles.CountByType().PrettyPrint("Total Media Files")
 	} else {
 		statOutput := NewStatOutput(*info, mediaFiles)
 		statOutput.Print(detailedStatJson)

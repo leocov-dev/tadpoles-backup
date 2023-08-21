@@ -1,8 +1,8 @@
+# Media Backup for Childcare Services
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT)
 ![Go version for branch](https://img.shields.io/github/go-mod/go-version/leocov-dev/tadpoles-backup/main)
 ![CI Status](https://img.shields.io/github/actions/workflow/status/leocov-dev/tadpoles-backup/ci.yml)
-
-# Media Backup for Childcare Services
 
 ## About
 This tool will allow you to save all your child's images and videos at full resolution from various service providers. Comments and timestamp info will be applied as EXIF image metadata where possible.
@@ -15,26 +15,13 @@ Providers:
 ## Install
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/leocov-dev/tadpoles-backup)](https://github.com/leocov-dev/tadpoles-backup/releases/latest)
 
-Get [latest](https://tadpoles-backup/releases/latest) prebuilt executable from the [releases](https://tadpoles-backup/releases) page.
+Get the [latest](https://github.com/leocov-dev/tadpoles-backup/releases/latest) prebuilt
+executable from the [releases](https://github.com/leocov-dev/tadpoles-backup/releases) page.
+Download the zip file for your system/architecture.
 
-Or use one of these commands:
-#### Linux
-```
-$ sudo wget https://tadpoles-backup/releases/latest/download/tadpoles-backup-linux-amd64 -O /usr/local/bin/tadpoles-backup
-$ sudo chmod +x /usr/local/bin/tadpoles-backup
-```
-
-#### OS X
-```
-$ sudo curl -Lo /usr/local/bin/tadpoles-backup https://tadpoles-backup/releases/latest/download/tadpoles-backup-darwin-amd64
-$ sudo chmod +x /usr/local/bin/tadpoles-backup
-```
-
-#### Windows
-```
-# PowerShell:
-$ Invoke-WebRequest -OutFile $env:USERPROFILE\tadpoles-backup.exe https://tadpoles-backup/releases/latest/download/tadpoles-backup-windows-amd64.exe
-```
+> **macOS** Gatekeeper will prevent you from running unsigned apps.
+> You can allow the app from system preferences or by right-clicking
+> the file and choosing open from the menu.
 
 ---
 ## Usage
@@ -46,16 +33,12 @@ $ tadpoles-backup --help
 # Get account statistics
 $ tadpoles-backup --provider <service-provider> stat
 
-# Download images
+# Download media (only new files not present in the target dir are downloaded)
 $ tadpoles-backup --provider <service-provider> backup <a-local-directory>
 
 # Clear Saved Login
 $ tadpoles-backup --provider <service-provider> clear login
 ```
-
-> Note for macOS
-> Gatekeeper will prevent you from running unidentified apps.
-> You can allow the app from system preferences or by right-click opening
 
 ### Provider Notes
 
