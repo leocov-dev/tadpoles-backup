@@ -2,6 +2,7 @@ package provider_client
 
 import (
 	"context"
+	"errors"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
@@ -90,19 +91,26 @@ func (t *reportTask) Run() error {
 		return err
 	}
 
+	filteredReports := bright_horizons.Reports{}
+
 	for _, r := range reports {
-		for _, s := range r.Snapshots {
-			err = s.HydrateMediaData(t.apiSpec.Client, t.apiSpec.Endpoints.MediaUrl)
-			if err != nil {
-				return err
+		if len(r.Snapshots) > 0 {
+			for _, s := range r.Snapshots {
+				err = s.HydrateMediaData(t.apiSpec.Client, t.apiSpec.Endpoints.MediaUrl)
+				if err != nil {
+					return err
+				}
 			}
+			filteredReports = append(filteredReports, r)
 		}
 	}
 
-	log.Debug("sending chunk result")
-	t.resultsChan <- reportTaskResult{
-		dependentId: t.dependent.Id,
-		reports:     reports,
+	if len(filteredReports) > 0 {
+		log.Debug("sending chunk result ", len(filteredReports))
+		t.resultsChan <- reportTaskResult{
+			dependentId: t.dependent.Id,
+			reports:     filteredReports,
+		}
 	}
 
 	log.Debug("fetching chunk Done")
@@ -142,10 +150,14 @@ func (c *BrightHorizonsClient) GetAllMediaFiles(ctx context.Context, start, end 
 		depUrlMap[d.Id] = reportUrls
 	}
 
-	taskPool := async.NewTaskPool(ctx)
 	// MUST be a buffered channel since we don't pull results until
 	// the end!
 	resultsChan := make(chan reportTaskResult, resultCount)
+
+	taskPool := async.NewTaskPool(
+		ctx,
+		func() { close(resultsChan) },
+	)
 
 	for _, d := range dependents {
 		for i, chunk := range depUrlMap[d.Id] {
@@ -161,11 +173,9 @@ func (c *BrightHorizonsClient) GetAllMediaFiles(ctx context.Context, start, end 
 			}
 		}
 	}
-
 	taskPool.Wait()
-	close(resultsChan)
 
-	taskErrors := taskPool.GetErrors()
+	taskErrors := taskPool.Errors()
 	if taskErrors != nil {
 		return nil, taskErrors
 	}
@@ -173,20 +183,33 @@ func (c *BrightHorizonsClient) GetAllMediaFiles(ctx context.Context, start, end 
 	log.Debug("report task pool Done")
 
 	for chunk := range resultsChan {
-		err = c.cache.UpdateReportCache(chunk.dependentId, chunk.reports)
-		if err != nil {
-			return nil, err
+		select {
+		case <-ctx.Done():
+			return nil, errors.New("canceled")
+		default:
+			if useCache {
+				err = c.cache.UpdateReportCache(chunk.dependentId, chunk.reports)
+				if err != nil {
+					return nil, err
+				}
+			}
+			log.Debug("combine results chunk ", len(chunk.reports))
+			combinedReports = append(combinedReports, chunk.reports...)
 		}
-		combinedReports = append(combinedReports, chunk.reports...)
 	}
 
-	log.Debug("report collection Done")
+	combinedReports = combinedReports.Dedupe()
+	combinedReports.Sort(bright_horizons.ByReportDate)
+
+	log.Debug("report collection Done ", len(combinedReports))
 
 	for _, r := range combinedReports {
 		for _, s := range r.Snapshots {
 			mediaFiles = append(mediaFiles, bright_horizons.NewMediaFileFromReportSnapshot(*r, *s))
 		}
 	}
+
+	log.Debug("media files compiled ", len(mediaFiles))
 
 	return mediaFiles, nil
 }

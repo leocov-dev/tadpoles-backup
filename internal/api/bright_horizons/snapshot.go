@@ -3,7 +3,6 @@ package bright_horizons
 import (
 	"encoding/json"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"net/url"
@@ -57,7 +56,6 @@ func (s *Snapshot) HydrateMediaData(
 	if err != nil {
 		return err
 	}
-	log.Debugf("fetched media metadata: %s - %s", s.AttachmentId, data.MimeType)
 
 	s.MediaResponse = data
 

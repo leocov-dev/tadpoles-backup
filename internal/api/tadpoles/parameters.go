@@ -15,7 +15,7 @@ type ParametersResponse struct {
 }
 
 type memberships struct {
-	Dependents []*dependents `json:"dependents"`
+	Dependents []*dependents `json:"dependants"`
 }
 
 type dependents struct {

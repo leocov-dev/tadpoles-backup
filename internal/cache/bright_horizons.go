@@ -96,9 +96,7 @@ func (c *BrightHorizonsCache) ReadReportCache(dependentId string) (reports brigh
 		return nil, err
 	}
 
-	reports.Sort(func(r1, r2 *bright_horizons.Report) bool {
-		return r1.Created.Before(r2.Created)
-	})
+	reports.Sort(bright_horizons.ByReportDate)
 
 	return reports, nil
 }
@@ -118,18 +116,18 @@ func (c *BrightHorizonsCache) UpdateReportCache(
 	log.Debugf("writing event cache %s <- %d", dependentId, len(reports))
 
 	for _, report := range reports {
-		err := db.Update(func(tx *bolt.Tx) error {
+		updateErr := db.Update(func(tx *bolt.Tx) error {
 			b := tx.Bucket([]byte(c.dependentBucketName(dependentId)))
 			// TODO: maybe there is a way to store without marshaling
 			//  to reduce processing on read-back
-			j, err := json.Marshal(report)
-			if err != nil {
-				return err
+			j, jsonErr := json.Marshal(report)
+			if jsonErr != nil {
+				return jsonErr
 			}
 			return b.Put([]byte(report.Id), j)
 		})
-		if err != nil {
-			return err
+		if updateErr != nil {
+			return updateErr
 		}
 	}
 
