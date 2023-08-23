@@ -85,7 +85,22 @@ $ make docker-image
 ```
 
 ### Docker Compose / Kubernetes
-Docker Compose and Kubernetes [examples](examples) are available.
+
+Please note that this utility is intended to run as a scheduled job.
+
+[Examples](examples) are available.
+
+#### Kubernetes
+
+This [example](examples/kubernetes) configures a `CronJob` that will run on a schedule. It's best to configure
+this so that only 1 job instance will run at a time. The example uses `kustomize` for
+configuration to provide authentication environment vars as a secret.
+
+#### Docker Compose
+
+This [example](examples/docker-compose.yml) configures a basic service with env
+vars defining the login values. Its important to remember that this service will
+exit after each run.
 
 ---
 ## Development

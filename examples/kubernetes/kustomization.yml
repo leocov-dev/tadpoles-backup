@@ -7,4 +7,4 @@ resources:
 secretGenerator:
   - name: tadpoles-auth
     envs:
-      - tadpoles-auth.env
+      - user-auth.env

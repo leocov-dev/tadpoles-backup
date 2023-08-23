@@ -22,11 +22,11 @@ func NewTadpolesCache() *TadpolesCache {
 		bucketName: "TADPOLES_CACHE",
 		cookieFile: filepath.Join(
 			config.GetDataDir(),
-			fmt.Sprintf(".%s-cookie", config.TADPOLES),
+			fmt.Sprintf(".%s-cookie", config.Tadpoles),
 		),
 		dbFile: filepath.Join(
 			config.GetDataDir(),
-			fmt.Sprintf(".%s-cache", config.TADPOLES),
+			fmt.Sprintf(".%s-cache", config.Tadpoles),
 		),
 	}
 

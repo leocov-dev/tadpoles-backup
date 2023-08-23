@@ -24,11 +24,11 @@ func NewBrightHorizonsCache() *BrightHorizonsCache {
 		bucketPrefix: "BH_",
 		dbFile: filepath.Join(
 			config.GetDataDir(),
-			fmt.Sprintf(".%s-cache", config.BRIGHT_HORIZONS),
+			fmt.Sprintf(".%s-cache", config.BrightHorizons),
 		),
 		apiKeyFile: filepath.Join(
 			config.GetDataDir(),
-			fmt.Sprintf(".%s-key", config.BRIGHT_HORIZONS),
+			fmt.Sprintf(".%s-key", config.BrightHorizons),
 		),
 	}
 }
