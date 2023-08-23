@@ -7,9 +7,18 @@ import (
 )
 
 const (
-	TADPOLES        string = "tadpoles"
-	BRIGHT_HORIZONS        = "brightHorizons"
+	Tadpoles       string = "tadpoles"
+	BrightHorizons        = "brightHorizons"
+
+	DefaultProvider = Tadpoles
 )
+
+func AllProviders() []string {
+	return []string{
+		Tadpoles,
+		BrightHorizons,
+	}
+}
 
 var (
 	// VersionTag
@@ -17,25 +26,22 @@ var (
 	// but should not be accessed directly
 	VersionTag string
 
-	DebugMode            = false
-	exePath, _           = os.Executable()
-	exeDir               = filepath.Dir(exePath)
-	Name                 = filepath.Base(exePath)
-	DotName              = fmt.Sprintf(".%s", Name)
-	MaxConcurrency int64 = 128
-	userHomeDir, _       = os.UserHomeDir()
-	TempDir              = filepath.Join(os.TempDir(), DotName)
-	EnvUsername          = os.Getenv("TADPOLES_USER")
-	EnvPassword          = os.Getenv("TADPOLES_PASS")
+	exePath, _ = os.Executable()
+	Name       = filepath.Base(exePath)
+	DotName    = fmt.Sprintf(".%s", Name)
+	TempDir    = filepath.Join(os.TempDir(), DotName)
 
-	allProviders    = []string{TADPOLES, BRIGHT_HORIZONS}
-	defaultProvider = TADPOLES
-	EnvProvider     = os.Getenv("PROVIDER")
-	Provider        = NewProviderConfig(allProviders, defaultProvider)
-
+	DebugMode          = false
 	NonInteractiveMode bool
 	JsonOutput         bool
-	dataDir            string
+
+	EnvUsername = os.Getenv("USERNAME")
+	EnvPassword = os.Getenv("PASSWORD")
+	EnvProvider = os.Getenv("PROVIDER")
+
+	Provider = NewProviderConfig(AllProviders(), DefaultProvider)
+
+	dataDir string
 )
 
 func init() {
@@ -84,8 +90,10 @@ func IsContainerized() bool {
 func GetDataDir() string {
 	if dataDir == "" {
 		if IsContainerized() {
+			exeDir := filepath.Dir(exePath)
 			dataDir = filepath.Join(exeDir, DotName)
 		} else {
+			userHomeDir, _ := os.UserHomeDir()
 			dataDir = filepath.Join(userHomeDir, DotName)
 		}
 		_ = os.MkdirAll(dataDir, os.ModePerm)

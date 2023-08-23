@@ -9,8 +9,9 @@ services:
     command: ["backup", "/images"]
 
     environment:
-      TADPOLES_USER: "<tadpoles.com user email>"
-      TADPOLES_PASS: "<tadpoles.com user password>"
+      USERNAME: "<user email>"
+      PASSWORD: "<user password>"
+      PROVIDER: "tadpoles"
 
     volumes:
       # target path to download images

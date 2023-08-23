@@ -31,5 +31,5 @@ spec:
                   name: image-dir
               envFrom:
                 - secretRef:
-                    name: tadpoles-auth
+                    name: user-auth
           restartPolicy: Never

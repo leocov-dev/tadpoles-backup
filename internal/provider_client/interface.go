@@ -21,7 +21,7 @@ type ProviderClient interface {
 
 func GetProviderClient() ProviderClient {
 	switch config.Provider.String() {
-	case config.BRIGHT_HORIZONS:
+	case config.BrightHorizons:
 		return NewBrightHorizonsClient()
 	default:
 		return NewTadpolesClient()
