@@ -72,7 +72,7 @@ $ docker pull leocov/tadpoles-backup:latest
 $ docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> leocov/tadpoles-backup stat
 
 # download new images
-$ docker run --rm -eUSERNAME=<email> -eTADPOLES_PASS=<password> -v$HOME/Pictures/tadpoles:/images leocov/tadpoles-backup backup /images
+$ docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> -v$HOME/Pictures/tadpoles:/images leocov/tadpoles-backup backup /images
 
 # enable api response caching by mapping app data directory
 $ docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> -v$HOME/.tadpoles-backup:/app/.tadpoles-backup leocov/tadpoles-backup stat
