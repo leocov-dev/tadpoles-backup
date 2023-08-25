@@ -41,7 +41,11 @@ func (a *ApiSpec) NeedsLogin(apiKey string) bool {
 }
 
 func (a *ApiSpec) DoLogin(username, password string) (string, error) {
-	return login(a.Client, a.Endpoints.loginUrl, username, password)
+	token, err := login(a.Client, a.Endpoints.loginUrl, username, password)
+	if err != nil {
+		return "", err
+	}
+	return fetchApiKey(a.Client, a.Endpoints.validateUrl, token)
 }
 
 func (a *ApiSpec) GetAccountData() (dependents Dependents, err error) {
