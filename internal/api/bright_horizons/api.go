@@ -35,9 +35,7 @@ func (a *ApiSpec) setApiKey(apiKey string) {
 
 func (a *ApiSpec) NeedsLogin(apiKey string) bool {
 	a.setApiKey(apiKey)
-	resp, err := a.Client.Get(a.Endpoints.profileUrl.String())
-
-	return err != nil || resp.StatusCode != http.StatusOK
+	return check(a.Client, a.Endpoints.profileUrl)
 }
 
 func (a *ApiSpec) DoLogin(username, password string) (string, error) {

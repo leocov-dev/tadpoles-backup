@@ -22,7 +22,7 @@ func newEndpoints() Endpoints {
 		root:        rootUrl,
 		apiV2Root:   apiV2Root,
 		loginUrl:    loginUrl,
-		validateUrl: apiV2Root.JoinPath("jwt", "validate"),
+		validateUrl: apiV2Root.JoinPath("auth", "jwt", "validate"),
 		profileUrl:  apiV2Root.JoinPath("user", "profile"),
 	}
 }
