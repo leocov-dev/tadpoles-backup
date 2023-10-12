@@ -89,3 +89,21 @@ func (a *ApiSpec) DoLogin(email string, password string, cookieFile string) (*ti
 	log.Debug("Login successful")
 	return loginAdmit(a.Client, a.endpoints.admitUrl, cookieFile)
 }
+
+func (a *ApiSpec) RequestPasswordReset(email string) error {
+	log.Debug("Ask tadpoles.com to reset user: ", email)
+
+	// We must make a new client with the `Host` header set
+	// to impersonate www.tadpoles.com or the request will fail.
+	// They've implemented a basic security check to limit reset
+	// spamming, but luckily they don't validate the header
+	// against an IP address etc.
+	client := &http.Client{
+		Transport: &HostHeaderTransport{
+			hostHeader: a.endpoints.root.Host,
+		},
+		Timeout: 60 * time.Second,
+	}
+
+	return requestPasswordReset(client, a.endpoints.resetUrl, email)
+}

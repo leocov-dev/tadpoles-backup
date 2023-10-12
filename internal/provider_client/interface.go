@@ -17,6 +17,7 @@ type ProviderClient interface {
 	ClearAll() []error
 	GetHttpClient() *http.Client
 	ShouldUseCache(operation string) bool
+	ResetUserPassword(email string) error
 }
 
 func GetProviderClient() ProviderClient {

@@ -2,9 +2,12 @@ package provider_client
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
+	"tadpoles-backup/config"
 	"tadpoles-backup/internal/api/bright_horizons"
 	"tadpoles-backup/internal/cache"
 	"tadpoles-backup/internal/schemas"
@@ -240,4 +243,8 @@ func (c *BrightHorizonsClient) ShouldUseCache(operation string) bool {
 	default:
 		return true
 	}
+}
+
+func (c *BrightHorizonsClient) ResetUserPassword(email string) error {
+	return errors.New(fmt.Sprintf("%s client does not support password reset", config.Provider.String()))
 }

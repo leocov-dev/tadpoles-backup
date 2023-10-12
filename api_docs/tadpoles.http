@@ -1,3 +1,11 @@
+### password reset
+POST {{host}}/auth/forgot
+Host: www.tadpoles.com
+Content-Type: application/x-www-form-urlencoded
+
+email={{email}}&app=parent&service=tadpoles
+
+
 ### fetch JWT token
 POST {{host}}/auth/login
 Content-Type: application/x-www-form-urlencoded
