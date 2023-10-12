@@ -10,7 +10,6 @@ require (
 	github.com/fatih/color v1.7.0
 	github.com/gosuri/uiprogress v0.0.1
 	github.com/h2non/filetype v1.0.10
-	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
 	github.com/weppos/publicsuffix-go v0.13.0

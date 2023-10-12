@@ -46,7 +46,13 @@ $ tadpoles-backup --provider <service-provider> clear login
 
 You **MUST** have a _www.tadpoles.com_ account with a tadpoles specific password.
 You **CAN NOT** log in to this tool with Google Auth.
-If you normally log into _tadpoles.com_ with Google/Gmail account verification read these [instructions](.github/GoogleAccountSignIn.md).
+If you normally log into _tadpoles.com_ with Google/Gmail account verification you will need to
+request a password reset with the command:
+```shell
+# this simply requests a reset email be sent to you
+# it does not change or access your password
+$ tadpoles-backup --provider tadpoles reset-password <email>
+```
 
 The tool stores your _www.tadpoles.com_ authentication cookie for future use so that you don't need to enter your password every time.
 This cookie lasts for about 2 weeks. Your email and password are never stored.
@@ -122,3 +128,4 @@ $ make && bin/tadpoles-backup --help
 ## Thanks to
 * @arthurnn - for assistance with Docker image
 * @AndyRPH - for assistance with Bright Horizons support
+* @s0rcy - for assistance with Tadpoles password reset

@@ -54,3 +54,35 @@ func login(
 
 	return nil
 }
+
+type HostHeaderTransport struct {
+	hostHeader string
+}
+
+func (t *HostHeaderTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Add("Host", t.hostHeader)
+	return http.DefaultTransport.RoundTrip(req)
+}
+
+func requestPasswordReset(
+	client *http.Client,
+	resetUrl *url.URL,
+	email string,
+) error {
+	resp, err := client.PostForm(
+		resetUrl.String(),
+		url.Values{
+			"email":   {email},
+			"app":     {"parent"},
+			"service": {"tadpoles"},
+		},
+	)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return utils.NewRequestError(resp, "tadpoles reset password request failed")
+	}
+
+	return nil
+}

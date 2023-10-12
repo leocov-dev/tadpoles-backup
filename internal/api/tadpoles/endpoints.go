@@ -13,6 +13,7 @@ type endpoints struct {
 	apiV1Root     *url.URL
 	parametersUrl *url.URL
 	admitUrl      *url.URL
+	resetUrl      *url.URL
 }
 
 func newEndpoints() endpoints {
@@ -25,6 +26,7 @@ func newEndpoints() endpoints {
 		loginUrl:      rootUrl.JoinPath("auth", "login"),
 		parametersUrl: apiV1Root.JoinPath("parameters"),
 		admitUrl:      apiV1Root.JoinPath("athome", "admit"),
+		resetUrl:      rootUrl.JoinPath("auth", "forgot"),
 	}
 }
 

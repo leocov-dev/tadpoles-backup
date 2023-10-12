@@ -133,3 +133,7 @@ func (c *TadpolesClient) ClearAll() []error {
 func (c *TadpolesClient) ShouldUseCache(_ string) bool {
 	return true
 }
+
+func (c *TadpolesClient) ResetUserPassword(email string) error {
+	return c.spec.RequestPasswordReset(email)
+}
