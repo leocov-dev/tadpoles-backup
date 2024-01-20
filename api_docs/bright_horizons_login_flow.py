@@ -82,10 +82,10 @@ def post_login_form(username: str, password: str, token: str, cj: cookiejar.Cook
         raise e
 
     if re.search(login_denied_pattern, page):
-        print(page)
+        # print(page)
         raise Exception("incorrect username or password")
     if re.search(login_locked_pattern, page):
-        print(page)
+        # print(page)
         raise Exception("account is locked")
 
     print("\npost login page ----------\n", page)
