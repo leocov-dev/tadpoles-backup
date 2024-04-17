@@ -15,7 +15,7 @@ func (jt EpocTime) String() string {
 
 // MarshalJSON is used to convert the timestamp to JSON
 func (jt EpocTime) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.FormatInt(time.Time(jt).Unix(), 10)), nil
+	return []byte(strconv.FormatFloat(float64(time.Time(jt).Unix()), 'f', 2, 64)), nil
 }
 
 // UnmarshalJSON is used to convert the timestamp from JSON
@@ -40,7 +40,7 @@ func (jt EpocTime) Unix() int64 {
 	return time.Time(jt).Unix()
 }
 
-// EpocTime returns the JSON time as a time.EpocTime instance in UTC
+// Time returns the JSON time as a time.EpocTime instance in UTC
 func (jt EpocTime) Time() time.Time {
 	return (time.Time)(jt).UTC()
 }
