@@ -3,7 +3,9 @@ GOFMT_FILES?=$$(find . -type f -name '*.go')
 default: dev
 
 test:
-	@bash -c "scripts/test.sh"
+	@rm -f coverage.out coverage.html
+	@go test -v -coverpkg=./... -coverprofile=coverage.out ./...
+	@go tool cover -html=coverage.out -o coverage.html
 
 # bin generates release zip packages in ./dist
 release: tidy
@@ -30,4 +32,4 @@ tidy:
 
 .NOTPARALLEL:
 
-.PHONY: bin default dev fmtcheck fmt tidy
+.PHONY: bin default dev fmtcheck fmt tidy test
