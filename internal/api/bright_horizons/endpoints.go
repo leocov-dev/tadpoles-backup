@@ -14,7 +14,8 @@ type Endpoints struct {
 }
 
 func newEndpoints() Endpoints {
-	loginUrl, _ := url.Parse("https://familyinfocenter.brighthorizons.com/mybrightday/login")
+	loginUrl, _ := url.Parse("https://bhlogin.brighthorizons.com")
+	//bhApiUrl, _ := url.Parse("https://mbdwgateway.brighthorizons.com/api")
 	rootUrl, _ := url.Parse("https://mybrightday.brighthorizons.com")
 	apiV2Root := rootUrl.JoinPath("api", "v2")
 

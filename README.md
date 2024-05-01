@@ -72,22 +72,22 @@ Pre-built images are available from Docker Hub
 [![Docker Image Version (latest by date)](https://img.shields.io/docker/v/leocov/tadpoles-backup?label=latest&sort=date)](https://hub.docker.com/r/leocov/tadpoles-backup)
 
 ```shell
-$ docker pull leocov/tadpoles-backup:latest
+docker pull leocov/tadpoles-backup:latest
 
 # list account info
-$ docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> leocov/tadpoles-backup stat
+docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> leocov/tadpoles-backup stat
 
 # download new images
-$ docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> -v$HOME/Pictures/tadpoles:/images leocov/tadpoles-backup backup /images
+docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> -v$HOME/Pictures/tadpoles:/images leocov/tadpoles-backup backup /images
 
 # enable api response caching by mapping app data directory
-$ docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> -v$HOME/.tadpoles-backup:/app/.tadpoles-backup leocov/tadpoles-backup stat
+docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> -v$HOME/.tadpoles-backup:/app/.tadpoles-backup leocov/tadpoles-backup stat
 ```
 
 You may also build the docker image locally.
 ```shell
 # will be automatically tagged as `tadpoles-backup`
-$ make docker-image
+make docker-image
 ```
 
 ### Docker Compose / Kubernetes
@@ -113,12 +113,24 @@ exit after each run.
 
 See the contributing guide [here](CONTRIBUTING.md).
 
+### Basic Setup
+
 Install the Go version defined in [go.mod](go.mod) or use [goenv](https://github.com/syndbg/goenv) to manage Go (as set by [.go-version](.go-version)).
 
-```
+### Dev build
+```shell
 # build for your platform only and run.
-$ make && bin/tadpoles-backup --help
+make && bin/tadpoles-backup --help
 ```
+
+### Testing
+
+Run all unit tests with helper utility. This will build a coverage report as
+`coverage.html`
+```shell
+make test
+```
+
 
 ---
 ## Inspired By

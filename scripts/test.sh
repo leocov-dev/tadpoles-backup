@@ -5,11 +5,13 @@ set -e
 echo "==> Running tests..."
 echo
 
-echo "" >coverage.txt
+_root=$(go list .)
+
 for d in $(go list ./... | grep -v vendor); do
-    go test -coverprofile=profile.out "$d"
-    if [ -f profile.out ]; then
-        cat profile.out >>coverage.txt
-        rm profile.out
-    fi
+    echo "Testing: $d"
+
+    _covertarget="coverage/$d"
+    mkdir -p "$_covertarget"
+
+    go test -coverprofile="$_covertarget/coverage.out" "$d"
 done
