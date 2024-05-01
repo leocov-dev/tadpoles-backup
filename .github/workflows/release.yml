@@ -15,10 +15,10 @@ jobs:
         run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version-file: "./go.mod"
           cache: true
@@ -34,7 +34,7 @@ jobs:
         run: ls ./dist
 
       - name: Draft Release
-        uses: release-drafter/release-drafter@v5
+        uses: release-drafter/release-drafter@v6
         with:
           tag: ${{ steps.vars.outputs.tag }}
           version: ${{ steps.vars.outputs.tag }}

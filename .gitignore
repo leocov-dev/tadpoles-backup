@@ -6,7 +6,7 @@
 .idea/
 
 # tests
-coverage.txt
+coverage.*
 
 # node
 node.log
