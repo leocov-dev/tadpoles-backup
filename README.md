@@ -67,19 +67,19 @@ This api-key may only expire if you change your password. Your email and passwor
 
 ---
 ## Container Image
-Pre-built images are available from the repositories Packages page.
+Pre-built images are available from the repos [Packages page](https://github.com/leocov-dev/tadpoles-backup/pkgs/container/tadpoles-backup).
 
 ```shell
-$ docker pull leocov/tadpoles-backup:latest
+$ docker pull ghcr.io/leocov-dev/tadpoles-backup:latest
 
 # list account info
-$ docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> leocov/tadpoles-backup stat
+$ docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> ghcr.io/leocov-dev/tadpoles-backup stat
 
 # download new images
-$ docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> -v$HOME/Pictures/tadpoles:/images leocov/tadpoles-backup backup /images
+$ docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> -v$HOME/Pictures/tadpoles:/images ghcr.io/leocov-dev/tadpoles-backup backup /images
 
 # enable api response caching by mapping app data directory
-$ docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> -v$HOME/.tadpoles-backup:/app/.tadpoles-backup leocov/tadpoles-backup stat
+$ docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> -v$HOME/.tadpoles-backup:/app/.tadpoles-backup ghcr.io/leocov-dev/tadpoles-backup stat
 ```
 
 You may also build the docker image locally.

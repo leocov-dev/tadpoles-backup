@@ -22,7 +22,7 @@ spec:
                 claimName: tadpoles-backup-images-claim
           containers:
             - name: tadpoles-backup
-              image: leocov/tadpoles-backup:latest
+              image: ghcr.io/leocov-dev/tadpoles-backup:latest
               imagePullPolicy: IfNotPresent
 #              command: ["./tadpoles-backup --non-interactive"]  # this is already entrypoint default
               args: [ "backup", "/images" ]

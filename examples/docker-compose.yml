@@ -3,7 +3,7 @@ version: "3.0"
 services:
   # tadpoles-backup is not persistent; it will run and then exit
   tadpoles-backup-download:
-    image: leocov/tadpoles-backup:latest
+    image: ghcr.io/leocov-dev/tadpoles-backup:latest
 
     # image entrypoint has default --non-interactive flag set
     command: ["backup", "/images"]
