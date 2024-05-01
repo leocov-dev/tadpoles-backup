@@ -113,12 +113,24 @@ exit after each run.
 
 See the contributing guide [here](CONTRIBUTING.md).
 
+### Basic Setup
+
 Install the Go version defined in [go.mod](go.mod) or use [goenv](https://github.com/syndbg/goenv) to manage Go (as set by [.go-version](.go-version)).
 
-```
+### Dev build
+```shell
 # build for your platform only and run.
 $ make && bin/tadpoles-backup --help
 ```
+
+### Testing
+
+Run all unit tests with helper utility. This will build a coverage report as
+`coverage.html`
+```shell
+make test
+```
+
 
 ---
 ## Inspired By

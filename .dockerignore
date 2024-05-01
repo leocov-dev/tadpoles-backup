@@ -16,6 +16,7 @@ scripts/
 Makefile
 LICENSE
 coverage.*
+coverage/
 Dockerfile
 env*
 .env*
