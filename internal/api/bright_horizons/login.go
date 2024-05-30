@@ -8,11 +8,17 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
-	"tadpoles-backup/internal/http_utils"
 	"tadpoles-backup/internal/utils"
-	"time"
 )
 
+func checkLogin(client *http.Client, checkUrl *url.URL) error {
+	_, err := fetchDependents(client, checkUrl)
+	return err
+}
+
+// fetchRequestVerificationToken
+// parse the CSRF token out of the initial login HTML page so we can make a
+// non-interactive login call
 func fetchRequestVerificationToken(client *http.Client, rvtUrl *url.URL) (string, error) {
 
 	resp, err := client.Get(rvtUrl.String())
@@ -20,17 +26,22 @@ func fetchRequestVerificationToken(client *http.Client, rvtUrl *url.URL) (string
 		return "", err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return "", err
+		return "", utils.NewRequestError(resp, "error fetching initial bh page")
 	}
 
 	defer utils.CloseWithLog(resp.Body)
 	body, _ := io.ReadAll(resp.Body)
 
+	page := string(body)
+
 	r, _ := regexp.Compile("<input.*name=\"__RequestVerificationToken\".*value=\"([a-zA-Z0-9-_]+)\".*/>")
 
-	return r.FindString(string(body)), nil
+	return r.FindString(page), nil
 }
 
+// login
+// initial login form for bright horizons users, requires a request verification
+// token used to counter CSRF (which we are doing...)
 func login(
 	client *http.Client,
 	loginUrl *url.URL,
@@ -51,19 +62,22 @@ func login(
 		return "", err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return "", err
+		return "", utils.NewRequestError(resp, "bh login error")
 	}
 
 	return resp.Header.Get("Location"), nil
 }
 
-func startSaml(client *http.Client, loginUrl *url.URL, redirectVal string) (string, string, error) {
-	resp, err := client.Get(fmt.Sprintf("%s%s", loginUrl.String(), redirectVal))
+// startSaml
+// first step in SAML process should yield an "action" url and a SAML Response
+// value
+func startSaml(client *http.Client, samlUrl *url.URL) (string, string, error) {
+	resp, err := client.Get(samlUrl.String())
 	if err != nil {
 		return "", "", err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return "", "", err
+		return "", "", utils.NewRequestError(resp, "error with SAML 1st step")
 	}
 
 	actionRx, _ := regexp.Compile("<form.*action=\"([a-zA-Z0-9-_]+)\".*/")
@@ -76,6 +90,9 @@ func startSaml(client *http.Client, loginUrl *url.URL, redirectVal string) (stri
 	return actionRx.FindString(page), samlRx.FindString(page), nil
 }
 
+// finishSaml
+// second step in SAML process should yield the bright horizons API token
+// in a response cookie
 func finishSaml(client *http.Client, action, samlResponse string) (string, error) {
 	resp, err := client.PostForm(
 		action,
@@ -87,7 +104,7 @@ func finishSaml(client *http.Client, action, samlResponse string) (string, error
 		return "", err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return "", err
+		return "", utils.NewRequestError(resp, "error with SAML 2nd step")
 	}
 
 	for _, cookie := range resp.Cookies() {
@@ -102,6 +119,8 @@ type tokenResponse struct {
 	Token string `json:"token"`
 }
 
+// exchangeToken
+// exchange the bright horizons token for a tadpoles token
 func exchangeToken(client *http.Client, tokenUrl *url.URL, bhToken string) (string, error) {
 	req, err := http.NewRequest("GET", tokenUrl.String(), nil)
 	if err != nil {
@@ -117,7 +136,7 @@ func exchangeToken(client *http.Client, tokenUrl *url.URL, bhToken string) (stri
 		return "", err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return "", err
+		return "", utils.NewRequestError(resp, "error exchanging bright horizons token for tadpoles token")
 	}
 
 	defer utils.CloseWithLog(resp.Body)
@@ -129,19 +148,14 @@ func exchangeToken(client *http.Client, tokenUrl *url.URL, bhToken string) (stri
 	return data.Token, err
 }
 
-func admit(client *http.Client, admitUrl *url.URL, token string, cookieFile string) (*time.Time, error) {
-	redirectUrl := admitUrl
-	redirectUrl.RawQuery = url.Values{
-		"jwt": {token},
-	}.Encode()
-
+func admitRedirect(client *http.Client, redirectUrl *url.URL) ([]*http.Cookie, error) {
 	resp, err := client.Get(redirectUrl.String())
 	if err != nil {
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, err
+		return nil, utils.NewRequestError(resp, "error validating jwt tadpoles token")
 	}
 
-	return http_utils.SerializeResponseCookies(cookieFile, resp)
+	return resp.Cookies(), nil
 }

@@ -59,10 +59,10 @@ Authorization: Bearer {{bhToken}}
 ### validate JWT token
 # This validates the JWT and returns an API key to be used in
 # the `X-Api-Key` header with every other request.
-POST {{host}}/api/v2/auth/jwt/validate
+POST {{host}}/api/v2/auth/jwt/redirect
 Content-Type: application/x-www-form-urlencoded
 
-token={{token}}
+jwt={{token}}
 
 > {% client.global.set("apiKey", response.body.api_key); %}
 

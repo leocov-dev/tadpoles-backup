@@ -8,6 +8,7 @@
 # tests
 coverage.*
 coverage/
+!coverage/.keep
 
 # node
 node.log

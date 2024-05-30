@@ -68,7 +68,7 @@ func (p *Provider) LoginIfNeeded() error {
 }
 
 func (p *Provider) FetchAccountInfo() (*schemas.AccountInfo, error) {
-	parameters, paramErr := fetchParameters(p.httpClient, p.e.parametersUrl)
+	parameters, paramErr := FetchParameters(p.httpClient, p.e.parametersUrl)
 	if paramErr != nil {
 		return nil, paramErr
 	}
@@ -88,7 +88,7 @@ func (p *Provider) FetchAccountInfo() (*schemas.AccountInfo, error) {
 }
 
 func (p *Provider) FetchAllMediaFiles(ctx context.Context, start, end time.Time) (schemas.MediaFiles, error) {
-	allEvents, eventsErr := fetchAllEvents(ctx, p.c, p.httpClient, p.e, start, end, true)
+	allEvents, eventsErr := FetchAllEvents(ctx, p.c, p.httpClient, p.e, start, end, true)
 	if eventsErr != nil {
 		return nil, eventsErr
 	}
@@ -98,7 +98,7 @@ func (p *Provider) FetchAllMediaFiles(ctx context.Context, start, end time.Time)
 	for _, event := range allEvents {
 		eventMediaFiles := make(schemas.MediaFiles, len(event.Attachments))
 		for i, attachment := range event.Attachments {
-			eventMediaFiles[i] = newMediaFileFromEventAttachment(*event, *attachment, p.e)
+			eventMediaFiles[i] = NewMediaFileFromEventAttachment(*event, *attachment, p.e)
 		}
 		mediaFiles = append(mediaFiles, eventMediaFiles...)
 	}
@@ -107,7 +107,7 @@ func (p *Provider) FetchAllMediaFiles(ctx context.Context, start, end time.Time)
 }
 
 func (p *Provider) ClearLoginData() error {
-	return p.c.ClearLoginCookie()
+	return p.c.ClearLoginData()
 }
 
 func (p *Provider) ClearCache() error {
@@ -115,7 +115,7 @@ func (p *Provider) ClearCache() error {
 }
 
 func (p *Provider) ClearAll() []error {
-	cookieErr := p.c.ClearLoginCookie()
+	cookieErr := p.c.ClearLoginData()
 	cacheErr := p.c.ClearCache()
 
 	return []error{cookieErr, cacheErr}

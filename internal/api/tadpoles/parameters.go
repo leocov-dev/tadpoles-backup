@@ -25,7 +25,7 @@ type dependents struct {
 	Key         string `json:"person"`
 }
 
-func fetchParameters(client *http.Client, paramsUrl *url.URL) (params *parametersResponse, err error) {
+func FetchParameters(client *http.Client, paramsUrl *url.URL) (params *parametersResponse, err error) {
 	resp, err := client.Get(paramsUrl.String())
 	if err != nil {
 		return nil, err

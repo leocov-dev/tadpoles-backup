@@ -13,7 +13,7 @@ import (
 
 type Report struct {
 	Id        string `json:"id"`
-	Dependent *Dependent
+	Dependent *Child
 	Created   time.Time   `json:"created"`
 	Snapshots []*Snapshot `json:"snapshot_entries"`
 }
@@ -66,7 +66,7 @@ func ByReportDate(r1, r2 *Report) bool {
 	return r1.Created.Before(r2.Created)
 }
 
-func fetchDependentReports(client *http.Client, reportUrl *url.URL, dependent Dependent) (reports Reports, err error) {
+func fetchDependentReports(client *http.Client, reportUrl *url.URL, dependent Child) (reports Reports, err error) {
 	resp, err := client.Get(reportUrl.String())
 	if err != nil {
 		return nil, err

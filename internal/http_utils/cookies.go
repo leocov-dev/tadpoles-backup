@@ -49,20 +49,24 @@ func DeserializeCookies(cookieFile string, hostUrl *url.URL) *cookiejar.Jar {
 	return jar
 }
 
-func SerializeResponseCookies(cookieFile string, response *http.Response) (expires *time.Time, err error) {
-	cookiesData := response.Cookies()
-	jsonString, err := json.MarshalIndent(cookiesData, "", "  ")
-	if err != nil {
-		logrus.Debug("Failed to marshal cookies...", err)
-		return nil, err
+func SerializeCookies(cookieFile string, cookies []*http.Cookie) (*time.Time, error) {
+	jsonString, marshalErr := json.MarshalIndent(cookies, "", "  ")
+	if marshalErr != nil {
+		logrus.Debug("Failed to marshal cookies...", marshalErr)
+		return nil, marshalErr
 	}
 
-	err = os.WriteFile(cookieFile, jsonString, 0600)
-	if err != nil {
-		logrus.Debug("Failed to write cookies json to file...", err)
-		return nil, err
+	writeErr := os.WriteFile(cookieFile, jsonString, 0600)
+	if writeErr != nil {
+		logrus.Debug("Failed to write cookies json to file...", writeErr)
+		return nil, writeErr
 	}
 
 	logrus.Debug("Serialize cookies successful")
-	return &cookiesData[0].Expires, nil
+	return &cookies[0].Expires, nil
+}
+
+func SerializeResponseCookies(cookieFile string, response *http.Response) (*time.Time, error) {
+	cookiesData := response.Cookies()
+	return SerializeCookies(cookieFile, cookiesData)
 }

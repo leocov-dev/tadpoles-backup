@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"sort"
+	"tadpoles-backup/internal/schemas"
 	"tadpoles-backup/internal/utils"
 	"tadpoles-backup/pkg/async"
 	"time"
@@ -106,11 +107,11 @@ func fetchEventsPage(client *http.Client, eventsUrl *url.URL) (newEvents Events,
 	return page.Events, page.Cursor, nil
 }
 
-func fetchAllEvents(
+func FetchAllEvents(
 	ctx context.Context,
 	eventCache *ApiCache,
 	httpClient *http.Client,
-	ep endpoints,
+	ep schemas.TadpolesApiEndpoints,
 	firstEventTime time.Time,
 	lastEventTime time.Time,
 	useCache bool,
@@ -148,7 +149,7 @@ func fetchAllEvents(
 			var pageEvents Events
 			var pageError error
 
-			pageEvents, cursor, pageError = fetchEventsPage(httpClient, ep.eventsUrl(firstEventTime, lastEventTime, cursor))
+			pageEvents, cursor, pageError = fetchEventsPage(httpClient, ep.EventsUrl(firstEventTime, lastEventTime, cursor))
 			if pageError != nil {
 				return nil, pageError
 			}

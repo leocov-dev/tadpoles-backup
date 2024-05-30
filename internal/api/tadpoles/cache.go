@@ -12,38 +12,92 @@ import (
 )
 
 type ApiCache struct {
-	BucketName string
-	CookieFile string
-	DbFile     string
+	EventsBucketName string
+	TokensBucketName string
+	CookieFile       string
+	DbFile           string
 }
 
 func NewApiCache(name string) *ApiCache {
 	return &ApiCache{
-		BucketName: fmt.Sprintf("TADPOLES_API_CACHE_%s", name),
+		EventsBucketName: fmt.Sprintf("TADPOLES_API_CACHE_%s", name),
+		TokensBucketName: fmt.Sprintf("API_TOKENS_CACHE_%s", name),
 		CookieFile: filepath.Join(
 			config.GetDataDir(),
 			fmt.Sprintf(".%s-api-cookie", name),
 		),
 		DbFile: filepath.Join(
 			config.GetDataDir(),
-			fmt.Sprintf(".%s-api-c", name),
+			fmt.Sprintf(".%s-api-cache", name),
 		),
 	}
 }
 
 func (c *ApiCache) ClearCache() error {
-	return utils.DeleteFile(c.DbFile)
+	cache.DeleteBucket(c.DbFile, c.EventsBucketName)
+	return nil
 }
 
-func (c *ApiCache) ClearLoginCookie() error {
+func (c *ApiCache) ClearLoginData() error {
+	cache.DeleteBucket(c.DbFile, c.TokensBucketName)
 	return utils.DeleteFile(c.CookieFile)
 }
 
-// ReadEventCache
+func (c *ApiCache) StoreToken(name, token string) error {
+	cache.InitializeBucket(c.DbFile, c.TokensBucketName)
+
+	db, err := bolt.Open(c.DbFile, 0600, &bolt.Options{ReadOnly: true})
+	if err != nil {
+		log.Errorln("failed bolt open")
+		return err
+	}
+	defer utils.CloseWithLog(db)
+
+	log.Debugf("storing token for %s", name)
+
+	err = db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(c.TokensBucketName))
+		return b.Put([]byte(name), []byte(token))
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *ApiCache) GetToken(name string) (string, error) {
+
+	cache.InitializeBucket(c.DbFile, c.TokensBucketName)
+
+	db, err := bolt.Open(c.DbFile, 0600, &bolt.Options{ReadOnly: true})
+	if err != nil {
+		log.Errorln("failed bolt open")
+		return "", err
+	}
+	defer utils.CloseWithLog(db)
+
+	log.Debugf("fetching token for %s", name)
+
+	var token string
+
+	err = db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(c.TokensBucketName))
+		token = string(b.Get([]byte(name)))
+		return nil
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
+// readEventCache
 // read the local bolt-db c file and
 // return a list of api Events sorted by Event time
 func (c *ApiCache) readEventCache() (events Events, err error) {
-	cache.InitializeBucket(c.DbFile, c.BucketName)
+	cache.InitializeBucket(c.DbFile, c.EventsBucketName)
 
 	db, err := bolt.Open(c.DbFile, 0600, &bolt.Options{ReadOnly: true})
 	if err != nil {
@@ -55,7 +109,7 @@ func (c *ApiCache) readEventCache() (events Events, err error) {
 	log.Debug("reading Event cache...")
 
 	err = db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(c.BucketName))
+		b := tx.Bucket([]byte(c.EventsBucketName))
 
 		c := b.Cursor()
 
@@ -83,10 +137,10 @@ func (c *ApiCache) readEventCache() (events Events, err error) {
 	return events, nil
 }
 
-// UpdateEventCache
+// updateEventCache
 // write a list of api Events to the local bolt-db c file
 func (c *ApiCache) updateEventCache(events Events) error {
-	cache.InitializeBucket(c.DbFile, c.BucketName)
+	cache.InitializeBucket(c.DbFile, c.EventsBucketName)
 
 	db, err := bolt.Open(c.DbFile, 0600, nil)
 	if err != nil {
@@ -98,7 +152,7 @@ func (c *ApiCache) updateEventCache(events Events) error {
 
 	for _, event := range events {
 		err := db.Update(func(tx *bolt.Tx) error {
-			b := tx.Bucket([]byte(c.BucketName))
+			b := tx.Bucket([]byte(c.EventsBucketName))
 			// TODO: maybe there is a way to store without marshaling
 			//  to reduce processing on read-back
 			j, err := json.Marshal(event)

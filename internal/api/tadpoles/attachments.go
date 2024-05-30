@@ -5,16 +5,16 @@ import (
 	"tadpoles-backup/internal/schemas"
 )
 
-func newMediaFileFromEventAttachment(
+func NewMediaFileFromEventAttachment(
 	event Event,
 	attachment Attachment,
-	endpoints endpoints,
+	endpoints schemas.TadpolesApiEndpoints,
 ) schemas.MediaFile {
 	return schemas.NewMediaFile(
 		event.Comment,
 		event.EventTime.Time(),
 		fmt.Sprintf("%s_%s", event.FormatTimeStamp(), event.ChildName),
-		endpoints.attachmentsUrl(event.EventKey, attachment.AttachmentKey),
+		endpoints.AttachmentsUrl(event.EventKey, attachment.AttachmentKey),
 		attachment.MimeType,
 	)
 }
