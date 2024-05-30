@@ -28,6 +28,17 @@ func newEndpoints() endpoints {
 	}
 }
 
+func (e endpoints) requestVerificationTokenUrl() *url.URL {
+	rvtUrl := e.loginUrl
+
+	rvtUrl.RawQuery = url.Values{
+		"benefitid":  {"5"},
+		"fstargetid": {"1"},
+	}.Encode()
+
+	return rvtUrl
+}
+
 func (e endpoints) dependentsUrl(userId string) *url.URL {
 	return e.apiV2Root.JoinPath("dependents", "guardian", userId)
 }
