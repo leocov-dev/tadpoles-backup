@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"tadpoles-backup/config"
-	"tadpoles-backup/internal/provider_client"
+	"tadpoles-backup/internal/api"
 	"tadpoles-backup/internal/utils"
 )
 
@@ -44,7 +44,7 @@ func resetPasswordRun(cmd *cobra.Command, args []string) {
 	if config.Provider.Value != config.Tadpoles {
 	}
 
-	provider := provider_client.GetProviderClient()
+	provider := api.GetProvider()
 
 	err := provider.ResetUserPassword(args[0])
 	if err != nil {

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type Endpoints struct {
+type endpoints struct {
 	root        *url.URL
 	apiV2Root   *url.URL
 	loginUrl    *url.URL
@@ -13,13 +13,13 @@ type Endpoints struct {
 	profileUrl  *url.URL
 }
 
-func newEndpoints() Endpoints {
+func newEndpoints() endpoints {
 	loginUrl, _ := url.Parse("https://bhlogin.brighthorizons.com")
 	//bhApiUrl, _ := url.Parse("https://mbdwgateway.brighthorizons.com/api")
 	rootUrl, _ := url.Parse("https://mybrightday.brighthorizons.com")
 	apiV2Root := rootUrl.JoinPath("api", "v2")
 
-	return Endpoints{
+	return endpoints{
 		root:        rootUrl,
 		apiV2Root:   apiV2Root,
 		loginUrl:    loginUrl,
@@ -28,11 +28,11 @@ func newEndpoints() Endpoints {
 	}
 }
 
-func (e Endpoints) dependentsUrl(userId string) *url.URL {
+func (e endpoints) dependentsUrl(userId string) *url.URL {
 	return e.apiV2Root.JoinPath("dependents", "guardian", userId)
 }
 
-func (e Endpoints) reportsUrl(childId string, start, end time.Time) *url.URL {
+func (e endpoints) reportsUrl(childId string, start, end time.Time) *url.URL {
 	eventsUrl := e.apiV2Root.JoinPath("dependent", childId, "daily_reports")
 
 	eventsUrl.RawQuery = url.Values{
@@ -43,7 +43,7 @@ func (e Endpoints) reportsUrl(childId string, start, end time.Time) *url.URL {
 	return eventsUrl
 }
 
-func (e Endpoints) getChunkedReportUrls(dependentId string, from, to time.Time) (reportUrls []*url.URL) {
+func (e endpoints) getChunkedReportUrls(dependentId string, from, to time.Time) (reportUrls []*url.URL) {
 	chunk := 0
 	isLastChunk := false
 
@@ -67,6 +67,6 @@ func (e Endpoints) getChunkedReportUrls(dependentId string, from, to time.Time) 
 	return reportUrls
 }
 
-func (e Endpoints) MediaUrl(attachmentId string) *url.URL {
+func (e endpoints) MediaUrl(attachmentId string) *url.URL {
 	return e.apiV2Root.JoinPath("media", attachmentId)
 }

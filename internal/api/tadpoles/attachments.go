@@ -5,7 +5,7 @@ import (
 	"tadpoles-backup/internal/schemas"
 )
 
-func NewMediaFileFromEventAttachment(
+func newMediaFileFromEventAttachment(
 	event Event,
 	attachment Attachment,
 	endpoints endpoints,

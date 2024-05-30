@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"tadpoles-backup/config"
-	"tadpoles-backup/internal/provider_client"
+	"tadpoles-backup/internal/api"
 	"tadpoles-backup/internal/schemas"
 	"tadpoles-backup/internal/utils"
 	"tadpoles-backup/internal/utils/progress"
@@ -59,7 +59,7 @@ func backupArgs() cobra.PositionalArgs {
 }
 
 func backupRun(_ *cobra.Command, args []string) {
-	provider := provider_client.GetProviderClient()
+	provider := api.GetProvider()
 
 	err := provider.LoginIfNeeded()
 	if err != nil {
@@ -76,16 +76,15 @@ func backupRun(_ *cobra.Command, args []string) {
 
 	// ------------------------------------------------------------------------
 	s := spinners.StartNewSpinner("Fetching Media Data...")
-	info, err := provider.GetAccountInfo()
+	info, err := provider.FetchAccountInfo()
 	if err != nil {
 		s.Stop()
 		utils.CmdFailed(err)
 	}
-	mediaFiles, err := provider.GetAllMediaFiles(
+	mediaFiles, err := provider.FetchAllMediaFiles(
 		backupCtx,
 		info.FirstEvent,
 		time.Now(),
-		provider.ShouldUseCache("backup"),
 	)
 	if err != nil {
 		s.Stop()
@@ -109,7 +108,7 @@ func backupRun(_ *cobra.Command, args []string) {
 		bw := progress.StartNewProgressBar(count, "Downloading")
 
 		err = newMediaFiles.DownloadAll(
-			provider.GetHttpClient(),
+			provider.HttpClient(),
 			backupTarget,
 			backupCtx,
 			bw,

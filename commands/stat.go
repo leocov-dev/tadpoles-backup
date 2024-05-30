@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"tadpoles-backup/config"
-	"tadpoles-backup/internal/provider_client"
+	"tadpoles-backup/internal/api"
 	"tadpoles-backup/internal/schemas"
 	"tadpoles-backup/internal/utils"
 	"tadpoles-backup/internal/utils/spinners"
@@ -36,7 +36,7 @@ func init() {
 }
 
 func statRun(_ *cobra.Command, _ []string) {
-	provider := provider_client.GetProviderClient()
+	provider := api.GetProvider()
 
 	err := provider.LoginIfNeeded()
 	if err != nil {
@@ -45,7 +45,7 @@ func statRun(_ *cobra.Command, _ []string) {
 
 	// ------------------------------------------------------------------------
 	s := spinners.StartNewSpinner("Fetching Account Info...")
-	info, err := provider.GetAccountInfo()
+	info, err := provider.FetchAccountInfo()
 	if err != nil {
 		s.Stop()
 		utils.CmdFailed(err)
@@ -58,11 +58,10 @@ func statRun(_ *cobra.Command, _ []string) {
 
 	// ------------------------------------------------------------------------
 	s = spinners.StartNewSpinner("Fetching Media Info...")
-	mediaFiles, err := provider.GetAllMediaFiles(
+	mediaFiles, err := provider.FetchAllMediaFiles(
 		statCtx,
 		info.FirstEvent,
 		time.Now(),
-		provider.ShouldUseCache("stat"),
 	)
 	if err != nil {
 		s.Stop()

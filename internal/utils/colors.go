@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	headingBase = headings.NewHeading(":", 16)
+	headingBase = headings.NewHeading(":", 18)
 	WriteMain   = headingBase.Copy(
 		headings.WithColor(color.FgHiYellow),
 	).Write

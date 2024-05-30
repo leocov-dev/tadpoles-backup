@@ -8,7 +8,7 @@ import (
 	"tadpoles-backup/internal/utils"
 )
 
-type ParametersResponse struct {
+type parametersResponse struct {
 	LastEventTime  utils.EpocTime `json:"last_event_time"`
 	FirstEventTime utils.EpocTime `json:"first_event_time"`
 	Memberships    []*memberships `json:"memberships"`
@@ -25,7 +25,7 @@ type dependents struct {
 	Key         string `json:"person"`
 }
 
-func fetchParameters(client *http.Client, paramsUrl *url.URL) (params *ParametersResponse, err error) {
+func fetchParameters(client *http.Client, paramsUrl *url.URL) (params *parametersResponse, err error) {
 	resp, err := client.Get(paramsUrl.String())
 	if err != nil {
 		return nil, err
