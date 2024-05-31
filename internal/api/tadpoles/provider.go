@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"tadpoles-backup/config"
 	"tadpoles-backup/internal/http_utils"
+	"tadpoles-backup/internal/interfaces"
 	"tadpoles-backup/internal/schemas"
 	"tadpoles-backup/internal/user_input"
 	"tadpoles-backup/internal/utils"
@@ -33,7 +34,7 @@ func NewProvider() *Provider {
 	}
 }
 
-func (p *Provider) HttpClient() *http.Client {
+func (p *Provider) HttpClient() interfaces.HttpClient {
 	return p.httpClient
 }
 
@@ -87,16 +88,16 @@ func (p *Provider) FetchAccountInfo() (*schemas.AccountInfo, error) {
 	return info, nil
 }
 
-func (p *Provider) FetchAllMediaFiles(ctx context.Context, start, end time.Time) (schemas.MediaFiles, error) {
+func (p *Provider) FetchAllMediaFiles(ctx context.Context, start, end time.Time) (http_utils.MediaFiles, error) {
 	allEvents, eventsErr := FetchAllEvents(ctx, p.c, p.httpClient, p.e, start, end, true)
 	if eventsErr != nil {
 		return nil, eventsErr
 	}
 
-	mediaFiles := schemas.MediaFiles{}
+	mediaFiles := http_utils.MediaFiles{}
 
 	for _, event := range allEvents {
-		eventMediaFiles := make(schemas.MediaFiles, len(event.Attachments))
+		eventMediaFiles := make(http_utils.MediaFiles, len(event.Attachments))
 		for i, attachment := range event.Attachments {
 			eventMediaFiles[i] = NewMediaFileFromEventAttachment(*event, *attachment, p.e)
 		}

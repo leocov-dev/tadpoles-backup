@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"tadpoles-backup/internal/interfaces"
 	"tadpoles-backup/internal/utils"
 )
 
@@ -25,7 +26,7 @@ type dependents struct {
 	Key         string `json:"person"`
 }
 
-func FetchParameters(client *http.Client, paramsUrl *url.URL) (params *parametersResponse, err error) {
+func FetchParameters(client interfaces.HttpClient, paramsUrl *url.URL) (params *parametersResponse, err error) {
 	resp, err := client.Get(paramsUrl.String())
 	if err != nil {
 		return nil, err

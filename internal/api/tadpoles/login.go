@@ -5,11 +5,12 @@ import (
 	"net/http"
 	"net/url"
 	"tadpoles-backup/internal/http_utils"
+	"tadpoles-backup/internal/interfaces"
 	"tadpoles-backup/internal/utils"
 	"time"
 )
 
-func loginAdmit(client *http.Client, admitUrl *url.URL, cookieFile string) (expires *time.Time, err error) {
+func loginAdmit(client interfaces.HttpClient, admitUrl *url.URL, cookieFile string) (expires *time.Time, err error) {
 	logrus.Debug("Admit...")
 
 	zone, _ := time.Now().Zone()
@@ -33,7 +34,7 @@ func loginAdmit(client *http.Client, admitUrl *url.URL, cookieFile string) (expi
 }
 
 func login(
-	client *http.Client,
+	client interfaces.HttpClient,
 	loginUrl *url.URL,
 	email, password string,
 ) error {
@@ -65,7 +66,7 @@ func (t *hostHeaderTransport) RoundTrip(req *http.Request) (*http.Response, erro
 }
 
 func requestPasswordReset(
-	client *http.Client,
+	client interfaces.HttpClient,
 	resetUrl *url.URL,
 	email string,
 ) error {

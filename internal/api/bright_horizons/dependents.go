@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"tadpoles-backup/internal/interfaces"
 	"tadpoles-backup/internal/utils"
 	"time"
 )
@@ -29,7 +30,7 @@ type MyChildrenResponse struct {
 	Children []Child `json:"children"`
 }
 
-func fetchDependents(client *http.Client, dependentUrl *url.URL) (Children, error) {
+func fetchDependents(client interfaces.HttpClient, dependentUrl *url.URL) (Children, error) {
 	resp, err := client.Get(dependentUrl.String())
 	if err != nil {
 		return nil, err

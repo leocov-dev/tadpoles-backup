@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"tadpoles-backup/config"
 	"tadpoles-backup/internal/api"
-	"tadpoles-backup/internal/schemas"
+	"tadpoles-backup/internal/http_utils"
 	"tadpoles-backup/internal/utils"
 	"tadpoles-backup/internal/utils/progress"
 	"tadpoles-backup/internal/utils/spinners"
@@ -134,13 +134,13 @@ func backupRun(_ *cobra.Command, args []string) {
 // BackupOutput
 // Formatting schema for printing backup info
 type BackupOutput struct {
-	MediaFiles schemas.MediaFiles `json:"files,omitempty"`
-	Images     int                `json:"imageCount"`
-	Videos     int                `json:"videoCount"`
-	Unknown    int                `json:"unknownCount"`
+	MediaFiles http_utils.MediaFiles `json:"files,omitempty"`
+	Images     int                   `json:"imageCount"`
+	Videos     int                   `json:"videoCount"`
+	Unknown    int                   `json:"unknownCount"`
 }
 
-func NewBackupOutput(files schemas.MediaFiles) BackupOutput {
+func NewBackupOutput(files http_utils.MediaFiles) BackupOutput {
 	countMap := files.CountByType()
 
 	return BackupOutput{

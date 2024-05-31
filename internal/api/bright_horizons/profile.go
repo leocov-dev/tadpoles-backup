@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"tadpoles-backup/internal/interfaces"
 	"tadpoles-backup/internal/utils"
 )
 
@@ -12,7 +13,7 @@ type ProfileResponse struct {
 	UserId string `json:"id"`
 }
 
-func fetchProfile(client *http.Client, profileUrl *url.URL) (profile *ProfileResponse, err error) {
+func fetchProfile(client interfaces.HttpClient, profileUrl *url.URL) (profile *ProfileResponse, err error) {
 	resp, err := client.Get(profileUrl.String())
 	if err != nil {
 		return nil, err

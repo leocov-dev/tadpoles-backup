@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"sort"
+	"tadpoles-backup/internal/interfaces"
 	"tadpoles-backup/internal/schemas"
 	"tadpoles-backup/internal/utils"
 	"tadpoles-backup/pkg/async"
@@ -87,7 +88,7 @@ type pageResponse struct {
 	Events Events `json:"Events"`
 }
 
-func fetchEventsPage(client *http.Client, eventsUrl *url.URL) (newEvents Events, cursor string, err error) {
+func fetchEventsPage(client interfaces.HttpClient, eventsUrl *url.URL) (newEvents Events, cursor string, err error) {
 
 	log.Debug("Query: ", eventsUrl.String())
 	resp, err := client.Get(eventsUrl.String())
@@ -110,7 +111,7 @@ func fetchEventsPage(client *http.Client, eventsUrl *url.URL) (newEvents Events,
 func FetchAllEvents(
 	ctx context.Context,
 	eventCache *ApiCache,
-	httpClient *http.Client,
+	httpClient interfaces.HttpClient,
 	ep schemas.TadpolesApiEndpoints,
 	firstEventTime time.Time,
 	lastEventTime time.Time,

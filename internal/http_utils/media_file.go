@@ -1,15 +1,15 @@
-package schemas
+package http_utils
 
 import (
 	"context"
 	"fmt"
 	"github.com/h2non/filetype/types"
-	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 	"tadpoles-backup/config"
+	"tadpoles-backup/internal/interfaces"
 	"tadpoles-backup/internal/utils"
 	"tadpoles-backup/internal/utils/progress"
 	"tadpoles-backup/pkg/async"
@@ -60,8 +60,8 @@ func (m MediaFile) GetComment() string {
 	return m.comment
 }
 
-func (m MediaFile) Download(client *http.Client, dlRoot string) error {
-	return utils.DownloadFile(
+func (m MediaFile) Download(client interfaces.HttpClient, dlRoot string) error {
+	return DownloadFile(
 		client,
 		m.downloadUrl,
 		m.FilePath(dlRoot),
@@ -128,7 +128,7 @@ func (mfs MediaFiles) FilterOnlyNew(
 }
 
 func (mfs MediaFiles) DownloadAll(
-	client *http.Client,
+	client interfaces.HttpClient,
 	dlRoot string,
 	ctx context.Context,
 	sharedProgressBar *progress.BarWrapper,

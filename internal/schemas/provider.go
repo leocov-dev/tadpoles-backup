@@ -2,15 +2,16 @@ package schemas
 
 import (
 	"context"
-	"net/http"
+	"tadpoles-backup/internal/http_utils"
+	"tadpoles-backup/internal/interfaces"
 	"time"
 )
 
 type Provider interface {
-	HttpClient() *http.Client
+	HttpClient() interfaces.HttpClient
 	LoginIfNeeded() error
 	FetchAccountInfo() (*AccountInfo, error)
-	FetchAllMediaFiles(ctx context.Context, start, end time.Time) (MediaFiles, error)
+	FetchAllMediaFiles(ctx context.Context, start, end time.Time) (http_utils.MediaFiles, error)
 	ClearLoginData() error
 	ClearCache() error
 	ClearAll() []error

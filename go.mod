@@ -3,6 +3,7 @@ module tadpoles-backup
 go 1.22
 
 require (
+	github.com/antchfx/htmlquery v1.3.1
 	github.com/briandowns/spinner v1.23.0
 	github.com/corpix/uarand v0.2.0
 	github.com/dsoprea/go-exif/v2 v2.0.0-20200321225314-640175a69fe4
@@ -19,9 +20,11 @@ require (
 )
 
 require (
+	github.com/antchfx/xpath v1.3.0 // indirect
 	github.com/dsoprea/go-logging v0.0.0-20200517223158-a10564966e9d // indirect
 	github.com/go-errors/errors v1.1.1 // indirect
 	github.com/golang/geo v0.0.0-20200319012246-673a6f80352d // indirect
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/gosuri/uilive v0.0.4 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

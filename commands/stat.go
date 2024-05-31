@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"tadpoles-backup/config"
 	"tadpoles-backup/internal/api"
+	"tadpoles-backup/internal/http_utils"
 	"tadpoles-backup/internal/schemas"
 	"tadpoles-backup/internal/utils"
 	"tadpoles-backup/internal/utils/spinners"
@@ -82,15 +83,15 @@ func statRun(_ *cobra.Command, _ []string) {
 // Formatting schema for printing account info
 type StatOutput struct {
 	Info       schemas.AccountInfo
-	MediaFiles schemas.MediaFiles `json:"files,omitempty"`
-	Images     int                `json:"imageCount,omitempty"`
-	Videos     int                `json:"videoCount,omitempty"`
-	Unknown    int                `json:"unknownCount,omitempty"`
+	MediaFiles http_utils.MediaFiles `json:"files,omitempty"`
+	Images     int                   `json:"imageCount,omitempty"`
+	Videos     int                   `json:"videoCount,omitempty"`
+	Unknown    int                   `json:"unknownCount,omitempty"`
 }
 
 func NewStatOutput(
 	info schemas.AccountInfo,
-	files schemas.MediaFiles,
+	files http_utils.MediaFiles,
 ) *StatOutput {
 	fileMap := files.CountByType()
 	return &StatOutput{

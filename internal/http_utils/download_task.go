@@ -1,20 +1,20 @@
-package schemas
+package http_utils
 
 import (
 	"fmt"
-	"net/http"
+	"tadpoles-backup/internal/interfaces"
 	"tadpoles-backup/internal/utils/progress"
 )
 
 type DownloadTask struct {
 	downloadRoot string
 	mediaFile    MediaFile
-	client       *http.Client
+	client       interfaces.HttpClient
 	progress     *progress.BarWrapper
 }
 
 func NewDownloadTask(
-	client *http.Client,
+	client interfaces.HttpClient,
 	mediaFile MediaFile,
 	downloadRoot string,
 	sharedProgressBar *progress.BarWrapper,

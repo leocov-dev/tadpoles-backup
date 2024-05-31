@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/antchfx/htmlquery"
 	"io"
 	"net/http"
 	"net/url"
-	"regexp"
+	"strings"
+	"tadpoles-backup/internal/interfaces"
 	"tadpoles-backup/internal/utils"
 )
 
-func checkLogin(client *http.Client, checkUrl *url.URL) error {
+func checkLogin(client interfaces.HttpClient, checkUrl *url.URL) error {
 	_, err := fetchDependents(client, checkUrl)
 	return err
 }
@@ -19,7 +21,7 @@ func checkLogin(client *http.Client, checkUrl *url.URL) error {
 // fetchRequestVerificationToken
 // parse the CSRF token out of the initial login HTML page so we can make a
 // non-interactive login call
-func fetchRequestVerificationToken(client *http.Client, rvtUrl *url.URL) (string, error) {
+func fetchRequestVerificationToken(client interfaces.HttpClient, rvtUrl *url.URL) (string, error) {
 
 	resp, err := client.Get(rvtUrl.String())
 	if err != nil {
@@ -32,18 +34,23 @@ func fetchRequestVerificationToken(client *http.Client, rvtUrl *url.URL) (string
 	defer utils.CloseWithLog(resp.Body)
 	body, _ := io.ReadAll(resp.Body)
 
-	page := string(body)
+	doc, err := htmlquery.Parse(strings.NewReader(string(body)))
 
-	r, _ := regexp.Compile("<input.*name=\"__RequestVerificationToken\".*value=\"([a-zA-Z0-9-_]+)\".*/>")
+	node := htmlquery.FindOne(doc, "//input[@name='__RequestVerificationToken']")
+	found := htmlquery.SelectAttr(node, "value")
 
-	return r.FindString(page), nil
+	if found == "" {
+		return "", errors.New("error finding RVT in page")
+	}
+
+	return found, nil
 }
 
 // login
 // initial login form for bright horizons users, requires a request verification
 // token used to counter CSRF (which we are doing...)
 func login(
-	client *http.Client,
+	client interfaces.HttpClient,
 	loginUrl *url.URL,
 	username, password, rvt string,
 ) (string, error) {
@@ -71,7 +78,7 @@ func login(
 // startSaml
 // first step in SAML process should yield an "action" url and a SAML Response
 // value
-func startSaml(client *http.Client, samlUrl *url.URL) (string, string, error) {
+func startSaml(client interfaces.HttpClient, samlUrl *url.URL) (string, string, error) {
 	resp, err := client.Get(samlUrl.String())
 	if err != nil {
 		return "", "", err
@@ -80,20 +87,26 @@ func startSaml(client *http.Client, samlUrl *url.URL) (string, string, error) {
 		return "", "", utils.NewRequestError(resp, "error with SAML 1st step")
 	}
 
-	actionRx, _ := regexp.Compile("<form.*action=\"([a-zA-Z0-9-_]+)\".*/")
-	samlRx, _ := regexp.Compile("<input.*name=\"SAMLResponse\".*value=\"([a-zA-Z0-9-_]+)\".*/>")
-
 	defer utils.CloseWithLog(resp.Body)
 	body, _ := io.ReadAll(resp.Body)
-	page := string(body)
+	doc, err := htmlquery.Parse(strings.NewReader(string(body)))
 
-	return actionRx.FindString(page), samlRx.FindString(page), nil
+	actionNode := htmlquery.FindOne(doc, "//form")
+	action := htmlquery.SelectAttr(actionNode, "action")
+	samlNode := htmlquery.FindOne(doc, "//input[@name='SAMLResponse']")
+	saml := htmlquery.SelectAttr(samlNode, "value")
+
+	if action == "" || saml == "" {
+		return "", "", errors.New("error finding SAML response")
+	}
+
+	return action, saml, nil
 }
 
 // finishSaml
 // second step in SAML process should yield the bright horizons API token
 // in a response cookie
-func finishSaml(client *http.Client, action, samlResponse string) (string, error) {
+func finishSaml(client interfaces.HttpClient, action, samlResponse string) (string, error) {
 	resp, err := client.PostForm(
 		action,
 		url.Values{
@@ -121,7 +134,7 @@ type tokenResponse struct {
 
 // exchangeToken
 // exchange the bright horizons token for a tadpoles token
-func exchangeToken(client *http.Client, tokenUrl *url.URL, bhToken string) (string, error) {
+func exchangeToken(client interfaces.HttpClient, tokenUrl *url.URL, bhToken string) (string, error) {
 	req, err := http.NewRequest("GET", tokenUrl.String(), nil)
 	if err != nil {
 		return "", err
@@ -148,7 +161,7 @@ func exchangeToken(client *http.Client, tokenUrl *url.URL, bhToken string) (stri
 	return data.Token, err
 }
 
-func admitRedirect(client *http.Client, redirectUrl *url.URL) ([]*http.Cookie, error) {
+func admitRedirect(client interfaces.HttpClient, redirectUrl *url.URL) ([]*http.Cookie, error) {
 	resp, err := client.Get(redirectUrl.String())
 	if err != nil {
 		return nil, err
