@@ -15,7 +15,8 @@ utils/
 scripts/
 Makefile
 LICENSE
-coverage.txt
+coverage.*
+coverage/
 Dockerfile
 env*
 .env*

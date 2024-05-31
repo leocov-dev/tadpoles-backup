@@ -1,4 +1,4 @@
-FROM golang:1.19-alpine3.17 AS builder
+FROM golang:1.22-alpine3.19 AS builder
 ARG VERSION_TAG
 
 WORKDIR /code
@@ -11,7 +11,7 @@ RUN go mod download && go mod verify
 COPY . .
 RUN  CGO_ENABLED=0 go build -o bin/tadpoles-backup --ldflags="-X 'tadpoles-backup/config.VersionTag=$VERSION_TAG'"
 
-FROM alpine:3.17 AS prod
+FROM alpine:3.19 AS prod
 
 WORKDIR /app
 COPY --from=builder /code/bin/tadpoles-backup .

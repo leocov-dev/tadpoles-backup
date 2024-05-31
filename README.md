@@ -9,7 +9,7 @@ This tool will allow you to save all your child's images and videos at full reso
 
 Providers:
 * Tadpoles
-* Bright Horizons
+* ~~Bright Horizons~~ (currently broken see [Issue #48](https://github.com/leocov-dev/tadpoles-backup/issues/48))
 
 ---
 ## Install
@@ -67,21 +67,19 @@ This api-key may only expire if you change your password. Your email and passwor
 
 ---
 ## Container Image
-Pre-built images are available from Docker Hub
-
-[![Docker Image Version (latest by date)](https://img.shields.io/docker/v/leocov/tadpoles-backup?label=latest&sort=date)](https://hub.docker.com/r/leocov/tadpoles-backup)
+Pre-built images are available from the repos [Packages page](https://github.com/leocov-dev/tadpoles-backup/pkgs/container/tadpoles-backup).
 
 ```shell
-docker pull leocov/tadpoles-backup:latest
+$ docker pull ghcr.io/leocov-dev/tadpoles-backup:latest
 
 # list account info
-docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> leocov/tadpoles-backup stat
+$ docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> ghcr.io/leocov-dev/tadpoles-backup stat
 
 # download new images
-docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> -v$HOME/Pictures/tadpoles:/images leocov/tadpoles-backup backup /images
+$ docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> -v$HOME/Pictures/tadpoles:/images ghcr.io/leocov-dev/tadpoles-backup backup /images
 
 # enable api response caching by mapping app data directory
-docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> -v$HOME/.tadpoles-backup:/app/.tadpoles-backup leocov/tadpoles-backup stat
+$ docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> -v$HOME/.tadpoles-backup:/app/.tadpoles-backup ghcr.io/leocov-dev/tadpoles-backup stat
 ```
 
 You may also build the docker image locally.
@@ -131,6 +129,13 @@ Run all unit tests with helper utility. This will build a coverage report as
 make test
 ```
 
+### Testing
+
+Run all unit tests with helper utility. This will build a coverage report as
+`coverage/coverage.html`
+```shell
+make test
+```
 
 ---
 ## Inspired By
