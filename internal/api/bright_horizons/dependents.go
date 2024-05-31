@@ -6,11 +6,12 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"tadpoles-backup/internal/interfaces"
 	"tadpoles-backup/internal/utils"
 	"time"
 )
 
-type Dependent struct {
+type Child struct {
 	Id          string    `json:"id"`
 	FirstName   string    `json:"first_name"`
 	LastName    string    `json:"last_name"`
@@ -18,13 +19,18 @@ type Dependent struct {
 	LastRecord  time.Time `json:"graduation_date"`
 }
 
-func (d *Dependent) DisplayName() string {
+func (d *Child) DisplayName() string {
 	return fmt.Sprintf("%s %s", d.FirstName, d.LastName)
 }
 
-type Dependents []Dependent
+type Children []Child
 
-func fetchDependents(client *http.Client, dependentUrl *url.URL) (dependents Dependents, err error) {
+// TODO: no idea what this response actually looks like....
+type MyChildrenResponse struct {
+	Children []Child `json:"children"`
+}
+
+func fetchDependents(client interfaces.HttpClient, dependentUrl *url.URL) (Children, error) {
 	resp, err := client.Get(dependentUrl.String())
 	if err != nil {
 		return nil, err
@@ -36,7 +42,9 @@ func fetchDependents(client *http.Client, dependentUrl *url.URL) (dependents Dep
 	defer utils.CloseWithLog(resp.Body)
 	body, _ := io.ReadAll(resp.Body)
 
-	err = json.Unmarshal(body, &dependents)
+	var response MyChildrenResponse
 
-	return dependents, err
+	err = json.Unmarshal(body, &response)
+
+	return response.Children, err
 }

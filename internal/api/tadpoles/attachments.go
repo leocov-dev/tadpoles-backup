@@ -2,19 +2,20 @@ package tadpoles
 
 import (
 	"fmt"
+	"tadpoles-backup/internal/http_utils"
 	"tadpoles-backup/internal/schemas"
 )
 
 func NewMediaFileFromEventAttachment(
 	event Event,
 	attachment Attachment,
-	endpoints endpoints,
-) schemas.MediaFile {
-	return schemas.NewMediaFile(
+	endpoints schemas.TadpolesApiEndpoints,
+) http_utils.MediaFile {
+	return http_utils.NewMediaFile(
 		event.Comment,
 		event.EventTime.Time(),
 		fmt.Sprintf("%s_%s", event.FormatTimeStamp(), event.ChildName),
-		endpoints.attachmentsUrl(event.EventKey, attachment.AttachmentKey),
+		endpoints.AttachmentsUrl(event.EventKey, attachment.AttachmentKey),
 		attachment.MimeType,
 	)
 }

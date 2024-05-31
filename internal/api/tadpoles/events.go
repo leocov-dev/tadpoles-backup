@@ -1,6 +1,7 @@
 package tadpoles
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
@@ -8,7 +9,11 @@ import (
 	"net/http"
 	"net/url"
 	"sort"
+	"tadpoles-backup/internal/interfaces"
+	"tadpoles-backup/internal/schemas"
 	"tadpoles-backup/internal/utils"
+	"tadpoles-backup/pkg/async"
+	"time"
 )
 
 type Attachment struct {
@@ -80,10 +85,10 @@ func (s *eventSorter) Less(i, j int) bool {
 
 type pageResponse struct {
 	Cursor string `json:"cursor"`
-	Events Events `json:"events"`
+	Events Events `json:"Events"`
 }
 
-func fetchEventsPage(client *http.Client, eventsUrl *url.URL) (newEvents Events, cursor string, err error) {
+func fetchEventsPage(client interfaces.HttpClient, eventsUrl *url.URL) (newEvents Events, cursor string, err error) {
 
 	log.Debug("Query: ", eventsUrl.String())
 	resp, err := client.Get(eventsUrl.String())
@@ -91,7 +96,7 @@ func fetchEventsPage(client *http.Client, eventsUrl *url.URL) (newEvents Events,
 		return nil, "", err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, "", utils.NewRequestError(resp, "could not get events page")
+		return nil, "", utils.NewRequestError(resp, "could not get Events page")
 	}
 
 	defer utils.CloseWithLog(resp.Body)
@@ -101,4 +106,75 @@ func fetchEventsPage(client *http.Client, eventsUrl *url.URL) (newEvents Events,
 	err = json.Unmarshal(body, &page)
 
 	return page.Events, page.Cursor, nil
+}
+
+func FetchAllEvents(
+	ctx context.Context,
+	eventCache *ApiCache,
+	httpClient interfaces.HttpClient,
+	ep schemas.TadpolesApiEndpoints,
+	firstEventTime time.Time,
+	lastEventTime time.Time,
+	useCache bool,
+) (Events, error) {
+	var allEvents Events
+	var newEvents Events
+
+	if useCache {
+		cachedEvents, err := eventCache.readEventCache()
+		if err != nil {
+			return nil, err
+		}
+		allEvents = append(allEvents, cachedEvents...)
+
+		cachedEventsLen := len(cachedEvents)
+		if cachedEventsLen > 0 {
+			lastCachedEvent := cachedEvents[cachedEventsLen-1]
+			lastEventTime = lastCachedEvent.EventTime.Time()
+			// TODO this falls apart if `end` is not after `lastEventTime`
+			firstEventTime = lastEventTime.Add(1 * time.Second)
+		}
+	}
+
+	pageNum := 0
+
+	// need a non-empty value to enter the while loop
+	cursor := "initialize"
+
+	for cursor != "" {
+		select {
+		case <-ctx.Done():
+			return nil, async.NewCanceledError()
+		default:
+			log.Debug(fmt.Sprintf("Page: %d Cursor: %s", pageNum, cursor))
+			var pageEvents Events
+			var pageError error
+
+			pageEvents, cursor, pageError = fetchEventsPage(httpClient, ep.EventsUrl(firstEventTime, lastEventTime, cursor))
+			if pageError != nil {
+				return nil, pageError
+			}
+			newEvents = append(newEvents, pageEvents...)
+			pageNum += 1
+		}
+	}
+
+	if len(newEvents) >= 0 {
+		log.Debug(fmt.Sprintf("Adding New Events: %d", len(newEvents)))
+		if useCache {
+			cacheErr := eventCache.updateEventCache(newEvents)
+			if cacheErr != nil {
+				return nil, cacheErr
+			}
+		}
+		allEvents = append(allEvents, newEvents...)
+	}
+
+	log.Debug("Get Events Done...")
+
+	allEvents.Sort(func(e1, e2 *Event) bool {
+		return e1.EventTime.Time().Before(e2.EventTime.Time())
+	})
+
+	return allEvents, nil
 }

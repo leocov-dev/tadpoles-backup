@@ -1,4 +1,4 @@
-package utils
+package http_utils
 
 import (
 	"bytes"
@@ -20,6 +20,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"tadpoles-backup/internal/interfaces"
+	"tadpoles-backup/internal/utils"
 	"time"
 )
 
@@ -29,7 +31,7 @@ type MediaMetadata interface {
 }
 
 func DownloadFile(
-	client *http.Client,
+	client interfaces.HttpClient,
 	fileUrl *url.URL,
 	targetPath string,
 	metadata MediaMetadata,
@@ -41,9 +43,9 @@ func DownloadFile(
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return NewRequestError(resp, "could not get attachment")
+		return utils.NewRequestError(resp, "could not get attachment")
 	}
-	defer CloseWithLog(resp.Body)
+	defer utils.CloseWithLog(resp.Body)
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -54,7 +56,7 @@ func DownloadFile(
 	log.Debug("type: ", fileType)
 
 	buffer := bytes.NewBuffer(data)
-	if IsImageType(fileType.MIME) {
+	if utils.IsImageType(fileType.MIME) {
 		// If the file data is an image (jpeg, png, etc.)
 		// then we will convert it to a jpeg if required
 		// and apply Exif tag data.
@@ -73,7 +75,7 @@ func DownloadFile(
 		}
 		data = buffer.Bytes()
 
-	} else if IsVideoType(fileType.MIME) {
+	} else if utils.IsVideoType(fileType.MIME) {
 		// TODO: video tags
 	} else {
 		return nil
@@ -94,7 +96,7 @@ func DownloadFile(
 	if err != nil {
 		return err
 	}
-	defer CloseWithLog(targetFile)
+	defer utils.CloseWithLog(targetFile)
 
 	_, err = targetFile.Write(data)
 	if err != nil {

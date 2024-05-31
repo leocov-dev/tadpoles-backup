@@ -1,0 +1,70 @@
+### get initial data
+GET https://bhlogin.brighthorizons.com?benefitid=5&fstargetid=1
+
+> {%
+    pattern = /<input.*name="__RequestVerificationToken".*value="([a-zA-Z0-9-_]+)".*\/>/gm
+    verification = pattern.exec(response.body)[1]
+    client.global.set("rvt", verification);
+%}
+
+### post login form with verification token
+POST https://bhlogin.brighthorizons.com
+Content-Type: application/x-www-form-urlencoded
+
+username                   = {{email}} &
+password                   = {{password}} &
+__RequestVerificationToken = {{rvt}} &
+benefitid                  = 5 &
+fstargetid                 = 1 &
+userType                   = 0
+
+> {%
+    client.global.set("loginRedirect", response.headers.valueOf("Location"));
+%}
+
+### fetch redirect page
+GET https://bhlogin.brighthorizons.com{{loginRedirect}}
+
+> {%
+    action_pattern = /<form.*action="([a-zA-Z0-9-_]+)".*\/>/gm
+    action = action_pattern.exec(response.body)[1]
+    samlPattern = /<input.*name="SAMLResponse".*value="([a-zA-Z0-9-_]+)".*\/>/gm
+    samlResponse = samlPattern.exec(response.body)[1]
+    client.global.set("action", action);
+    client.global.set("samlResponse", samlResponse);
+%}
+
+### finish SAML
+POST {{action}}
+Content-Type: application/x-www-form-urlencoded
+
+SAMLResponse = {{samlResponse}}
+
+> {%
+    cookies = response.headers.valuesOf("Set-Cookie")
+    bhToken = cookies.find((v) => {
+        return v.split("=")[0] == "acs";
+    }).split("=")[1]
+    client.global.set("bhToken", bhToken);
+%}
+
+### get tadpoles token
+GET https://mbdwgateway.brighthorizons.com/api/account/token2
+Authorization: Bearer {{bhToken}}
+
+> {%
+    client.global.set("tpToken", response.body.token)
+%}
+
+### validate JWT token
+# This validates the JWT and returns an API key to be used in
+# the `X-Api-Key` header with every other request.
+POST {{host}}/api/v2/auth/jwt/redirect
+Content-Type: application/x-www-form-urlencoded
+
+jwt={{token}}
+
+> {% client.global.set("apiKey", response.body.api_key); %}
+
+
+### TODO: try API calls from tadpoles.http

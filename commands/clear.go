@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"strings"
-	"tadpoles-backup/internal/provider_client"
+	"tadpoles-backup/internal/api"
 	"tadpoles-backup/internal/utils"
 )
 
@@ -56,7 +56,7 @@ func clearRun(cmd *cobra.Command, args []string) {
 		choice = args[0]
 	}
 
-	provider := provider_client.GetProviderClient()
+	provider := api.GetProvider()
 
 	switch choice {
 	case "login":

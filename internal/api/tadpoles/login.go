@@ -4,12 +4,13 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
-	"tadpoles-backup/internal/api"
+	"tadpoles-backup/internal/http_utils"
+	"tadpoles-backup/internal/interfaces"
 	"tadpoles-backup/internal/utils"
 	"time"
 )
 
-func loginAdmit(client *http.Client, admitUrl *url.URL, cookieFile string) (expires *time.Time, err error) {
+func loginAdmit(client interfaces.HttpClient, admitUrl *url.URL, cookieFile string) (expires *time.Time, err error) {
 	logrus.Debug("Admit...")
 
 	zone, _ := time.Now().Zone()
@@ -29,11 +30,11 @@ func loginAdmit(client *http.Client, admitUrl *url.URL, cookieFile string) (expi
 
 	logrus.Debug("Admit successful")
 
-	return api.SerializeResponseCookies(cookieFile, resp)
+	return http_utils.SerializeResponseCookies(cookieFile, resp)
 }
 
 func login(
-	client *http.Client,
+	client interfaces.HttpClient,
 	loginUrl *url.URL,
 	email, password string,
 ) error {
@@ -55,17 +56,17 @@ func login(
 	return nil
 }
 
-type HostHeaderTransport struct {
+type hostHeaderTransport struct {
 	hostHeader string
 }
 
-func (t *HostHeaderTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *hostHeaderTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.Header.Add("Host", t.hostHeader)
 	return http.DefaultTransport.RoundTrip(req)
 }
 
 func requestPasswordReset(
-	client *http.Client,
+	client interfaces.HttpClient,
 	resetUrl *url.URL,
 	email string,
 ) error {

@@ -85,7 +85,7 @@ $ docker run --rm -eUSERNAME=<email> -ePASSWORD=<password> -v$HOME/.tadpoles-bac
 You may also build the docker image locally.
 ```shell
 # will be automatically tagged as `tadpoles-backup`
-$ make docker-image
+make docker-image
 ```
 
 ### Docker Compose / Kubernetes
@@ -118,7 +118,7 @@ Install the Go version defined in [go.mod](go.mod) or use [goenv](https://github
 ### Dev build
 ```shell
 # build for your platform only and run.
-$ make && bin/tadpoles-backup --help
+make && bin/tadpoles-backup --help
 ```
 
 ### Testing
@@ -129,6 +129,13 @@ Run all unit tests with helper utility. This will build a coverage report as
 make test
 ```
 
+### Testing
+
+Run all unit tests with helper utility. This will build a coverage report as
+`coverage/coverage.html`
+```shell
+make test
+```
 
 ---
 ## Inspired By

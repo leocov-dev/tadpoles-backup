@@ -30,7 +30,7 @@ func newEndpoints() endpoints {
 	}
 }
 
-func (e endpoints) attachmentsUrl(eventKey, attachmentKey string) *url.URL {
+func (e endpoints) AttachmentsUrl(eventKey, attachmentKey string) *url.URL {
 	attachmentsUrl := e.apiV1Root.JoinPath("obj_attachment")
 
 	attachmentsUrl.RawQuery = url.Values{
@@ -41,7 +41,7 @@ func (e endpoints) attachmentsUrl(eventKey, attachmentKey string) *url.URL {
 	return attachmentsUrl
 }
 
-func (e endpoints) eventsUrl(firstEventTime, lastEventTime time.Time, cursor string) *url.URL {
+func (e endpoints) EventsUrl(firstEventTime, lastEventTime time.Time, cursor string) *url.URL {
 	eventsUrl := e.apiV1Root.JoinPath("events")
 
 	first := "0"
